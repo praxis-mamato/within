@@ -13,6 +13,7 @@ import { ChipGroup, PerspectiveCard, PromptChips, SafetyPanel } from '../compone
 import { Orbit } from '../components/Illustrations';
 import { SharingToggles } from '../components/Sharing';
 import { track } from '../services/telemetry';
+import { load as loadInterview, markStep, update as updateInterview, visibleLenses } from '../interview/session';
 import { SAMPLE_BIRTH, useStore, type Birth } from '../state';
 
 const STEPS = 8;
@@ -60,7 +61,10 @@ export default function Onboarding() {
 
   // Move focus to each new step's heading so screen-reader users hear where they are.
   useEffect(() => heading.current?.focus(), [step]);
-  useEffect(() => track('onboarding_step', { step }), [step]);
+  useEffect(() => {
+    track('onboarding_step', { step });
+    markStep(step);
+  }, [step]);
 
   const next = () => {
     if (step === 2) {
@@ -91,7 +95,10 @@ export default function Onboarding() {
     if (remind) dispatch({ type: 'notifications/set', on: true });
     track('onboarding_finished', { self_only: !(mode === 'other' && nickname.trim()), time_precision: birth.timePrecision, reminder: !!remind });
     if (choice) track('step_chosen', { pillar: 'onboarding', choice: choice === 'pause' || choice === 'none' ? choice : 'step' });
-    nav('/today');
+    if (loadInterview()) {
+      updateInterview((s) => ({ ...s, finishedAt: Date.now(), choice: choice === 'pause' || choice === 'none' ? choice : choice ? 'step' : null }));
+      nav('/interview/check');
+    } else nav('/today');
   };
 
 
@@ -220,7 +227,7 @@ export default function Onboarding() {
           <p className="small muted" style={{ textAlign: 'center' }}>
             Placements are calculated from your details. The interpretation text is still a draft.
           </p>
-          {state.lensOrder.map((t) => (
+          {visibleLenses(state.lensOrder).map((t) => (
             <PerspectiveCard key={t} p={r.perspectives[t]} reflectionId="onboarding" facts={chart ? factsFor('self', t, chart, null) : null} composed={composed?.[t]} />
           ))}
           <div className="btn-row">

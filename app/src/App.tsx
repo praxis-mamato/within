@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { HashRouter, Link, MemoryRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom';
+import { HashRouter, Link, MemoryRouter, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { StoreProvider, useStore } from './state';
 import { TabBar } from './components/ui';
 import Onboarding from './screens/Onboarding';
@@ -12,6 +12,8 @@ import AccountScreen from './screens/Account';
 import { AccountProvider } from './services/AccountContext';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { track } from './services/telemetry';
+import Interview, { ComprehensionCheck, InterviewBar } from './screens/Interview';
+import { interviewRequested, load as loadInterview } from './interview/session';
 
 function Shell() {
   const { state } = useStore();
@@ -23,6 +25,12 @@ function Shell() {
     window.scrollTo(0, 0);
     main.current?.focus();
   }, [loc.pathname]);
+
+  // ?interview in the address opens the facilitator setup (Stage 1 interviews).
+  const nav = useNavigate();
+  useEffect(() => {
+    if (interviewRequested() && !loadInterview()) nav('/interview');
+  }, [nav]);
 
   // Counted once per launch, only with the person's consent (lets the pilot measure returns).
   const opened = useRef(false);
@@ -38,6 +46,7 @@ function Shell() {
         Skip to content
       </a>
       <div className="proto-banner">Prototype · draft interpretations · your entries stay on this device</div>
+      <InterviewBar />
       <header className="topbar">
         <Link className="wordmark" to={state.onboarded ? '/today' : '/'}>
           WITHIN
@@ -57,6 +66,7 @@ function Shell() {
           {!state.onboarded ? (
             <>
               <Route path="/" element={<Onboarding />} />
+              <Route path="/interview" element={<Interview />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </>
           ) : (
@@ -75,6 +85,8 @@ function Shell() {
               <Route path="/follow-up/:id" element={<FollowUp />} />
               <Route path="/settings" element={<Settings />} />
               <Route path="/account" element={<AccountScreen />} />
+              <Route path="/interview" element={<Interview />} />
+              <Route path="/interview/check" element={<ComprehensionCheck />} />
               <Route path="*" element={<Navigate to="/today" replace />} />
             </>
           )}

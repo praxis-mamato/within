@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { track } from '../services/telemetry';
+import { visibleLenses } from '../interview/session';
 import { composeReflection } from '../content/compose';
 import { OUTCOME_STEPS, planFor, SITUATIONS } from '../content/topics';
 import { skyNotes } from '../content/fullReading';
@@ -71,17 +72,18 @@ export default function Reflection() {
   };
   useEffect(() => track('reflection_opened', { pillar: r.pillar }), [r.pillar]);
 
+  const lenses = visibleLenses(state.lensOrder);
   const reflectionBody = (
     <>
       <section aria-labelledby="persp-h">
-        <h2 id="persp-h">Two perspectives</h2>
+        <h2 id="persp-h">{lenses.length > 1 ? 'Two perspectives' : 'A perspective'}</h2>
         <p className="small muted">
           Interpretations, not predictions or facts about anyone. Each tradition is shown on its own; you decide what fits.
         </p>
-        {state.lensOrder.map((t) => (
+        {lenses.map((t) => (
           <PerspectiveCard key={t} p={r.perspectives[t]} reflectionId={r.id} nickname={nickname} facts={me ? factsFor(r.pillar, t, me, other, nickname) : null} composed={composed?.[t]} />
         ))}
-        <TogetherCard text={composed?.together.body ?? r.together} reflectionId={r.id} nickname={nickname} />
+        {lenses.length > 1 && <TogetherCard text={composed?.together.body ?? r.together} reflectionId={r.id} nickname={nickname} />}
       </section>
 
       <section aria-labelledby="q-h">
