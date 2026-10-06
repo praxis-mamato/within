@@ -41,9 +41,18 @@ Authorized by the product owner ("the geographical location needs to be in there
 - **Interpretation text is still draft** and labeled so. It does not yet change with the placements; that needs approved templates (§3.5).
 - **Public link:** GitHub Pages from this repo, once Pages is switched on.
 
+## Amendment, Oct 6, 2026: accounts, payment, on-device data
+
+Product owner decisions ("they should sso in or oauth via apple or google. we need to take payment as well, data should be stored locally on their app"):
+
+- Sign-in with Apple and Google.
+- Paid subscription (price not yet set). Building payment is authorized; charging real customers still needs the price decision and the store accounts.
+- Personal data stays on the person's device. Servers hold only sign-in identity and subscription status.
+- Open conflicts with the pilot design and the PRD are listed in `docs/next-features.md` (Group B, "Conflicts this creates").
+
 ## Not authorized yet (needs G1/G2)
 
-Storing or collecting birth data, recruitment for the pilot, a server-side calculation service, AI phrasing, billing.
+Collecting birth data on our servers (now ruled out by design), recruitment for the pilot, AI phrasing, charging real customers before the price is set.
 
 ## Open for the product owner before G2
 
