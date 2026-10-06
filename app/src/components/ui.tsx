@@ -1,6 +1,8 @@
 import { useState, type ReactNode } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
-import { SAFETY_RESOURCES, METHOD, type Perspective, type Tradition } from '../data/fixtures';
+import { METHOD, type Perspective, type Tradition } from '../data/fixtures';
+import { GLOBAL_DIRECTORY, RESOURCES, guessCountry, resourcesFor } from '../safety/resources';
+import { countryName } from '../geo/places';
 import type { Facts } from '../astro/facts';
 import type { Composed } from '../content/compose';
 import { FEEDBACK_NOTES } from '../data/prompts';
@@ -88,9 +90,16 @@ export function TabBar() {
 }
 
 /** Region resources and the "not an emergency service" line (build spec §8.1). */
+const COUNTRY_OPTIONS = Object.keys(RESOURCES)
+  .map((code) => ({ code, name: countryName(code) }))
+  .sort((a, b) => a.name.localeCompare(b.name));
+
 export function SafetyPanel({ compact = false }: { compact?: boolean }) {
-  const { state } = useStore();
+  const { state, dispatch } = useStore();
   const urgent = isUrgent(state.safety.category);
+  const country = state.country ?? guessCountry();
+  const res = resourcesFor(country);
+  const selectId = compact ? 'safety-country-settings' : 'safety-country';
   return (
     <section className="banner safety" aria-labelledby="safety-h" role={urgent ? 'alert' : undefined}>
       <h2 id="safety-h">{urgent ? 'Your safety comes first' : 'Support is available'}</h2>
@@ -102,11 +111,33 @@ export function SafetyPanel({ compact = false }: { compact?: boolean }) {
         </p>
       )}
       <ul className="small">
-        {SAFETY_RESOURCES.lines.map((l) => (
-          <li key={l}>{l}</li>
+        <li>
+          Emergency services: <strong>{res ? res.emergency : 'your local emergency number'}</strong>
+        </li>
+        {res?.lines?.map((l) => (
+          <li key={l.name}>
+            {l.url ? <a href={l.url} target="_blank" rel="noreferrer">{l.name}</a> : l.name}
+            {l.kind === 'domestic_violence' ? ' (domestic abuse support)' : ''}: <strong>{l.contact}</strong>
+          </li>
         ))}
+        <li>
+          <a href={GLOBAL_DIRECTORY.url} target="_blank" rel="noreferrer">
+            {GLOBAL_DIRECTORY.name}
+          </a>
+          : {GLOBAL_DIRECTORY.description}
+        </li>
       </ul>
-      <p className="small muted">{SAFETY_RESOURCES.note}</p>
+      <label htmlFor={selectId} className="small">
+        Showing support for
+      </label>
+      <select id={selectId} value={country && RESOURCES[country] ? country : ''} onChange={(e) => dispatch({ type: 'country/set', country: e.target.value || 'other' })}>
+        <option value="">Another country</option>
+        {COUNTRY_OPTIONS.map((c) => (
+          <option key={c.code} value={c.code}>
+            {c.name}
+          </option>
+        ))}
+      </select>
       <p className="small">Within is not an emergency service and is not monitored around the clock.</p>
     </section>
   );

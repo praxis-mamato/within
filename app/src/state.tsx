@@ -86,6 +86,8 @@ export interface State {
   notifications: boolean;
   /** Opt-in usage counts and crash reports. Both off until the person turns them on. */
   sharing: Consent;
+  /** Where safety resources are shown for: a country code, 'other', or null to guess from the device. */
+  country: string | null;
   todayDone: boolean;
 }
 
@@ -121,6 +123,7 @@ export function initialState(): State {
     stale: false,
     notifications: false,
     sharing: { usage: false, crashes: false },
+    country: null,
     todayDone: false,
   };
 }
@@ -146,6 +149,7 @@ export type Event =
   | { type: 'text/screen'; text: string }
   | { type: 'notifications/set'; on: boolean }
   | { type: 'sharing/set'; sharing: Consent }
+  | { type: 'country/set'; country: string | null }
   | { type: 'today/finish' }
   | { type: 'reset' }
   | { type: 'hydrate'; state: State };
@@ -211,6 +215,8 @@ export function reducer(s: State, e: Event): State {
       return { ...s, notifications: e.on };
     case 'sharing/set':
       return { ...s, sharing: e.sharing };
+    case 'country/set':
+      return { ...s, country: e.country };
     case 'today/finish':
       return { ...s, todayDone: true };
     case 'reset':
