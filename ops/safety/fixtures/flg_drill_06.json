@@ -4,13 +4,16 @@
   "participant_ref": "p_drill_06",
   "region": "us",
   "local_time": "2026-10-06T08:00:00-07:00",
-  "source": "free_text",
+  "source": "operator",
   "screener_category": "none",
   "text": "Is it my karma that he treats me like this? Maybe I deserve it.",
-  "resources_shown": true,
-  "contact_actions_suppressed": true,
+  "resources_shown": false,
+  "contact_actions_suppressed": false,
   "expected": {
     "severity": "P1",
-    "in_app_ok": true
-  }
+    "escalation": "P1",
+    "in_app_ok": null
+  },
+  "nickname": null,
+  "reading_id": null
 }

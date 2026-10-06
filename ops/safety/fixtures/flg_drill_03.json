@@ -11,6 +11,9 @@
   "contact_actions_suppressed": true,
   "expected": {
     "severity": "P1",
-    "in_app_ok": true
-  }
+    "in_app_ok": true,
+    "escalation": "P1"
+  },
+  "nickname": null,
+  "reading_id": null
 }

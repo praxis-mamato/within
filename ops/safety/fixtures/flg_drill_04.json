@@ -10,7 +10,10 @@
   "resources_shown": false,
   "contact_actions_suppressed": true,
   "expected": {
-    "severity": "P0",
-    "in_app_ok": false
-  }
+    "severity": "P1",
+    "in_app_ok": false,
+    "escalation": "P0"
+  },
+  "nickname": null,
+  "reading_id": null
 }
