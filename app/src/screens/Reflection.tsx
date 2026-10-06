@@ -1,4 +1,5 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { track } from '../services/telemetry';
 import { composeReflection } from '../content/compose';
 import { OUTCOME_STEPS, planFor, SITUATIONS } from '../content/topics';
 import { skyNotes } from '../content/fullReading';
@@ -66,7 +67,9 @@ export default function Reflection() {
       text: kind === 'step' ? choice : kind === 'pause' ? 'A deliberate pause' : 'Nothing for now',
       followUp: choice === 'none' ? 'none' : FOLLOW_UPS[followUp[0] ?? 'No reminder'],
     });
+    track('step_chosen', { pillar: r.pillar, choice: kind });
   };
+  useEffect(() => track('reflection_opened', { pillar: r.pillar }), [r.pillar]);
 
   const reflectionBody = (
     <>
@@ -204,7 +207,7 @@ export default function Reflection() {
         <p>{intention ? intention.behavior : 'No purpose set yet.'}</p>
       </section>
 
-      {pillar === 'self' ? reflectionBody : <Paywall what="This reflection">{reflectionBody}</Paywall>}
+      {pillar === 'self' ? reflectionBody : <Paywall where="reflection" what="This reflection">{reflectionBody}</Paywall>}
     </>
   );
 }

@@ -67,7 +67,7 @@ export default function AccountScreen() {
             )}
           </div>
         ) : (
-          <Paywall what="Everything beyond your first reflection">{null}</Paywall>
+          <Paywall where="account" what="Everything beyond your first reflection">{null}</Paywall>
         )}
       </section>
 

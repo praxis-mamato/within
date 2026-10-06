@@ -11,6 +11,8 @@ import { skyNotes } from '../content/fullReading';
 import { SIGN_ELEMENT } from '../content/templates';
 import { ChipGroup, PerspectiveCard, PromptChips, SafetyPanel } from '../components/ui';
 import { Orbit } from '../components/Illustrations';
+import { SharingToggles } from '../components/Sharing';
+import { track } from '../services/telemetry';
 import { SAMPLE_BIRTH, useStore, type Birth } from '../state';
 
 const STEPS = 8;
@@ -58,6 +60,7 @@ export default function Onboarding() {
 
   // Move focus to each new step's heading so screen-reader users hear where they are.
   useEffect(() => heading.current?.focus(), [step]);
+  useEffect(() => track('onboarding_step', { step }), [step]);
 
   const next = () => {
     if (step === 2) {
@@ -86,6 +89,8 @@ export default function Onboarding() {
       });
     }
     if (remind) dispatch({ type: 'notifications/set', on: true });
+    track('onboarding_finished', { self_only: !(mode === 'other' && nickname.trim()), time_precision: birth.timePrecision, reminder: !!remind });
+    if (choice) track('step_chosen', { pillar: 'onboarding', choice: choice === 'pause' || choice === 'none' ? choice : 'step' });
     nav('/today');
   };
 
@@ -151,6 +156,10 @@ export default function Onboarding() {
             <p>You choose your purpose and your next step, including choosing to pause. Your entries are private.</p>
             <p className="small muted">Within isn’t therapy, medical, or legal advice, and isn’t an emergency service.</p>
           </div>
+          <details className="card soft">
+            <summary>Help improve Within (optional, off unless you turn it on)</summary>
+            <SharingToggles />
+          </details>
           <div className="btn-row">
             <button className="btn" type="button" onClick={next}>
               I understand

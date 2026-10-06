@@ -10,6 +10,8 @@ import Growth, { FollowUp } from './screens/Growth';
 import Settings from './screens/Settings';
 import AccountScreen from './screens/Account';
 import { AccountProvider } from './services/AccountContext';
+import { ErrorBoundary } from './components/ErrorBoundary';
+import { track } from './services/telemetry';
 
 function Shell() {
   const { state } = useStore();
@@ -21,6 +23,14 @@ function Shell() {
     window.scrollTo(0, 0);
     main.current?.focus();
   }, [loc.pathname]);
+
+  // Counted once per launch, only with the person's consent (lets the pilot measure returns).
+  const opened = useRef(false);
+  useEffect(() => {
+    if (opened.current || !state.sharing.usage) return;
+    opened.current = true;
+    track('app_opened');
+  }, [state.sharing.usage]);
 
   return (
     <div className="app">
@@ -42,6 +52,7 @@ function Shell() {
         )}
       </header>
       <main id="main" ref={main} tabIndex={-1}>
+        <ErrorBoundary resetKey={loc.pathname}>
         <Routes>
           {!state.onboarded ? (
             <>
@@ -68,6 +79,7 @@ function Shell() {
             </>
           )}
         </Routes>
+        </ErrorBoundary>
       </main>
       {state.onboarded && <TabBar />}
     </div>

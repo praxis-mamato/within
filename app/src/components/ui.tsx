@@ -6,6 +6,7 @@ import type { Composed } from '../content/compose';
 import { FEEDBACK_NOTES } from '../data/prompts';
 import { isUrgent } from '../lib/screener';
 import { useStore, personalize } from '../state';
+import { track } from '../services/telemetry';
 
 export function ChipGroup({
   label,
@@ -211,6 +212,7 @@ function FeedbackButton({ reflectionId, tradition }: { reflectionId: string; tra
               className="btn"
               onClick={() => {
                 dispatch({ type: 'feedback/add', feedback: { reflectionId, tradition, kind: kinds[kind[0] as keyof typeof kinds], note } });
+                track('feedback_given', { kind: kinds[kind[0] as keyof typeof kinds], lens: tradition });
                 setSent(true);
               }}
             >
