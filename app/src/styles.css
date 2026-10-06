@@ -60,6 +60,7 @@
   --leaf-vein: #8a6a3c;
   --leaf-2: #7d8466;
   --grain-opacity: 0.05;
+  --logo-gold: #b58a45;
   --apple-bg: #000000;
   --apple-ink: #ffffff;
   --radius-card: 16px;
@@ -133,6 +134,7 @@
     --leaf-vein: #e0c08a;
     --leaf-2: #8f9876;
     --grain-opacity: 0.07;
+    --logo-gold: #d9b072;
     --apple-bg: #ffffff;
     --apple-ink: #000000;
     color-scheme: dark;
@@ -273,7 +275,7 @@ legend { font-weight: 600; color: var(--ink-display); margin: 14px 0 6px; paddin
 
 /* Header */
 .topbar { display: flex; justify-content: space-between; align-items: center; padding: 12px 20px 0; min-height: 52px; }
-.wordmark { font-family: var(--font-display); font-size: 1.5rem; letter-spacing: 0.08em; color: var(--ink-display); text-decoration: none; font-weight: 600; }
+.wordmark { display: inline-flex; align-items: center; gap: 8px; font-family: var(--font-display); font-size: 1.5rem; letter-spacing: 0.08em; color: var(--ink-display); text-decoration: none; font-weight: 600; }
 .icon-btn {
   width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--line);
   background: var(--surface); display: grid; place-items: center; cursor: pointer; color: var(--ink-display);
