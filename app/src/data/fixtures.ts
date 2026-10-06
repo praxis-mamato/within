@@ -1,9 +1,9 @@
 /**
  * Sample content for the E1 prototype.
  *
- * Every perspective here is ILLUSTRATIVE TEXT, NOT A CHART READING (PRD §6). It exists to
- * test layout, tone, and comprehension in Stage 1 interviews. Real readings come from the
- * calculation service and approved templates (build spec §3).
+ * The interpretation text here is ILLUSTRATIVE, NOT APPROVED (PRD §6, build spec §3.5). The
+ * placements shown beside it are calculated live from the person's birth details (src/astro);
+ * the prose does not yet change with them. It exists to test layout, tone, and comprehension.
  */
 import type { FuzzyDate } from '../lib/dates';
 
@@ -14,10 +14,6 @@ export interface Perspective {
   tradition: Tradition;
   title: string;
   body: string;
-  /** "Show the details" content: placements and method, as an approver would see them. */
-  details: string[];
-  /** Elements that could not be included, named plainly (PRD §4 step 6). */
-  unavailable: string[];
   limitation?: string;
 }
 
@@ -40,20 +36,18 @@ export interface Reflection {
 export const METHOD = {
   western: {
     name: 'Western',
-    version: 'western.tropical.placidus.sample-v0',
+    version: 'western.tropical.placidus.prototype-v1',
     summary:
-      'Uses the tropical zodiac, tied to the seasons. In this prototype the conventions are placeholders until the approver signs them off.',
+      'Uses the tropical zodiac, tied to the seasons, with Placidus houses. Placements are calculated live in your browser. The conventions are provisional until the approver signs them off.',
   },
   vedic: {
     name: 'Vedic',
-    version: 'vedic.sidereal.lahiri.sample-v0',
+    version: 'vedic.sidereal.lahiri.prototype-v1',
     summary:
-      'Uses the sidereal zodiac, tied to the fixed stars, with an ayanamsa correction. In this prototype the conventions are placeholders until the approver signs them off.',
+      'Uses the sidereal zodiac, tied to the fixed stars, with the Lahiri ayanamsa, whole-sign houses from the lagna, and Vimshottari dashas. Placements are calculated live in your browser. The conventions are provisional until the approver signs them off.',
   },
 } as const;
 
-const NO_TIME_WESTERN = 'Rising sign and houses need a birth time, so they are not included.';
-const NO_TIME_VEDIC = 'Lagna (ascendant), houses, and dasha start dates need a birth time, so they are not included.';
 
 export const REFLECTIONS: Record<Pillar, Reflection> = {
   self: {
@@ -68,16 +62,11 @@ export const REFLECTIONS: Record<Pillar, Reflection> = {
         tradition: 'western',
         title: 'Harmony, and the cost of keeping it',
         body: 'One way to read this is a pull between keeping the peace and naming what you want. The question isn’t whether you’re agreeable; it’s whether agreeing is a choice you make or a reflex.',
-        details: ['Sample: Moon in Libra', 'Sample: Venus square Mars', 'Method: tropical zodiac, placeholder conventions'],
-        unavailable: [NO_TIME_WESTERN],
       },
       vedic: {
         tradition: 'vedic',
         title: 'Steadiness that can turn into silence',
         body: 'This lens might describe a temperament that values steadiness and loyalty. That can be a strength, and it can also make it easy to set your own preference aside to keep things calm.',
-        details: ['Sample: Moon in Rohini nakshatra', 'Sample: Venus in Taurus (own sign)', 'Method: sidereal zodiac, Lahiri ayanamsa (placeholder)'],
-        unavailable: [NO_TIME_VEDIC],
-        limitation: 'The Moon moves about 13° a day. Without a birth time, the nakshatra may be uncertain near a boundary.',
       },
     },
     together:
@@ -98,15 +87,11 @@ export const REFLECTIONS: Record<Pillar, Reflection> = {
         tradition: 'western',
         title: 'Different rhythms, not different stakes',
         body: 'This reading offers a possibility, not a fact about {name}: some people recharge alone even when a relationship matters deeply to them. Is that something you could ask about?',
-        details: ['Sample comparison: your Moon trine their Saturn', 'Method: synastry, placeholder conventions'],
-        unavailable: [NO_TIME_WESTERN],
       },
       vedic: {
         tradition: 'vedic',
         title: 'Closeness shown in different ways',
         body: 'This lens might suggest that you and {name} show care differently: one through presence, one through reliability. That is a question to explore together, not a conclusion about how {name} feels.',
-        details: ['Sample: Moon signs two apart', 'Method: bounded compatibility reading, placeholder conventions'],
-        unavailable: ['{name}’s birth time wasn’t added, so their lagna and houses are not included.'],
       },
     },
     together:
@@ -127,15 +112,11 @@ export const REFLECTIONS: Record<Pillar, Reflection> = {
         tradition: 'western',
         title: 'A season of settling',
         body: 'This tradition might read the current period as one of consolidating: less about big changes, more about how you both make space for each other’s routines.',
-        details: ['Sample transit: Saturn to your Venus', 'Method: selected transits, placeholder conventions'],
-        unavailable: [NO_TIME_WESTERN],
       },
       vedic: {
         tradition: 'vedic',
         title: 'Building on what you have',
         body: 'This lens might describe a period suited to strengthening foundations, for instance agreeing on what “enough time together” looks like for each of you.',
-        details: ['Sample: practitioner-selected timing method', 'Method: placeholder pending sign-off'],
-        unavailable: ['The timing periods depend on birth time, so this reading uses a broader window.'],
         limitation: 'Interpretations of periods describe themes, not events. Nothing here says what will happen.',
       },
     },
@@ -157,15 +138,11 @@ export const REFLECTIONS: Record<Pillar, Reflection> = {
         tradition: 'western',
         title: 'Directness as a skill',
         body: 'This reading might frame your intention as practising directness in small, safe moments, so it’s familiar before it matters most.',
-        details: ['Sample: Mars in Virgo', 'Method: natal, placeholder conventions'],
-        unavailable: [NO_TIME_WESTERN],
       },
       vedic: {
         tradition: 'vedic',
         title: 'Speech with care',
         body: 'This lens might describe a value placed on kind, considered speech. Your intention fits it: saying what you need, and choosing how.',
-        details: ['Sample: Mercury in Gemini', 'Method: natal, placeholder conventions'],
-        unavailable: [NO_TIME_VEDIC],
       },
     },
     together: 'Both lenses support practising small, honest statements. You choose the pace.',

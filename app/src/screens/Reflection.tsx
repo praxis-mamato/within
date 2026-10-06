@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { REFLECTIONS, type Pillar } from '../data/fixtures';
 import { Back, ChipGroup, PerspectiveCard, SafetyPanel, TogetherCard } from '../components/ui';
+import { factsFor } from '../astro/facts';
+import { useCharts } from '../astro/useCharts';
 import { activeIntention, personalize, useStore, type Action, type Choice } from '../state';
 
 const FOLLOW_UPS: Record<string, Action['followUp']> = {
@@ -18,6 +20,7 @@ export default function Reflection() {
   const nickname = state.person?.nickname;
   const intention = activeIntention(state);
   const existing = state.actions.find((a) => a.reflectionId === r.id);
+  const { me, other } = useCharts();
 
   const [situation, setSituation] = useState(pillar === 'self' && state.focusText ? state.focusText : r.situation);
   const [editing, setEditing] = useState(false);
@@ -98,7 +101,7 @@ export default function Reflection() {
           Interpretations, not predictions or facts about anyone. Each tradition is shown on its own; you decide what fits.
         </p>
         {state.lensOrder.map((t) => (
-          <PerspectiveCard key={t} p={r.perspectives[t]} reflectionId={r.id} nickname={nickname} />
+          <PerspectiveCard key={t} p={r.perspectives[t]} reflectionId={r.id} nickname={nickname} facts={me ? factsFor(r.pillar, t, me, other, nickname) : null} />
         ))}
         <TogetherCard text={r.together} reflectionId={r.id} nickname={nickname} />
       </section>

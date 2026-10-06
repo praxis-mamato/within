@@ -9,9 +9,11 @@
     "preview": "vite preview",
     "typecheck": "tsc -b",
     "test": "vitest run",
-    "build:artifact": "tsc -b && node scripts/build-artifact.mjs"
+    "build:artifact": "tsc -b && node scripts/build-artifact.mjs",
+    "places": "node scripts/build-places.mjs"
   },
   "dependencies": {
+    "astronomy-engine": "^2.1.19",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^7.18.4"
@@ -21,6 +23,8 @@
     "@types/react": "^18.3.31",
     "@types/react-dom": "^18.3.7",
     "@vitejs/plugin-react": "^4.7.0",
+    "all-the-cities": "^3.1.0",
+    "city-timezones": "^1.3.4",
     "typescript": "^5.9.3",
     "vite": "^5.4.21",
     "vitest": "^2.1.9"

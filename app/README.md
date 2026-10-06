@@ -2,7 +2,18 @@
 
 Clickable mobile web prototype for Stage 1 interviews (build spec §9, E1; authorized in `docs/decisions/G0-gate-record.md`).
 
-**Sample data only.** Every reading is illustrative text, not a chart reading. Nothing is sent anywhere or kept after the tab closes; there is no backend and no ephemeris.
+**Live charts, draft interpretations.** Birth place search and Western and Vedic placements are real and calculated in the browser. The interpretation text is draft and labeled so. Nothing is sent anywhere or kept after the tab closes; there is no backend.
+
+## Calculations
+
+- `src/astro/chart.ts`: planet positions from [Astronomy Engine](https://github.com/cosinekitty/astronomy) (MIT); Placidus and whole-sign houses, Lahiri ayanamsa, mean node, nakshatras, Vimshottari dashas written here.
+- `src/astro/natal.ts`: applies the PRD rules for uncertain birth times. Unknown time: no rising sign, lagna, houses, or dasha dates, and the Moon is checked across the whole day. Approximate time: shows both possible signs if the window crosses a boundary.
+- `src/astro/reference.swisseph.json`: six reference charts generated offline with Swiss Ephemeris (not shipped). Tests require agreement within 0.01°; the worst case is 30″.
+- `src/geo/`: 49,025 towns of 5,000+ people with time zones (`npm run places` regenerates them). Historical daylight-saving rules come from the browser.
+
+## Attribution
+
+Place data © [GeoNames](https://www.geonames.org/) (CC BY 4.0), via all-the-cities (MIT). Time zones via city-timezones (MIT). Planet positions via Astronomy Engine (MIT).
 
 ## Run it
 
@@ -10,7 +21,7 @@ Clickable mobile web prototype for Stage 1 interviews (build spec §9, E1; autho
 cd app
 npm install
 npm run dev        # http://localhost:5173
-npm test           # date precision, safety screener (incl. drill fixtures), app state rules
+npm test           # chart math vs Swiss Ephemeris, places and time zones, safety screener, app state
 npm run build      # static site in app/dist, works from any path
 npm run build:artifact  # one self-contained file in app/dist-artifact, for the hosted preview
 ```

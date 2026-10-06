@@ -5,7 +5,7 @@ import { TabBar } from './components/ui';
 import Onboarding from './screens/Onboarding';
 import Today from './screens/Today';
 import Reflection from './screens/Reflection';
-import { MilestoneDetail, MilestoneForm, RelationshipHome, RelationshipsList, YouSpace } from './screens/Relationships';
+import { MilestoneDetail, MilestoneForm, RelationshipHome, RelationshipsList, YouChart, YouSpace } from './screens/Relationships';
 import Growth, { FollowUp } from './screens/Growth';
 import Settings from './screens/Settings';
 
@@ -25,7 +25,7 @@ function Shell() {
       <a className="skip" href="#main" onClick={(e) => (e.preventDefault(), main.current?.focus())}>
         Skip to content
       </a>
-      <div className="proto-banner">Prototype · sample data only · not a real reading</div>
+      <div className="proto-banner">Prototype · live chart, draft interpretations · nothing is saved</div>
       <header className="topbar">
         <Link className="wordmark" to={state.onboarded ? '/today' : '/'}>
           WITHIN
@@ -51,6 +51,7 @@ function Shell() {
               <Route path="/today" element={<Today />} />
               <Route path="/reflection/:pillar" element={<Reflection />} />
               <Route path="/relationships" element={<RelationshipsList />} />
+              <Route path="/you/chart" element={<YouChart />} />
               <Route path="/you/:pillar" element={<YouSpace />} />
               <Route path="/relationship/:pillar" element={<RelationshipHome />} />
               <Route path="/milestone/new" element={<MilestoneForm />} />

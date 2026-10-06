@@ -31,9 +31,19 @@ Gate 0 (build spec §10) unlocks **E1, the clickable prototype**. It does not un
 - Second drill on the fixed templates: **PASS** (6/6), recorded in `ops/safety/drills/2026-10-06-rerun/`. Its 4 small findings were fixed.
 - Before G2 the drill must pass again on **approved** templates with real region resources.
 
+## Amendment, Oct 6, 2026: live charts and a public link
+
+Authorized by the product owner ("the geographical location needs to be in there and we need a real live response from the open source astrology sources"; "make a public app link").
+
+- **Birth place** is a real place search (49,025 towns, GeoNames data) with coordinates and the historical time zone for the birth date.
+- **Charts are calculated live in the browser** with Astronomy Engine (MIT) plus Within's own houses, ayanamsa, nakshatra, and dasha code, tested against Swiss Ephemeris to within 0.01°.
+- **People may now enter real birth details.** Nothing is stored or sent: there is no server, no browser storage, and no analytics. Closing the tab erases everything.
+- **Interpretation text is still draft** and labeled so. It does not yet change with the placements; that needs approved templates (§3.5).
+- **Public link:** GitHub Pages from this repo, once Pages is switched on.
+
 ## Not authorized yet (needs G1/G2)
 
-Real birth data, recruitment, deployment that participants can reach, the calculation service, AI phrasing, billing.
+Storing or collecting birth data, recruitment for the pilot, a server-side calculation service, AI phrasing, billing.
 
 ## Open for the product owner before G2
 

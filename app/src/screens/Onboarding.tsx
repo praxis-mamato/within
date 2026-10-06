@@ -1,4 +1,7 @@
-import { forwardRef, useEffect, useRef, useState } from 'react';
+import { forwardRef, useEffect, useMemo, useRef, useState } from 'react';
+import { BirthFields } from '../components/BirthFields';
+import { computeNatal } from '../astro/natal';
+import { factsFor } from '../astro/facts';
 import { useNavigate } from 'react-router-dom';
 import { FOCUS_OPTIONS, OUTCOME_OPTIONS, REFLECTIONS } from '../data/fixtures';
 import { ChipGroup, PerspectiveCard, SafetyPanel } from '../components/ui';
@@ -39,6 +42,13 @@ export default function Onboarding() {
   const [remind, setRemind] = useState<boolean | null>(null);
   const heading = useRef<HTMLHeadingElement>(null);
   const r = REFLECTIONS.self;
+  const chart = useMemo(() => {
+    try {
+      return step >= 6 ? computeNatal(birth) : null;
+    } catch {
+      return null;
+    }
+  }, [birth, step]);
 
   // Move focus to each new step's heading so screen-reader users hear where they are.
   useEffect(() => heading.current?.focus(), [step]);
@@ -143,54 +153,10 @@ export default function Onboarding() {
       {step === 4 && (
         <>
           <Heading ref={heading}>Your birth details</Heading>
-          <div className="banner" role="note">
-            <strong>Prototype:</strong> sample details are filled in. Please don’t enter your real birth details.
-          </div>
-          <label htmlFor="b-date">
-            Birth date <span className="hint">Both traditions start from the date.</span>
-          </label>
-          <input id="b-date" type="date" value={birth.date} onChange={(e) => setBirth({ ...birth, date: e.target.value })} />
-          <fieldset className="radio-list">
-            <legend>
-              Birth time <span className="hint">Needed for rising sign, houses, and some timing. We never guess it.</span>
-            </legend>
-            {(
-              [
-                ['exact', 'I know it'],
-                ['approximate', 'I know roughly'],
-                ['unknown', 'I don’t know'],
-              ] as const
-            ).map(([v, l]) => (
-              <label key={v}>
-                <input type="radio" name="tp" checked={birth.timePrecision === v} onChange={() => setBirth({ ...birth, timePrecision: v })} />
-                {l}
-              </label>
-            ))}
-          </fieldset>
-          {birth.timePrecision !== 'unknown' && (
-            <>
-              <label htmlFor="b-time">Time</label>
-              <input id="b-time" type="time" value={birth.time} onChange={(e) => setBirth({ ...birth, time: e.target.value })} />
-            </>
-          )}
-          {birth.timePrecision === 'approximate' && (
-            <>
-              <label htmlFor="b-win">Give or take</label>
-              <select id="b-win" value={birth.windowMinutes} onChange={(e) => setBirth({ ...birth, windowMinutes: Number(e.target.value) })}>
-                <option value={30}>30 minutes</option>
-                <option value={60}>1 hour</option>
-                <option value={120}>2 hours</option>
-                <option value={240}>4 hours</option>
-              </select>
-            </>
-          )}
-          <label htmlFor="b-place">
-            Birth place <span className="hint">Sets the time zone and the sky’s position.</span>
-          </label>
-          <input id="b-place" type="text" value={birth.place} onChange={(e) => setBirth({ ...birth, place: e.target.value })} />
-          <p className="small muted">We’ll show the time zone we used so you can check it: UTC−07:00 (sample).</p>
+          <p className="sub">Calculated in your browser. Nothing you enter is saved or sent anywhere.</p>
+          <BirthFields value={birth} onChange={setBirth} idPrefix="ob" />
           <div className="btn-row">
-            <button className="btn" type="button" disabled={!birth.date || !birth.place.trim()} onClick={next}>
+            <button className="btn" type="button" disabled={!birth.date || !birth.tz} onClick={next}>
               Continue
             </button>
           </div>
@@ -233,8 +199,11 @@ export default function Onboarding() {
         <>
           <Heading ref={heading}>Your first reflection</Heading>
           <p className="sub muted">{r.subheading}</p>
+          <p className="small muted" style={{ textAlign: 'center' }}>
+            Placements are calculated from your details. The interpretation text is still a draft.
+          </p>
           {state.lensOrder.map((t) => (
-            <PerspectiveCard key={t} p={r.perspectives[t]} reflectionId="onboarding" />
+            <PerspectiveCard key={t} p={r.perspectives[t]} reflectionId="onboarding" facts={chart ? factsFor('self', t, chart, null) : null} />
           ))}
           <div className="btn-row">
             <button className="btn" type="button" onClick={next}>

@@ -4,7 +4,12 @@ import { MILESTONE_INTERPRETATION, MILESTONE_TYPES, REFLECTIONS, type Milestone,
 import { describePrecision, formatFuzzyDate, type DateKind } from '../lib/dates';
 import { Landscape, Leaf, Orbit, Venn } from '../components/Illustrations';
 import { Back, ConfirmButton, PurposeCard, SafetyPanel } from '../components/ui';
-import { personalize, useStore } from '../state';
+import { personalize, SAMPLE_BIRTH, useStore, type Birth } from '../state';
+import { BirthFields } from '../components/BirthFields';
+import Chart, { ChartTables } from './Chart';
+import { useCharts } from '../astro/useCharts';
+import { currentTransits } from '../astro/facts';
+import { antardashas, vimshottari } from '../astro/chart';
 
 /** List: the "You" space always, plus at most one relationship in the MVP. */
 export function RelationshipsList() {
@@ -35,7 +40,7 @@ export function RelationshipsList() {
                 <strong>{p.nickname}</strong>{' '}
                 {p.status === 'archived' && <span className="pill">Archived</span>}
                 <span className="small muted" style={{ display: 'block' }}>
-                  {p.milestones.length} milestones · {p.birthAdded ? 'birth details added' : 'no birth details'}
+                  {p.milestones.length} milestones · {p.birth ? 'birth details added' : 'no birth details'}
                 </span>
               </span>
               <span aria-hidden="true">›</span>
@@ -102,11 +107,7 @@ function PillarBody({ pillar }: { pillar: Pillar }) {
       <h1>{personalize(r.heading, nickname)}</h1>
       <p className="sub">{personalize(r.subheading, nickname)}</p>
       {illo}
-      {pillar === 'other' && !state.person?.birthAdded && (
-        <p className="small muted" style={{ textAlign: 'center' }}>
-          {nickname}’s birth details aren’t added, so this uses your chart and what you’ve told us.
-        </p>
-      )}
+      {pillar === 'other' && <OtherBirth />}
       {pillar === 'other' && <p className="sub">{personalize(r.question, nickname)}</p>}
       {pillar === 'purpose' && (
         <div className="card soft spread">
@@ -140,12 +141,91 @@ export function YouSpace() {
   return (
     <>
       <Back to="/relationships" label="Relationships" />
-      <nav className="segmented" aria-label="You" style={{ gridTemplateColumns: 'repeat(2, 1fr)' }}>
-        <NavLink to="/you/self">Self</NavLink>
-        <NavLink to="/you/purpose">Purpose</NavLink>
-      </nav>
+      <YouNav />
       <PillarBody pillar={p} />
     </>
+  );
+}
+
+function YouNav() {
+  return (
+    <nav className="segmented" aria-label="You" style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}>
+      <NavLink to="/you/self">Self</NavLink>
+      <NavLink to="/you/purpose">Purpose</NavLink>
+      <NavLink to="/you/chart">Chart</NavLink>
+    </nav>
+  );
+}
+
+export function YouChart() {
+  return (
+    <>
+      <Back to="/relationships" label="Relationships" />
+      <YouNav />
+      <Chart />
+    </>
+  );
+}
+
+/** The other person's birth details are optional; without them, Other uses only your chart. */
+function OtherBirth() {
+  const { state, dispatch } = useStore();
+  const { other } = useCharts();
+  const p = state.person!;
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState<Birth>(p.birth ?? { ...SAMPLE_BIRTH, date: '1992-08-17' });
+  if (editing) {
+    return (
+      <div className="card">
+        <h2 style={{ marginTop: 0 }}>{p.nickname}’s birth details</h2>
+        <p className="small muted">Optional. Adding them doesn’t mean {p.nickname} agreed to this, so keep it respectful. Nothing is saved or sent.</p>
+        <BirthFields value={draft} onChange={setDraft} idPrefix="other" />
+        <div className="btn-row">
+          <button
+            type="button"
+            className="btn"
+            disabled={!draft.date || !draft.tz}
+            onClick={() => {
+              dispatch({ type: 'person/birth', birth: draft });
+              setEditing(false);
+            }}
+          >
+            Save {p.nickname}’s details
+          </button>
+          {p.birth && (
+            <button
+              type="button"
+              className="btn quiet"
+              onClick={() => {
+                dispatch({ type: 'person/birth', birth: null });
+                setEditing(false);
+              }}
+            >
+              Remove their details
+            </button>
+          )}
+          <button type="button" className="btn quiet" onClick={() => setEditing(false)}>
+            Cancel
+          </button>
+        </div>
+      </div>
+    );
+  }
+  return (
+    <div className="stack">
+      <p className="small muted" style={{ textAlign: 'center' }}>
+        {p.birth ? `Comparing your chart with ${p.nickname}’s (${p.birth.place}).` : `${p.nickname}’s birth details aren’t added, so this uses your chart and what you’ve told us.`}{' '}
+        <button type="button" className="link" onClick={() => setEditing(true)}>
+          {p.birth ? 'Edit' : `Add ${p.nickname}’s details`}
+        </button>
+      </p>
+      {other && (
+        <details>
+          <summary className="link">{p.nickname}’s chart</summary>
+          <ChartTables chart={other} label={p.nickname} />
+        </details>
+      )}
+    </div>
   );
 }
 
@@ -272,6 +352,7 @@ export function MilestoneDetail() {
   const { state, dispatch } = useStore();
   const nav = useNavigate();
   const m = state.person?.milestones.find((x) => x.id === id);
+  const { me } = useCharts();
   if (!m) {
     return (
       <>
@@ -299,14 +380,16 @@ export function MilestoneDetail() {
           <section className="voice trad">
             <h3>The Western tradition offers</h3>
             <p>
-              {MILESTONE_INTERPRETATION.western} <span className="sample-tag">Sample text</span>
+              {MILESTONE_INTERPRETATION.western} <span className="sample-tag">Draft text</span>
             </p>
+            {me && <SkyOnDate milestone={m} kind="western" />}
           </section>
           <section className="voice trad" style={{ borderColor: 'var(--sage)' }}>
             <h3>The Vedic tradition offers</h3>
             <p>
-              {MILESTONE_INTERPRETATION.vedic} <span className="sample-tag">Sample text</span>
+              {MILESTONE_INTERPRETATION.vedic} <span className="sample-tag">Draft text</span>
             </p>
+            {me && <SkyOnDate milestone={m} kind="vedic" />}
             {m.date.kind !== 'exact' && <p className="unavailable">This date isn’t exact, so interpretations use a broader window.</p>}
           </section>
         </>
@@ -430,4 +513,32 @@ export function MilestoneForm() {
       </div>
     </>
   );
+}
+
+/** Placements on a milestone's date (midpoint for ranges), calculated live. */
+function SkyOnDate({ milestone, kind }: { milestone: Milestone; kind: 'western' | 'vedic' }) {
+  const { me } = useCharts();
+  if (!me) return null;
+  const d = milestone.date;
+  const at = new Date(d.kind === 'range' && d.end ? (Date.parse(d.start) + Date.parse(d.end)) / 2 : Date.parse(d.start) + (d.kind === 'approximate' ? 14 * 86400000 : 43200000));
+  if (kind === 'western') {
+    const t = currentTransits(me, at);
+    return (
+      <ul className="details">
+        {t.length ? t.map((x) => <li key={x}>{x.replace(' now ', ' then ')}</li>) : <li>No slow-planet transits to your Sun, Moon, or Venus within 2° around then.</li>}
+        {d.kind !== 'exact' && <li>Slow planets move little in a month, so an approximate date still works here.</li>}
+      </ul>
+    );
+  }
+  const moon = me.vedic.planets.find((p) => p.body === 'Moon')!;
+  if (me.timePrecision !== 'exact') return <p className="small muted">The dasha running then needs an exact birth time.</p>;
+  const maha = vimshottari(me.utc, moon.longitude).find((p) => p.start <= at && at < p.end);
+  const antar = maha && antardashas(maha).find((p) => p.start <= at && at < p.end);
+  return maha ? (
+    <ul className="details">
+      <li>
+        Dasha then: {maha.lord} mahadasha{antar ? `, ${antar.lord} antardasha` : ''}
+      </li>
+    </ul>
+  ) : null;
 }

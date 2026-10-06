@@ -16,13 +16,18 @@ export interface Birth {
   timePrecision: TimePrecision;
   time: string;
   windowMinutes: number;
+  /** Display label, e.g. "Los Angeles, CA, United States". */
   place: string;
+  lat: number;
+  lon: number;
+  /** IANA time zone used to turn the local birth time into UTC. */
+  tz: string;
 }
 
 export interface Person {
   id: string;
   nickname: string;
-  birthAdded: boolean;
+  birth: Birth | null;
   status: 'active' | 'archived';
   milestones: Milestone[];
 }
@@ -89,7 +94,10 @@ export const SAMPLE_BIRTH: Birth = {
   timePrecision: 'unknown',
   time: '',
   windowMinutes: 60,
-  place: 'Sample City (UTC−07:00)',
+  place: 'Los Angeles, CA, United States',
+  lat: 34.052,
+  lon: -118.244,
+  tz: 'America/Los_Angeles',
 };
 
 export function initialState(): State {
@@ -119,6 +127,7 @@ export type Event =
   | { type: 'birth/update'; birth: Birth }
   | { type: 'stale/refresh' }
   | { type: 'person/add'; nickname: string }
+  | { type: 'person/birth'; birth: Birth | null }
   | { type: 'person/archive' }
   | { type: 'person/unarchive' }
   | { type: 'person/delete' }
@@ -152,7 +161,7 @@ export function reducer(s: State, e: Event): State {
       return withScreen({ ...s, focus: e.focus, focusText: e.focusText, outcome: e.outcome }, e.focusText);
     case 'onboarding/finish': {
       const person: Person | null = e.nickname
-        ? { id: id(), nickname: e.nickname, birthAdded: false, status: 'active', milestones: SAMPLE_MILESTONES }
+        ? { id: id(), nickname: e.nickname, birth: null, status: 'active', milestones: SAMPLE_MILESTONES }
         : null;
       return addIntention({ ...s, onboarded: true, birth: e.birth, person }, e.intention, e.behavior);
     }
@@ -161,7 +170,9 @@ export function reducer(s: State, e: Event): State {
     case 'stale/refresh':
       return { ...s, stale: false };
     case 'person/add':
-      return { ...s, person: { id: id(), nickname: e.nickname, birthAdded: false, status: 'active', milestones: SAMPLE_MILESTONES } };
+      return { ...s, person: { id: id(), nickname: e.nickname, birth: null, status: 'active', milestones: SAMPLE_MILESTONES } };
+    case 'person/birth':
+      return s.person ? { ...s, person: { ...s.person, birth: e.birth } } : s;
     case 'person/archive':
       return s.person ? { ...s, person: { ...s.person, status: 'archived' } } : s;
     case 'person/unarchive':

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { METHOD } from '../data/fixtures';
 import { Back, ConfirmButton, SafetyPanel } from '../components/ui';
+import { BirthFields } from '../components/BirthFields';
 import { useStore, type Birth } from '../state';
 
 export default function Settings() {
@@ -44,20 +45,7 @@ export default function Settings() {
 
       <section aria-labelledby="b-h">
         <h2 id="b-h">Birth details</h2>
-        <label htmlFor="s-date">Birth date</label>
-        <input id="s-date" type="date" value={birth.date} onChange={(e) => setBirth({ ...birth, date: e.target.value })} />
-        <label htmlFor="s-tp">Birth time</label>
-        <select id="s-tp" value={birth.timePrecision} onChange={(e) => setBirth({ ...birth, timePrecision: e.target.value as Birth['timePrecision'] })}>
-          <option value="exact">I know it</option>
-          <option value="approximate">I know roughly</option>
-          <option value="unknown">I don’t know</option>
-        </select>
-        {birth.timePrecision !== 'unknown' && (
-          <>
-            <label htmlFor="s-time">Time</label>
-            <input id="s-time" type="time" value={birth.time} onChange={(e) => setBirth({ ...birth, time: e.target.value })} />
-          </>
-        )}
+        <BirthFields value={birth} onChange={setBirth} idPrefix="set" />
         <p className="small muted">Changing these marks existing reflections out of date until you refresh them. Your notes stay as they are.</p>
         <button
           type="button"
@@ -131,7 +119,10 @@ export default function Settings() {
       </section>
 
       <hr />
-      <p className="small muted">Prototype 0.1 · sample data only · nothing leaves this browser tab.</p>
+      <p className="small muted">Prototype 0.2 · charts calculated in your browser · nothing is saved or sent.</p>
+      <p className="small muted">
+        Place data © GeoNames (CC BY 4.0). Planet positions: Astronomy Engine (MIT).
+      </p>
     </>
   );
 }

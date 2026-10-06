@@ -1,6 +1,7 @@
 import { useState, type ReactNode } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { SAFETY_RESOURCES, METHOD, type Perspective, type Tradition } from '../data/fixtures';
+import type { Facts } from '../astro/facts';
 import { isUrgent } from '../lib/screener';
 import { useStore, personalize } from '../state';
 
@@ -110,7 +111,7 @@ export function SafetyPanel({ compact = false }: { compact?: boolean }) {
 
 const LENS_NAME: Record<Tradition | 'together', string> = { western: 'Western perspective', vedic: 'Vedic perspective', together: 'Together' };
 
-export function PerspectiveCard({ p, reflectionId, nickname }: { p: Perspective; reflectionId: string; nickname?: string }) {
+export function PerspectiveCard({ p, reflectionId, nickname, facts }: { p: Perspective; reflectionId: string; nickname?: string; facts: Facts | null }) {
   const [open, setOpen] = useState(false);
   const detailsId = `${reflectionId}-${p.tradition}-details`;
   return (
@@ -118,25 +119,26 @@ export function PerspectiveCard({ p, reflectionId, nickname }: { p: Perspective;
       <div className="lens-label">
         <span className="dot" aria-hidden="true" />
         {LENS_NAME[p.tradition]}
-        <span className="sample-tag">Sample text</span>
+        <span className="sample-tag" title="The interpretation text is a draft. The placements are calculated from your details.">Draft text</span>
       </div>
       <h3 id={`${detailsId}-h`}>{personalize(p.title, nickname)}</h3>
       <p>{personalize(p.body, nickname)}</p>
-      {p.unavailable.map((u) => (
+      {facts?.unavailable.map((u) => (
         <p className="unavailable" key={u}>
-          {personalize(u, nickname)}
+          {u}
         </p>
       ))}
+      {!facts && <p className="unavailable">These birth details can’t be calculated, so no placements are shown.</p>}
       {p.limitation && <p className="small muted">{p.limitation}</p>}
       <div className="spread">
         <button type="button" className="link" aria-expanded={open} aria-controls={detailsId} onClick={() => setOpen(!open)}>
-          {open ? 'Hide the details' : 'Show the details'}
+          {open ? 'Hide the placements' : 'Show the placements'}
         </button>
         <FeedbackButton reflectionId={reflectionId} tradition={p.tradition} />
       </div>
       <div id={detailsId} hidden={!open}>
         <ul className="details">
-          {p.details.map((d) => (
+          {facts?.facts.map((d) => (
             <li key={d}>{d}</li>
           ))}
         </ul>
@@ -154,7 +156,7 @@ export function TogetherCard({ text, reflectionId, nickname }: { text: string; r
       <div className="lens-label">
         <span className="dot" aria-hidden="true" />
         <span id={`${reflectionId}-together`}>Together</span>
-        <span className="sample-tag">Sample text</span>
+        <span className="sample-tag">Draft text</span>
       </div>
       <p>{personalize(text, nickname)}</p>
       <p className="small muted">Agreement between traditions isn’t proof, and disagreement isn’t averaged away.</p>

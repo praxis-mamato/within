@@ -100,6 +100,8 @@ There is no combined score and no averaging. "Together" is authored from a templ
 | Skyfield-based astrology wrappers (e.g., libephemeris) | Free | Checked: libephemeris is **AGPL-3.0-only**, the same problem as free Swiss Ephemeris. | Rejected |
 | Hosted astrology APIs (VedicAstroAPI, StarsAPI, AstroAPI, etc.) | ~$10–50/month | Sends every user's birth data to a third party. That adds a processor to the privacy review, puts calculations outside our provenance controls, and creates vendor lock-in. | Rejected |
 
+**Update, Oct 6 (prototype v0.2):** the prototype now calculates live with **Astronomy Engine (MIT)** plus Within's own houses (Placidus, whole-sign), Lahiri ayanamsa, nakshatras, and Vimshottari dashas (`app/src/astro/`). Against Swiss Ephemeris on six reference charts the worst error is 30″ (0.008°). That is the "Skyfield-style" fallback above, already built and validated, so **revisit this decision at G2**: the license may be unnecessary if the approver accepts these reference results.
+
 Sequencing:
 - **E1 prototype:** no license needed. Fixture readings are precomputed offline and contain no real people's data.
 - **Before E3 is deployed anywhere reachable by participants (G2):** license purchased, contract filed in `docs/decisions/`.
