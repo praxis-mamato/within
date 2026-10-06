@@ -121,7 +121,7 @@ function Home({ review }: { review: Review }) {
       <h1>Template review</h1>
       <p className="sub">Every reading is built from these fragments. Approve, edit, or reject each one.</p>
       <div className="card">
-        <div className="progress" role="img" aria-label={`${total.approved} of ${FRAGMENTS.length} approved`}>
+        <div className="review-progress" role="img" aria-label={`${total.approved} of ${FRAGMENTS.length} approved`}>
           <span style={{ width: `${(100 * total.approved) / FRAGMENTS.length}%` }} />
         </div>
         <p className="small">
