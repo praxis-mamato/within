@@ -2,6 +2,7 @@ import { forwardRef, useEffect, useMemo, useRef, useState } from 'react';
 import { BirthFields } from '../components/BirthFields';
 import { computeNatal } from '../astro/natal';
 import { factsFor } from '../astro/facts';
+import { composeReflection } from '../content/compose';
 import { useNavigate } from 'react-router-dom';
 import { FOCUS_OPTIONS, OUTCOME_OPTIONS, REFLECTIONS } from '../data/fixtures';
 import { ChipGroup, PerspectiveCard, SafetyPanel } from '../components/ui';
@@ -49,6 +50,9 @@ export default function Onboarding() {
       return null;
     }
   }, [birth, step]);
+  const composed = useMemo(() => (chart ? composeReflection('self', chart, null) : null), [chart]);
+  const firstQuestion = composed?.question ?? r.question;
+  const firstStep = composed?.step ?? r.step;
 
   // Move focus to each new step's heading so screen-reader users hear where they are.
   useEffect(() => heading.current?.focus(), [step]);
@@ -75,7 +79,7 @@ export default function Onboarding() {
         type: 'action/choose',
         reflectionId: r.id,
         choice: kind,
-        text: kind === 'step' ? r.step : kind === 'pause' ? 'A deliberate pause' : 'Nothing for now',
+        text: kind === 'step' ? firstStep : kind === 'pause' ? 'A deliberate pause' : 'Nothing for now',
         followUp: kind === 'none' ? 'none' : remind ? 'in_3_days' : 'none',
       });
     }
@@ -203,7 +207,7 @@ export default function Onboarding() {
             Placements are calculated from your details. The interpretation text is still a draft.
           </p>
           {state.lensOrder.map((t) => (
-            <PerspectiveCard key={t} p={r.perspectives[t]} reflectionId="onboarding" facts={chart ? factsFor('self', t, chart, null) : null} />
+            <PerspectiveCard key={t} p={r.perspectives[t]} reflectionId="onboarding" facts={chart ? factsFor('self', t, chart, null) : null} composed={composed?.[t]} />
           ))}
           <div className="btn-row">
             <button className="btn" type="button" onClick={next}>
@@ -215,11 +219,11 @@ export default function Onboarding() {
 
       {step === 7 && (
         <>
-          <Heading ref={heading}>{r.question}</Heading>
+          <Heading ref={heading}>{firstQuestion}</Heading>
           <p className="sub">Then choose what you’d like to do. Every option is a real choice.</p>
           <ChipGroup
             label="Next step"
-            options={[`Try: ${r.step}`, 'Take a deliberate pause', 'Nothing for now']}
+            options={[`Try: ${firstStep}`, 'Take a deliberate pause', 'Nothing for now']}
             value={choice}
             onChange={setChoice}
           />

@@ -65,6 +65,7 @@ export interface NatalChart {
   western: {
     planets: WesternPlacement[];
     ascendant: Uncertain<string>;
+    moonSign: Uncertain<string>;
     ascendantDegree: number | null;
     midheaven: string | null;
     houseSystem: 'Placidus' | null;
@@ -173,6 +174,7 @@ export function computeNatal(b: BirthInput, now = new Date()): NatalChart {
     western: {
       planets: westernPlanets,
       ascendant: ascSigns,
+      moonSign: uncertain(window.map((t) => SIGNS[Math.floor(tropicalLongitude('Moon', t) / 30)])),
       ascendantDegree: angles && b.timePrecision === 'exact' ? angles.asc % 30 : null,
       midheaven: angles && b.timePrecision === 'exact' ? SIGNS[Math.floor(angles.mc / 30)] : null,
       houseSystem: cusps && b.timePrecision === 'exact' && ascSigns.certain ? 'Placidus' : null,

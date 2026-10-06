@@ -2,6 +2,7 @@ import { useState, type ReactNode } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { SAFETY_RESOURCES, METHOD, type Perspective, type Tradition } from '../data/fixtures';
 import type { Facts } from '../astro/facts';
+import type { Composed } from '../content/compose';
 import { isUrgent } from '../lib/screener';
 import { useStore, personalize } from '../state';
 
@@ -111,7 +112,9 @@ export function SafetyPanel({ compact = false }: { compact?: boolean }) {
 
 const LENS_NAME: Record<Tradition | 'together', string> = { western: 'Western perspective', vedic: 'Vedic perspective', together: 'Together' };
 
-export function PerspectiveCard({ p, reflectionId, nickname, facts }: { p: Perspective; reflectionId: string; nickname?: string; facts: Facts | null }) {
+export function PerspectiveCard({ p, reflectionId, nickname, facts, composed }: { p: Perspective; reflectionId: string; nickname?: string; facts: Facts | null; composed?: Composed }) {
+  const title = composed?.title ?? personalize(p.title, nickname);
+  const body = composed?.body ?? personalize(p.body, nickname);
   const [open, setOpen] = useState(false);
   const detailsId = `${reflectionId}-${p.tradition}-details`;
   return (
@@ -121,8 +124,8 @@ export function PerspectiveCard({ p, reflectionId, nickname, facts }: { p: Persp
         {LENS_NAME[p.tradition]}
         <span className="sample-tag" title="The interpretation text is a draft. The placements are calculated from your details.">Draft text</span>
       </div>
-      <h3 id={`${detailsId}-h`}>{personalize(p.title, nickname)}</h3>
-      <p>{personalize(p.body, nickname)}</p>
+      <h3 id={`${detailsId}-h`}>{title}</h3>
+      <p>{body}</p>
       {facts?.unavailable.map((u) => (
         <p className="unavailable" key={u}>
           {u}
@@ -145,12 +148,18 @@ export function PerspectiveCard({ p, reflectionId, nickname, facts }: { p: Persp
         <p className="small muted">
           {METHOD[p.tradition].summary} Method version: <code>{METHOD[p.tradition].version}</code>.
         </p>
+        {composed && (
+          <p className="small muted">
+            Draft templates, awaiting approval: <code>{composed.templateIds.join(', ')}</code>
+          </p>
+        )}
       </div>
     </article>
   );
 }
 
 export function TogetherCard({ text, reflectionId, nickname }: { text: string; reflectionId: string; nickname?: string }) {
+  // text may already be personalized by the composer; personalize() is a no-op then.
   return (
     <article className="card lens together" aria-labelledby={`${reflectionId}-together`}>
       <div className="lens-label">

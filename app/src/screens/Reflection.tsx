@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
+import { composeReflection } from '../content/compose';
 import { Link, useParams } from 'react-router-dom';
 import { REFLECTIONS, type Pillar } from '../data/fixtures';
 import { Back, ChipGroup, PerspectiveCard, SafetyPanel, TogetherCard } from '../components/ui';
@@ -21,6 +22,7 @@ export default function Reflection() {
   const intention = activeIntention(state);
   const existing = state.actions.find((a) => a.reflectionId === r.id);
   const { me, other } = useCharts();
+  const composed = useMemo(() => (me ? composeReflection(r.pillar, me, other, nickname) : null), [me, other, nickname, r.pillar]);
 
   const [situation, setSituation] = useState(pillar === 'self' && state.focusText ? state.focusText : r.situation);
   const [editing, setEditing] = useState(false);
@@ -30,11 +32,12 @@ export default function Reflection() {
 
   // Safety: steps involving the other person are never offered after a flag (PRD §6, build spec §8.1).
   const stepHidden = state.safety.suppressContactActions && r.stepInvolvesOther;
-  const step = personalize(r.step, nickname);
+  const step = composed?.step ?? personalize(r.step, nickname);
+  const question = composed?.question ?? personalize(r.question, nickname);
 
   const save = () => {
     if (!choice) return;
-    if (answer.trim()) dispatch({ type: 'journal/add', body: `${personalize(r.question, nickname)}\n${answer.trim()}` });
+    if (answer.trim()) dispatch({ type: 'journal/add', body: `${question}\n${answer.trim()}` });
     dispatch({
       type: 'action/choose',
       reflectionId: r.id,
@@ -101,15 +104,15 @@ export default function Reflection() {
           Interpretations, not predictions or facts about anyone. Each tradition is shown on its own; you decide what fits.
         </p>
         {state.lensOrder.map((t) => (
-          <PerspectiveCard key={t} p={r.perspectives[t]} reflectionId={r.id} nickname={nickname} facts={me ? factsFor(r.pillar, t, me, other, nickname) : null} />
+          <PerspectiveCard key={t} p={r.perspectives[t]} reflectionId={r.id} nickname={nickname} facts={me ? factsFor(r.pillar, t, me, other, nickname) : null} composed={composed?.[t]} />
         ))}
-        <TogetherCard text={r.together} reflectionId={r.id} nickname={nickname} />
+        <TogetherCard text={composed?.together.body ?? r.together} reflectionId={r.id} nickname={nickname} />
       </section>
 
       <section aria-labelledby="q-h">
         <h2 id="q-h">Reflection</h2>
         <label htmlFor="answer">
-          {personalize(r.question, nickname)}
+          {question}
           <span className="hint">Optional. Saved to your private journal.</span>
         </label>
         <textarea id="answer" value={answer} onChange={(e) => setAnswer(e.target.value)} disabled={!!existing} />
