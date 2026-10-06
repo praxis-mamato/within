@@ -46,6 +46,8 @@ The agent runs **hourly** during the pilot and immediately on a new P0/P1 flag. 
 ## 4. Escalation
 
 - **P0 or in-app defect:** the agent writes `ESCALATE NOW` at the top of its triage file and shift log. The notification step (push + email to Maggie) fires on that line. The notification contains the flag ID and severity only, no participant text or names.
+- **Drills never alert.** The notifier watches only `ops/safety/triage/` and `ops/safety/logs/`, never `ops/safety/drills/`.
+- **Operator- or feedback-raised P0/P1:** the app has not switched off contact suggestions for these. The approver switches them off for that participant in the console before sending any follow-up.
 - **P1/P2:** appear in the console queue sorted by severity, then age.
 - **Approver unavailable over 48 h:** the named delegate covers the queue. With no delegate, intake of new participants pauses.
 - **Serious incident** (harm linked to the app, a P0 missed by over 24 h, a privacy breach): pause the pilot and investigate (PRD §11).
@@ -90,6 +92,7 @@ Drills write to `ops/safety/drills/<YYYY-MM-DD>/` (triage files plus `shift-log.
 | Date | Fixtures | Result | Notes |
 |---|---|---|---|
 | Oct 6, 2026 | 6 | PASS | 14 findings on templates and runbook, fixed the same day. Run again after the fixes. |
+| Oct 6, 2026 (rerun) | 6 | PASS | 4 small findings (one fixture, a conditional template sentence, drill alerts, greeting rule), fixed the same day. |
 
 ## 8. Before G2 (open items)
 

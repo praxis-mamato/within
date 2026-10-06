@@ -28,7 +28,8 @@ Gate 0 (build spec §10) unlocks **E1, the clickable prototype**. It does not un
 ## Safety agent status at this gate
 
 - First drill: **PASS** (6/6). It produced 14 findings on templates and the runbook. All were fixed except finding 13, which is a policy decision (below).
-- A second drill on the fixed templates is recorded in `ops/safety/drills/2026-10-06-rerun/`.
+- Second drill on the fixed templates: **PASS** (6/6), recorded in `ops/safety/drills/2026-10-06-rerun/`. Its 4 small findings were fixed.
+- Before G2 the drill must pass again on **approved** templates with real region resources.
 
 ## Not authorized yet (needs G1/G2)
 

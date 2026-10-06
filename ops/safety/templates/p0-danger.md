@@ -8,6 +8,6 @@ We read what you wrote and want to make sure you have this. If you're in danger 
 You can also talk to someone confidentially, any time:
 {{region_dv_line}}
 
-WITHIN isn't monitored around the clock and can't send help, but these services can. Suggestions to talk with {{other_person}} are switched off. Use WITHIN only if and when it feels right.
+WITHIN isn't monitored around the clock and can't send help, but these services can. [ONLY IF the flag shows contact_actions_suppressed: true:] Suggestions to talk with {{other_person}} are switched off. Use WITHIN only if and when it feels right.
 
 — {{approver_name}}, WITHIN

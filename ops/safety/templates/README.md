@@ -6,9 +6,10 @@ All templates are **DRAFT** until Maggie approves them (status line at the top o
 
 | Placeholder | Filled by | Rule |
 |---|---|---|
-| `{{greeting}}` | Agent | "Hi {first name}," if the profile has one, otherwise "Hi," |
+| `{{greeting}}` | Agent | Always "Hi," (the agent can't see names). The approver may personalize it. |
 | `{{other_person}}` | Agent | The flag's `nickname` if set, otherwise "the other person" |
 | `{{region_emergency_number}}`, `{{region_crisis_line}}`, `{{region_dv_line}}`, `{{region_resources}}` | Agent | Copied verbatim from `ops/safety/resources/<region>.md`. If that file doesn't exist, write `[PLACEHOLDER: …]`. Never invent a number. |
+| `[ONLY IF …:]` | Agent | Keep the sentence only when the condition holds on the flag; otherwise delete it. |
 | `[HUMAN: …]` | Approver | Anything that depends on an action the agent can't see (e.g. whether a reading was removed). The agent leaves these in place. |
 | `{{approver_name}}` | Agent | "Maggie" |
 
