@@ -11,7 +11,8 @@
     "test": "vitest run",
     "build:artifact": "tsc -b && node scripts/build-artifact.mjs",
     "places": "node scripts/build-places.mjs",
-    "test:a11y": "playwright test"
+    "test:a11y": "playwright test",
+    "test:pilot": "WITHIN_BUILD=pilot vitest run src/content/approvals.test.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.2",

@@ -256,7 +256,13 @@ export function RelationshipHome() {
     return (
       <>
         <Back to="/relationships" label="Relationships" />
-        <p>No relationship added.</p>
+        <div className="empty">
+          <Leaf />
+          <p>No one added yet. Add one person to explore a relationship through both traditions.</p>
+          <Link className="btn secondary" to="/relationships">
+            Add someone
+          </Link>
+        </div>
       </>
     );
   }

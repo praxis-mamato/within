@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { lazy, Suspense, useEffect, useRef } from 'react';
 import { HashRouter, Link, MemoryRouter, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { StoreProvider, useStore } from './state';
 import { TabBar } from './components/ui';
@@ -14,6 +14,25 @@ import { ErrorBoundary } from './components/ErrorBoundary';
 import { track } from './services/telemetry';
 import Interview, { ComprehensionCheck, InterviewBar } from './screens/Interview';
 import { interviewRequested, load as loadInterview } from './interview/session';
+
+// The template review console is for the approver only: not linked anywhere, loaded on demand.
+const ReviewConsole = lazy(() => import('./screens/Review'));
+
+function Routed() {
+  return (
+    <Routes>
+      <Route
+        path="/review/*"
+        element={
+          <Suspense fallback={<p className="review">Loading…</p>}>
+            <ReviewConsole />
+          </Suspense>
+        }
+      />
+      <Route path="*" element={<Shell />} />
+    </Routes>
+  );
+}
 
 function Shell() {
   const { state } = useStore();
@@ -107,11 +126,11 @@ export default function App() {
           for the single-file artifact build, whose host frame doesn't pass hash state through. */}
       {import.meta.env.MODE === 'artifact' ? (
         <MemoryRouter>
-          <Shell />
+          <Routed />
         </MemoryRouter>
       ) : (
         <HashRouter>
-          <Shell />
+          <Routed />
         </HashRouter>
       )}
       </AccountProvider>
