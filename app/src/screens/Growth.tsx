@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { track } from '../services/telemetry';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { OUTCOME_OPTIONS } from '../data/fixtures';
 import { Back, ChipGroup, PromptChips, PurposeCard } from '../components/ui';
@@ -192,7 +193,7 @@ export function FollowUp() {
       <Back />
       <p className="kicker">Check in</p>
 <h1>How did it go?</h1>
-      <Paywall what="Check-ins">
+      <Paywall where="check_ins" what="Check-ins">
 
       <p className="sub">“{a.text}”</p>
       <fieldset>
@@ -244,6 +245,7 @@ export function FollowUp() {
                 next: NEXT[next[0] as keyof typeof NEXT],
               },
             });
+            track('follow_up_done', { attempt: ATT[attempt[0]], usefulness: useful[0] ? USE[useful[0]] : 'skipped' });
             nav(next[0] === 'Adjust it' || next[0] === 'Set a new one' ? '/growth' : '/today');
           }}
         >

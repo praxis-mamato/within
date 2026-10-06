@@ -192,8 +192,3 @@ export const MILESTONE_INTERPRETATION = {
   question: 'Looking back, what did this moment teach you about what you need?',
 };
 
-/** Placeholder until region resource lists are written and verified (runbook §8). */
-export const SAFETY_RESOURCES = {
-  note: 'Prototype placeholder. Real, verified resources for your region will appear here.',
-  lines: ['Local emergency number', 'A crisis line (verified per region)', 'A domestic-violence support line (verified per region)'],
-};
