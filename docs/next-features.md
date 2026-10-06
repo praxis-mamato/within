@@ -182,6 +182,12 @@ People's entries live **on their phone**, and copies go to **their own cloud acc
 
 ---
 
+## Subscriber depth
+
+Specified in [`readings-engine.md`](readings-engine.md) Part 2: a deeper rule-based library (deep natal report, Navamsa and Dashamsa, aspect patterns, house rulers, monthly and yearly timing with exact dates, full synastry and composite) and an optional AI-written layer grounded in the calculated chart, pending a decision.
+
+---
+
 ## Group C: after the pilot (G3+), per PRD
 
 Multiple relationships, friendships and family, progressions and Davison charts, optional end-to-end encrypted sync between devices.
