@@ -3,7 +3,8 @@ import { Link, NavLink, useNavigate, useParams } from 'react-router-dom';
 import { MILESTONE_INTERPRETATION, MILESTONE_TYPES, REFLECTIONS, type Milestone, type MilestoneType, type Pillar } from '../data/fixtures';
 import { describePrecision, formatFuzzyDate, type DateKind } from '../lib/dates';
 import { Landscape, Leaf, Orbit, Venn } from '../components/Illustrations';
-import { Back, ConfirmButton, PurposeCard, SafetyPanel } from '../components/ui';
+import { Back, ConfirmButton, PromptChips, PurposeCard, SafetyPanel } from '../components/ui';
+import { MILESTONE_MEANINGS, MILESTONE_TITLES } from '../data/prompts';
 import { personalize, SAMPLE_BIRTH, useStore, type Birth } from '../state';
 import { BirthFields } from '../components/BirthFields';
 import Chart, { ChartTables } from './Chart';
@@ -460,7 +461,8 @@ export function MilestoneForm() {
         ))}
       </select>
       <label htmlFor="m-title">Name it</label>
-      <input id="m-title" type="text" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. A turning point" />
+      <PromptChips label="Suggestions" options={MILESTONE_TITLES[type]} value={title} onChange={setTitle} mode="replace" />
+      <input id="m-title" type="text" value={title} onChange={(e) => setTitle(e.target.value)} />
       <fieldset className="radio-list">
         <legend>How sure are you of the date?</legend>
         {(
@@ -501,6 +503,7 @@ export function MilestoneForm() {
       <label htmlFor="m-meaning">
         What it meant to you <span className="hint">Optional. Private.</span>
       </label>
+      <PromptChips label="Tap any that fit" options={MILESTONE_MEANINGS} value={meaning} onChange={setMeaning} />
       <textarea id="m-meaning" value={meaning} onChange={(e) => setMeaning(e.target.value)} />
       <label className="toggle" style={{ marginTop: 16 }}>
         Leave this out of future reflections

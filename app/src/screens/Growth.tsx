@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { OUTCOME_OPTIONS } from '../data/fixtures';
-import { Back, ChipGroup, PurposeCard } from '../components/ui';
+import { Back, ChipGroup, PromptChips, PurposeCard } from '../components/ui';
+import { FOLLOW_UP_NOTES, JOURNAL_STARTERS, OBSERVED, PURPOSES } from '../data/prompts';
 import { useStore, type Action, type Attempt, type Usefulness } from '../state';
 
 const fmt = (iso: string) => new Date(iso).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
@@ -38,6 +39,7 @@ export default function Growth() {
               <ChipGroup label="Value" options={OUTCOME_OPTIONS} value={value} onChange={setValue} />
             </fieldset>
             <label htmlFor="g-beh">The behavior you want to practise</label>
+            <PromptChips label="Ideas" options={PURPOSES} value={behavior} onChange={setBehavior} mode="replace" />
             <input id="g-beh" type="text" value={behavior} onChange={(e) => setBehavior(e.target.value)} />
             <div className="btn-row">
               <button
@@ -94,7 +96,8 @@ export default function Growth() {
         <label htmlFor="obs" className="sr-only">
           Something you noticed
         </label>
-        <textarea id="obs" value={observed} onChange={(e) => setObserved(e.target.value)} placeholder="e.g. I said what I wanted before agreeing to dinner plans." />
+        <PromptChips label="Tap one, or write your own" options={OBSERVED} value={observed} onChange={setObserved} mode="replace" />
+        <textarea id="obs" value={observed} onChange={(e) => setObserved(e.target.value)} />
         <button
           type="button"
           className="btn quiet"
@@ -121,6 +124,7 @@ export default function Growth() {
         <label htmlFor="jr" className="sr-only">
           New journal entry
         </label>
+        <PromptChips label="Start from a prompt" options={JOURNAL_STARTERS} value={entry} onChange={setEntry} />
         <textarea id="jr" value={entry} onChange={(e) => setEntry(e.target.value)} />
         <button
           type="button"
@@ -213,6 +217,7 @@ export function FollowUp() {
           <label htmlFor="fu-notes">
             What happened? What would you change? <span className="hint">Optional</span>
           </label>
+          <PromptChips label="Tap any that fit" options={FOLLOW_UP_NOTES} value={notes} onChange={setNotes} />
           <textarea id="fu-notes" value={notes} onChange={(e) => setNotes(e.target.value)} />
           <fieldset>
             <legend>What’s next?</legend>

@@ -4,8 +4,11 @@ import { computeNatal } from '../astro/natal';
 import { factsFor } from '../astro/facts';
 import { composeReflection } from '../content/compose';
 import { useNavigate } from 'react-router-dom';
-import { FOCUS_OPTIONS, OUTCOME_OPTIONS, REFLECTIONS } from '../data/fixtures';
-import { ChipGroup, PerspectiveCard, SafetyPanel } from '../components/ui';
+import { FOCUS_OPTIONS, REFLECTIONS } from '../data/fixtures';
+import { OUTCOMES, PURPOSES } from '../data/prompts';
+import { planFor, SITUATIONS } from '../content/topics';
+import { SIGN_ELEMENT } from '../content/templates';
+import { ChipGroup, PerspectiveCard, PromptChips, SafetyPanel } from '../components/ui';
 import { Orbit } from '../components/Illustrations';
 import { SAMPLE_BIRTH, useStore, type Birth } from '../state';
 
@@ -19,14 +22,6 @@ const Heading = forwardRef<HTMLHeadingElement, { children: string }>(function He
   );
 });
 
-/** Turns the chosen outcome into a starting purpose the user can edit. */
-const PURPOSE_FOR: Record<string, string> = {
-  Clarity: 'Notice what I need before I respond',
-  'Expressing a need': 'Speak honestly, stay connected',
-  'Preparing a conversation': 'Prepare what I want to say, calmly',
-  Acceptance: 'Accept what I can’t change, and choose what I can',
-  'Defining a boundary': 'Name one boundary and keep it',
-};
 
 export default function Onboarding() {
   const { state, dispatch } = useStore();
@@ -39,7 +34,8 @@ export default function Onboarding() {
   const [mode, setMode] = useState<'self' | 'other' | null>(null);
   const [nickname, setNickname] = useState('Alex');
   const [behavior, setBehavior] = useState('');
-  const [choice, setChoice] = useState<string[]>([]);
+  const [choice, setChoice] = useState<string>('');
+  const [answer, setAnswer] = useState('');
   const [remind, setRemind] = useState<boolean | null>(null);
   const heading = useRef<HTMLHeadingElement>(null);
   const r = REFLECTIONS.self;
@@ -51,8 +47,13 @@ export default function Onboarding() {
     }
   }, [birth, step]);
   const composed = useMemo(() => (chart ? composeReflection('self', chart, null) : null), [chart]);
-  const firstQuestion = composed?.question ?? r.question;
-  const firstStep = composed?.step ?? r.step;
+  // Step 7 comes from the person's own answers in steps 1–2; the chart only suggests a style.
+  const moonSign = chart?.western.moonSign.value ?? chart?.western.planets.find((p) => p.body === 'Moon')?.sign;
+  const plan = useMemo(
+    () => planFor(focusText, focus, outcome[0] ?? '', moonSign ? SIGN_ELEMENT[moonSign] : null),
+    [focusText, focus, outcome, moonSign],
+  );
+  const stepOptions = plan.steps.filter((x) => !(state.safety.suppressContactActions && x.involvesOther));
 
   // Move focus to each new step's heading so screen-reader users hear where they are.
   useEffect(() => heading.current?.focus(), [step]);
@@ -60,7 +61,7 @@ export default function Onboarding() {
   const next = () => {
     if (step === 2) {
       dispatch({ type: 'onboarding/answers', focus, focusText, outcome: outcome[0] ?? '' });
-      setBehavior(PURPOSE_FOR[outcome[0]] ?? 'Speak honestly, stay connected');
+      setBehavior(OUTCOMES[outcome[0]] ?? 'Speak honestly, stay connected');
     }
     setStep(step + 1);
   };
@@ -72,14 +73,14 @@ export default function Onboarding() {
       intention: outcome[0] ?? 'Clarity',
       behavior,
     });
-    const picked = choice[0];
-    if (picked) {
-      const kind = picked.startsWith('Try') ? 'step' : picked.startsWith('Take') ? 'pause' : 'none';
+    if (answer.trim()) dispatch({ type: 'journal/add', body: `${plan.question}\n${answer.trim()}` });
+    if (choice) {
+      const kind = choice === 'pause' ? 'pause' : choice === 'none' ? 'none' : 'step';
       dispatch({
         type: 'action/choose',
         reflectionId: r.id,
         choice: kind,
-        text: kind === 'step' ? firstStep : kind === 'pause' ? 'A deliberate pause' : 'Nothing for now',
+        text: kind === 'step' ? choice : kind === 'pause' ? 'A deliberate pause' : 'Nothing for now',
         followUp: kind === 'none' ? 'none' : remind ? 'in_3_days' : 'none',
       });
     }
@@ -109,12 +110,13 @@ export default function Onboarding() {
         <>
           <Orbit />
           <Heading ref={heading}>What would you like help understanding?</Heading>
-          <p className="sub">Choose any that fit, or describe it in your own words.</p>
+          <p className="sub">Choose any that fit, then pick a situation that sounds like yours or describe it.</p>
           <ChipGroup label="Topics" multi options={FOCUS_OPTIONS} value={focus} onChange={setFocus} />
           <label htmlFor="focus-text">
-            In your own words <span className="hint">Optional</span>
+            What’s happening? <span className="hint">Tap one below or write your own. You can edit it.</span>
           </label>
-          <textarea id="focus-text" value={focusText} onChange={(e) => setFocusText(e.target.value)} placeholder="e.g. I say yes and later feel resentful." />
+          <PromptChips label="Situations other people describe" options={SITUATIONS} value={focusText} onChange={setFocusText} mode="replace" />
+          <textarea id="focus-text" value={focusText} onChange={(e) => setFocusText(e.target.value)} placeholder="In your own words" />
           <div className="btn-row">
             <button className="btn" type="button" disabled={!focus.length && !focusText.trim()} onClick={next}>
               Continue
@@ -127,7 +129,7 @@ export default function Onboarding() {
         <>
           <Heading ref={heading}>What would a useful outcome look like?</Heading>
           <p className="sub">This becomes your starting purpose. You can change it any time.</p>
-          <ChipGroup label="Outcome" options={OUTCOME_OPTIONS} value={outcome} onChange={setOutcome} />
+          <ChipGroup label="Outcome" options={Object.keys(OUTCOMES)} value={outcome} onChange={setOutcome} />
           <div className="btn-row">
             <button className="btn" type="button" disabled={!outcome.length} onClick={next}>
               Continue
@@ -219,20 +221,67 @@ export default function Onboarding() {
 
       {step === 7 && (
         <>
-          <Heading ref={heading}>{firstQuestion}</Heading>
-          <p className="sub">Then choose what you’d like to do. Every option is a real choice.</p>
-          <ChipGroup
-            label="Next step"
-            options={[`Try: ${firstStep}`, 'Take a deliberate pause', 'Nothing for now']}
-            value={choice}
-            onChange={setChoice}
-          />
-          <label htmlFor="purpose">
-            Your purpose <span className="hint">Edit it so it sounds like you.</span>
+          <div className="card soft recap">
+            <p className="small muted" style={{ margin: 0 }}>
+              You told us
+            </p>
+            <p style={{ margin: 0 }}>{focusText.trim() ? `“${focusText.trim()}”` : focus.join(', ')}</p>
+            {outcome[0] && (
+              <p className="small" style={{ margin: 0 }}>
+                You’d like: <strong>{outcome[0].toLowerCase()}</strong>
+              </p>
+            )}
+          </div>
+          <Heading ref={heading}>{plan.question}</Heading>
+          <label htmlFor="ob-answer">
+            Your answer <span className="hint">Optional. Saved to your private journal.</span>
           </label>
+          <PromptChips label="Ideas to start from" options={plan.answers} value={answer} onChange={setAnswer} />
+          <textarea id="ob-answer" value={answer} onChange={(e) => setAnswer(e.target.value)} />
+
+          <fieldset className="radio-list">
+            <legend>What would you like to do next?</legend>
+            {stepOptions.map((x) => (
+              <label key={x.text}>
+                <input type="radio" name="ob-step" checked={choice === x.text} onChange={() => setChoice(x.text)} />
+                <span>
+                  <strong>Try:</strong> {x.text}
+                  <span className="hint">{x.source === 'situation' ? 'Based on what’s happening' : `Based on your goal: ${outcome[0]?.toLowerCase()}`}</span>
+                </span>
+              </label>
+            ))}
+            <label>
+              <input type="radio" name="ob-step" checked={choice === 'pause'} onChange={() => setChoice('pause')} />
+              <span>
+                <strong>Take a deliberate pause.</strong> Notice, don’t act yet.
+              </span>
+            </label>
+            <label>
+              <input type="radio" name="ob-step" checked={choice === 'none'} onChange={() => setChoice('none')} />
+              <span>Nothing for now</span>
+            </label>
+          </fieldset>
+          {plan.style && (
+            <p className="small muted">
+              Your chart suggests a style that may come easily: <strong>{plan.style}</strong>.
+            </p>
+          )}
+
+          <label htmlFor="purpose">
+            Your purpose <span className="hint">From the outcome you chose. Edit it, or pick another.</span>
+          </label>
+          <PromptChips label="Other purposes" options={PURPOSES.filter((x) => x !== behavior)} value={behavior} onChange={setBehavior} mode="replace" limit={4} />
           <input id="purpose" type="text" value={behavior} onChange={(e) => setBehavior(e.target.value)} />
           <div className="btn-row">
-            <button className="btn" type="button" disabled={!choice.length || !behavior.trim()} onClick={next}>
+            <button
+              className="btn"
+              type="button"
+              disabled={!choice || !behavior.trim()}
+              onClick={() => {
+                if (answer.trim()) dispatch({ type: 'text/screen', text: answer });
+                next();
+              }}
+            >
               Continue
             </button>
           </div>

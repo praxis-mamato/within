@@ -3,6 +3,7 @@ import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { SAFETY_RESOURCES, METHOD, type Perspective, type Tradition } from '../data/fixtures';
 import type { Facts } from '../astro/facts';
 import type { Composed } from '../content/compose';
+import { FEEDBACK_NOTES } from '../data/prompts';
 import { isUrgent } from '../lib/screener';
 import { useStore, personalize } from '../state';
 
@@ -199,6 +200,7 @@ function FeedbackButton({ reflectionId, tradition }: { reflectionId: string; tra
           <label htmlFor={`fb-${reflectionId}-${tradition}`}>
             Anything to add? <span className="hint">Optional</span>
           </label>
+          <PromptChips label="Tap any that fit" options={FEEDBACK_NOTES} value={note} onChange={setNote} />
           <textarea id={`fb-${reflectionId}-${tradition}`} value={note} onChange={(e) => setNote(e.target.value)} />
           <div className="btn-row">
             <button
@@ -255,5 +257,43 @@ export function ConfirmButton({ label, question, confirmLabel, onConfirm }: { la
         </button>
       </div>
     </div>
+  );
+}
+
+/**
+ * Tap-to-fill suggestions for a text field. Picking one fills an empty field or adds to the
+ * text already there; the person can still edit everything.
+ */
+export function PromptChips({ label, options, value, onChange, mode = 'append', limit = 6 }: { label: string; options: string[]; value: string; onChange: (v: string) => void; mode?: 'append' | 'replace'; limit?: number }) {
+  const [all, setAll] = useState(false);
+  const shown = all ? options : options.slice(0, limit);
+  return (
+    <>
+      <p className="prompts-label">{label}</p>
+      <div className="prompts wrap" role="group" aria-label={label}>
+        {shown.map((o) => {
+          const used = value.includes(o.replace(/…$/, ''));
+          return (
+            <button
+              key={o}
+              type="button"
+              className="prompt"
+              aria-pressed={used}
+              onClick={() => {
+                if (mode === 'replace' || !value.trim()) onChange(o.endsWith('…') ? o.slice(0, -1) + ' ' : o);
+                else if (!used) onChange(`${value.trim()} ${o.endsWith('…') ? o.slice(0, -1) : o}`);
+              }}
+            >
+              {o}
+            </button>
+          );
+        })}
+        {options.length > limit && (
+          <button type="button" className="link small" aria-expanded={all} onClick={() => setAll(!all)}>
+            {all ? 'Fewer ideas' : `More ideas (${options.length - limit})`}
+          </button>
+        )}
+      </div>
+    </>
   );
 }

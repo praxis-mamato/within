@@ -95,10 +95,11 @@ Native apps are recommended because a browser can delete locally stored data (Sa
 - Native sign-in on each platform (Apple's and Google's own SDKs), plus web sign-in for the web version.
 - Offering Google sign-in on iOS requires an equivalent privacy-focused option ([App Store Guideline 4.8](https://developer.apple.com/app-store/review/guidelines/#login-services)); Sign in with Apple meets it.
 - A small auth service (recommended: Supabase Auth or Firebase Auth) verifies the identity token and stores only: provider, account ID, email (Apple's private relay address is fine), created date, subscription status.
+- **Email link as the second factor (decided Oct 6).** After Apple or Google sign-in, a one-time link sent to the account's email confirms it's really you. Asked for: first sign-in on a new device, restoring a backup, changing the subscription, and deleting the account. Apple's private relay addresses receive these links normally. Links expire after 15 minutes, work once, and contain no personal details. The email says only "Your Within sign-in link".
 - **Delete account inside the app** (required by Apple Guideline 5.1.1(v)): deletes the server record, revokes the Apple token, and offers to wipe on-device data.
 - Sign-in is not required to try the app: onboarding and the first full reflection work signed-out (PRD: one complete introductory reflection free). Sign-in comes when the person subscribes or wants a second device.
 
-**Acceptance:** sign in, sign out, and delete account work on iOS, Android, and web; the server record contains no birth data, journal text, or relationship details (checked by a test that inspects every API payload).
+**Acceptance:** sign in, sign out, and delete account work on iOS, Android, and web; a new device can't open the account or restore a backup until the email link is used; an expired or reused link is refused; the server record contains no birth data, journal text, or relationship details (checked by a test that inspects every API payload).
 
 **Size:** M
 
@@ -179,5 +180,5 @@ Multiple relationships, friendships and family, progressions and Davison charts,
 | 6 | Launch countries (decides store rules, fees, safety resources, privacy review) | B2, safety, B6 |
 | 7 | Auth provider: Supabase Auth or Firebase Auth | B1 |
 | 8 | Out-of-hours P0 coverage (runbook §3) | Safety |
-| ~~—~~ | ~~Sign-in method~~ **Decided: Apple and Google** | B1 |
+| ~~—~~ | ~~Sign-in method~~ **Decided: Apple and Google, with an email link as the second factor** | B1 |
 | ~~—~~ | ~~Reminder channel~~ **Decided by on-device storage: local notifications** | B4 |

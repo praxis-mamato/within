@@ -139,8 +139,9 @@ input[type='text'], input[type='date'], input[type='time'], input[type='month'],
 textarea { min-height: 96px; resize: vertical; }
 fieldset { border: 0; padding: 0; margin: 0; }
 legend { font-weight: 600; color: var(--ink-display); margin: 14px 0 6px; padding: 0; }
-.radio-list label { font-weight: 400; color: var(--ink-body); display: flex; gap: 10px; align-items: center; margin: 6px 0; min-height: 40px; }
-.radio-list input { width: 20px; height: 20px; accent-color: var(--accent); }
+.radio-list label { font-weight: 400; color: var(--ink-body); display: flex; gap: 10px; align-items: flex-start; margin: 10px 0; min-height: 40px; }
+.radio-list label .hint { margin-top: 2px; }
+.radio-list input { width: 20px; height: 20px; accent-color: var(--accent); flex: none; margin-top: 2px; }
 .toggle { display: flex; align-items: center; justify-content: space-between; gap: 12px; font-weight: 400; color: var(--ink-body); }
 .toggle input { width: 22px; height: 22px; accent-color: var(--accent); }
 
@@ -266,3 +267,14 @@ abbr { text-decoration: none; color: var(--accent-pressed); }
 .facts dd { margin: 0; color: var(--ink-display); font-weight: 600; min-width: 0; }
 h3.mini { font-family: var(--font-body); font-size: 0.8125rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--ink-muted); margin: 14px 0 4px; }
 details > summary { cursor: pointer; margin: 8px 0; }
+
+/* Tap-to-fill prompts */
+.prompts { display: flex; gap: 8px; overflow-x: auto; padding: 2px 0 8px; margin: 4px 0; scrollbar-width: thin; }
+.prompts.wrap { flex-wrap: wrap; overflow-x: visible; }
+.prompt {
+  flex: 0 0 auto; min-height: 40px; padding: 6px 14px; border-radius: 12px; text-align: left;
+  border: 1px dashed #c9b7a5; background: var(--surface); color: var(--ink-body); cursor: pointer; max-width: 260px; white-space: normal; font-size: 0.9375rem;
+}
+.prompt:hover { border-style: solid; border-color: var(--accent); }
+.prompt[aria-pressed='true'] { border-style: solid; border-color: var(--accent); background: var(--accent-soft); color: var(--ink-display); }
+.prompts-label { font-size: 0.8125rem; color: var(--ink-muted); margin: 8px 0 0; }

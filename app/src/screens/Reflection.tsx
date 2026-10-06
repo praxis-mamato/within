@@ -1,8 +1,11 @@
 import { useMemo, useState } from 'react';
 import { composeReflection } from '../content/compose';
+import { OUTCOME_STEPS, planFor, SITUATIONS } from '../content/topics';
+import { SIGN_ELEMENT } from '../content/templates';
+import { PILLAR_ANSWERS } from '../data/prompts';
 import { Link, useParams } from 'react-router-dom';
 import { REFLECTIONS, type Pillar } from '../data/fixtures';
-import { Back, ChipGroup, PerspectiveCard, SafetyPanel, TogetherCard } from '../components/ui';
+import { Back, ChipGroup, PerspectiveCard, PromptChips, SafetyPanel, TogetherCard } from '../components/ui';
 import { factsFor } from '../astro/facts';
 import { useCharts } from '../astro/useCharts';
 import { activeIntention, personalize, useStore, type Action, type Choice } from '../state';
@@ -27,22 +30,38 @@ export default function Reflection() {
   const [situation, setSituation] = useState(pillar === 'self' && state.focusText ? state.focusText : r.situation);
   const [editing, setEditing] = useState(false);
   const [answer, setAnswer] = useState('');
-  const [choice, setChoice] = useState<Choice | null>(null);
+  const [choice, setChoice] = useState<string | null>(null);
   const [followUp, setFollowUp] = useState<string[]>(['In 3 days']);
 
+  // Self follows the person's own situation and outcome (same logic as onboarding step 7);
+  // other pillars use the chart-based question and step, plus the outcome's step where it fits.
+  const moonSign = me?.western.moonSign.value ?? me?.western.planets.find((x) => x.body === 'Moon')?.sign;
+  const plan = useMemo(
+    () => planFor(situation, state.focus, state.outcome, moonSign ? SIGN_ELEMENT[moonSign] : null),
+    [situation, state.focus, state.outcome, moonSign],
+  );
+  const question = pillar === 'self' ? plan.question : (composed?.question ?? personalize(r.question, nickname));
+  const answerIdeas = pillar === 'self' ? plan.answers : PILLAR_ANSWERS[r.pillar];
+  const allSteps =
+    pillar === 'self'
+      ? plan.steps
+      : [
+          { text: composed?.step ?? personalize(r.step, nickname), involvesOther: composed?.stepInvolvesOther ?? r.stepInvolvesOther, source: 'situation' as const },
+          ...(pillar === 'purpose' && OUTCOME_STEPS[state.outcome] ? [{ ...OUTCOME_STEPS[state.outcome], text: OUTCOME_STEPS[state.outcome].step, involvesOther: OUTCOME_STEPS[state.outcome].stepInvolvesOther, source: 'outcome' as const }] : []),
+        ];
   // Safety: steps involving the other person are never offered after a flag (PRD §6, build spec §8.1).
-  const stepHidden = state.safety.suppressContactActions && r.stepInvolvesOther;
-  const step = composed?.step ?? personalize(r.step, nickname);
-  const question = composed?.question ?? personalize(r.question, nickname);
+  const steps = allSteps.filter((x) => !(state.safety.suppressContactActions && x.involvesOther));
+  const stepHidden = steps.length < allSteps.length;
 
   const save = () => {
     if (!choice) return;
     if (answer.trim()) dispatch({ type: 'journal/add', body: `${question}\n${answer.trim()}` });
+    const kind: Choice = choice === 'pause' ? 'pause' : choice === 'none' ? 'none' : 'step';
     dispatch({
       type: 'action/choose',
       reflectionId: r.id,
-      choice,
-      text: choice === 'step' ? step : choice === 'pause' ? 'A deliberate pause' : 'Nothing for now',
+      choice: kind,
+      text: kind === 'step' ? choice : kind === 'pause' ? 'A deliberate pause' : 'Nothing for now',
       followUp: choice === 'none' ? 'none' : FOLLOW_UPS[followUp[0] ?? 'No reminder'],
     });
   };
@@ -71,6 +90,7 @@ export default function Reflection() {
             <label htmlFor="sit" className="sr-only">
               Your situation
             </label>
+            <PromptChips label="Or pick one" options={SITUATIONS} value={situation} onChange={setSituation} mode="replace" />
             <textarea id="sit" value={situation} onChange={(e) => setSituation(e.target.value)} />
             <button
               type="button"
@@ -115,6 +135,7 @@ export default function Reflection() {
           {question}
           <span className="hint">Optional. Saved to your private journal.</span>
         </label>
+        {!existing && <PromptChips label="Ideas to start from" options={answerIdeas} value={answer} onChange={setAnswer} />}
         <textarea id="answer" value={answer} onChange={(e) => setAnswer(e.target.value)} disabled={!!existing} />
       </section>
 
@@ -140,16 +161,16 @@ export default function Reflection() {
           <>
             <fieldset className="radio-list">
               <legend className="sr-only">Choose what to do next</legend>
-              {stepHidden ? (
-                <p className="small muted">A step involving {nickname ?? 'the other person'} isn’t offered right now. A pause is a real choice.</p>
-              ) : (
-                <label>
-                  <input type="radio" name="choice" checked={choice === 'step'} onChange={() => setChoice('step')} />
+              {stepHidden && <p className="small muted">A step involving {nickname ?? 'the other person'} isn’t offered right now. A pause is a real choice.</p>}
+              {steps.map((x) => (
+                <label key={x.text}>
+                  <input type="radio" name="choice" checked={choice === x.text} onChange={() => setChoice(x.text)} />
                   <span>
-                    <strong>Try a step:</strong> {step}
+                    <strong>Try:</strong> {x.text}
+                    {steps.length > 1 && <span className="hint">{x.source === 'situation' ? 'Based on what’s happening' : `Based on your goal: ${state.outcome.toLowerCase()}`}</span>}
                   </span>
                 </label>
-              )}
+              ))}
               <label>
                 <input type="radio" name="choice" checked={choice === 'pause'} onChange={() => setChoice('pause')} />
                 <span>
@@ -161,6 +182,7 @@ export default function Reflection() {
                 <span>Nothing for now</span>
               </label>
             </fieldset>
+            {pillar === 'self' && plan.style && <p className="small muted">Your chart suggests a style that may come easily: <strong>{plan.style}</strong>.</p>}
             {choice && choice !== 'none' && (
               <fieldset>
                 <legend>When should we check in?</legend>

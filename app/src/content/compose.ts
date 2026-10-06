@@ -56,7 +56,7 @@ function westernSelf(c: NatalChart): Composed {
     : `Without a birth time, your Moon could be in ${moon.options.join(' or ')}: ${moon.options.map((o) => `${o} suggests a need for ${WESTERN_SIGN[o].need}`).join('; ')}.`;
   return {
     title: moon.certain ? `${m} Moon: a need for ${WESTERN_SIGN[m].short}` : `A Moon between ${moon.options.join(' and ')}`,
-    body: `${moonText} Venus in ${venus} may mean you connect ${WESTERN_SIGN[venus].connect}, and Mars in ${mars} that you assert yourself ${WESTERN_SIGN[mars].assert}. If keeping the peace costs you your own view, it may be worth noticing which of these is doing the work.`,
+    body: `${moonText} Venus in ${venus} may mean you connect ${WESTERN_SIGN[venus].connect}, and Mars in ${mars} that you assert yourself ${WESTERN_SIGN[mars].assert}. Notice which of these shows up in the situation you described.`,
     templateIds: [id('self.western.moon', moon.certain ? m : 'uncertain'), id('self.western.venus', venus), id('self.western.mars', mars)],
   };
 }
