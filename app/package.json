@@ -10,7 +10,8 @@
     "typecheck": "tsc -b",
     "test": "vitest run",
     "build:artifact": "tsc -b && node scripts/build-artifact.mjs",
-    "places": "node scripts/build-places.mjs"
+    "places": "node scripts/build-places.mjs",
+    "test:pilot": "WITHIN_BUILD=pilot vitest run src/content/approvals.test.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.2",

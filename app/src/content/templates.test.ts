@@ -1,6 +1,9 @@
 import * as T from './templates';
 import { composeReflection } from './compose';
 import { computeNatal } from '../astro/natal';
+import { BANNED as RULES } from './lint';
+
+const BANNED = RULES.map((b) => b.re);
 
 /** Every string in the library, flattened. */
 function strings(x: unknown): string[] {
@@ -10,9 +13,6 @@ function strings(x: unknown): string[] {
   return [];
 }
 const all = strings(Object.values(T));
-
-// Content lint (build spec §8.3): certainty and destiny language, mind-reading, diagnoses, scores, directives.
-const BANNED = [/\bwill\b/i, /\bdestin/i, /\bsoulmate/i, /\bkarmic debt/i, /\bfated?\b/i, /\balways\b/i, /\bnever\b/i, /\bthey (feel|want|intend|think)\b/i, /\b(he|she) (feels|wants|intends|thinks)\b/i, /\bdiagnos/i, /\bscore\b/i, /\b(leave|break up|stay with)\b/i, /\bnarcissis/i, /\btoxic\b/i];
 
 describe('template library', () => {
   it.each(BANNED.map((r) => [r.source, r]))('contains no %s', (_s, re) => {
