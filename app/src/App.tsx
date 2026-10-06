@@ -1,0 +1,81 @@
+import { useEffect, useRef } from 'react';
+import { HashRouter, Link, Navigate, Route, Routes, useLocation } from 'react-router-dom';
+import { StoreProvider, useStore } from './state';
+import { TabBar } from './components/ui';
+import Onboarding from './screens/Onboarding';
+import Today from './screens/Today';
+import Reflection from './screens/Reflection';
+import { MilestoneDetail, MilestoneForm, RelationshipHome, RelationshipsList, YouSpace } from './screens/Relationships';
+import Growth, { FollowUp } from './screens/Growth';
+import Settings from './screens/Settings';
+
+function Shell() {
+  const { state } = useStore();
+  const loc = useLocation();
+  const main = useRef<HTMLElement>(null);
+
+  // On navigation, scroll to top and move focus to the page so screen readers announce it.
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    main.current?.focus();
+  }, [loc.pathname]);
+
+  return (
+    <div className="app">
+      <a className="skip" href="#main" onClick={(e) => (e.preventDefault(), main.current?.focus())}>
+        Skip to content
+      </a>
+      <div className="proto-banner">Prototype · sample data only · not a real reading</div>
+      <header className="topbar">
+        <Link className="wordmark" to={state.onboarded ? '/today' : '/'}>
+          WITHIN
+        </Link>
+        {state.onboarded && (
+          <Link className="icon-btn" to="/settings" aria-label="Settings">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true">
+              <circle cx="12" cy="8" r="4" />
+              <path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7" />
+            </svg>
+          </Link>
+        )}
+      </header>
+      <main id="main" ref={main} tabIndex={-1}>
+        <Routes>
+          {!state.onboarded ? (
+            <>
+              <Route path="/" element={<Onboarding />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </>
+          ) : (
+            <>
+              <Route path="/today" element={<Today />} />
+              <Route path="/reflection/:pillar" element={<Reflection />} />
+              <Route path="/relationships" element={<RelationshipsList />} />
+              <Route path="/you/:pillar" element={<YouSpace />} />
+              <Route path="/relationship/:pillar" element={<RelationshipHome />} />
+              <Route path="/milestone/new" element={<MilestoneForm />} />
+              <Route path="/milestone/:id/edit" element={<MilestoneForm />} />
+              <Route path="/milestone/:id" element={<MilestoneDetail />} />
+              <Route path="/growth" element={<Growth />} />
+              <Route path="/follow-up/:id" element={<FollowUp />} />
+              <Route path="/settings" element={<Settings />} />
+              <Route path="*" element={<Navigate to="/today" replace />} />
+            </>
+          )}
+        </Routes>
+      </main>
+      {state.onboarded && <TabBar />}
+    </div>
+  );
+}
+
+export default function App() {
+  return (
+    <StoreProvider>
+      {/* Hash routing so the static build works on any host without rewrites. */}
+      <HashRouter>
+        <Shell />
+      </HashRouter>
+    </StoreProvider>
+  );
+}

@@ -270,7 +270,7 @@ The consent form must tell participants that safety-related text is processed by
 | Epic | Scope | Key acceptance (from PRD) | Gate |
 |---|---|---|---|
 | **E0 Decisions** | Resolve PRD §13 items 1–6; pick conventions, calc source, region | Written sign-offs on file | G0 |
-| **E1 Prototype** | Clickable PWA on fixture data covering all §5 screens, using Rendering A visuals + the D1–D9 fixes | Usable in Stage 1 interviews; contains no real data | G1 |
+| **E1 Prototype** | Clickable PWA on fixture data covering all §5 screens, using Rendering A visuals + the D1–D9 fixes | Usable in Stage 1 interviews; contains no real data. **Built Oct 6, 2026: [`app/`](../app/README.md)** | G1 |
 | **E2 Accounts & birth data** | Auth, onboarding, precision-aware birth profile, timezone resolution | No invented birth time; every field explained | G2 |
 | **E3 Calculation service** | Swiss Ephemeris (Professional License), Western + Vedic per convention profile, snapshots, time-sensitivity | Approver's reference cases match within agreed tolerance; license on file | G2 |
 | **E4 Content system** | Templates, review workflow, provenance, lint, correction notices | Each perspective traceable to template revision + reviewer | G2 |

@@ -1,0 +1,439 @@
+import { useState } from 'react';
+import { Link, NavLink, useNavigate, useParams } from 'react-router-dom';
+import { MILESTONE_INTERPRETATION, MILESTONE_TYPES, REFLECTIONS, type Milestone, type MilestoneType, type Pillar } from '../data/fixtures';
+import { describePrecision, formatFuzzyDate, type DateKind } from '../lib/dates';
+import { Landscape, Leaf, Orbit, Venn } from '../components/Illustrations';
+import { Back, PurposeCard, SafetyPanel } from '../components/ui';
+import { personalize, useStore } from '../state';
+
+/** List: the "You" space always, plus at most one relationship in the MVP. */
+export function RelationshipsList() {
+  const { state, dispatch } = useStore();
+  const [adding, setAdding] = useState(false);
+  const [nick, setNick] = useState('');
+  const p = state.person;
+  return (
+    <>
+      <p className="kicker">Relationships</p>
+      <h1>Who you’re exploring</h1>
+      <ul className="list card" style={{ padding: '4px 16px' }}>
+        <li>
+          <Link className="list-link" to="/you/self">
+            <span>
+              <strong>You</strong>
+              <span className="small muted" style={{ display: 'block' }}>
+                Self and purpose
+              </span>
+            </span>
+            <span aria-hidden="true">›</span>
+          </Link>
+        </li>
+        {p && (
+          <li>
+            <Link className="list-link" to="/relationship/self">
+              <span>
+                <strong>{p.nickname}</strong>{' '}
+                {p.status === 'archived' && <span className="pill">Archived</span>}
+                <span className="small muted" style={{ display: 'block' }}>
+                  {p.milestones.length} milestones · {p.birthAdded ? 'birth details added' : 'no birth details'}
+                </span>
+              </span>
+              <span aria-hidden="true">›</span>
+            </Link>
+          </li>
+        )}
+      </ul>
+      {!p &&
+        (adding ? (
+          <div className="card">
+            <label htmlFor="new-nick">
+              A nickname for them <span className="hint">No surname or contact details.</span>
+            </label>
+            <input id="new-nick" type="text" value={nick} onChange={(e) => setNick(e.target.value)} />
+            <div className="btn-row">
+              <button
+                type="button"
+                className="btn"
+                disabled={!nick.trim()}
+                onClick={() => {
+                  dispatch({ type: 'person/add', nickname: nick.trim() });
+                  setAdding(false);
+                }}
+              >
+                Add
+              </button>
+              <button type="button" className="btn quiet" onClick={() => setAdding(false)}>
+                Cancel
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="btn-row">
+            <button type="button" className="btn secondary" onClick={() => setAdding(true)}>
+              Add someone
+            </button>
+            <p className="small muted">Optional. Within is complete on your own.</p>
+          </div>
+        ))}
+      {p && <p className="small muted">This version supports one relationship at a time.</p>}
+    </>
+  );
+}
+
+const PILLARS: { id: Pillar; label: string }[] = [
+  { id: 'self', label: 'Self' },
+  { id: 'other', label: 'Other' },
+  { id: 'relationship', label: 'Relationship' },
+  { id: 'purpose', label: 'Purpose' },
+];
+
+/** Pillar content shared by the "You" space and a relationship (decision 1). */
+function PillarBody({ pillar }: { pillar: Pillar }) {
+  const { state } = useStore();
+  const nickname = state.person?.nickname;
+  const r = REFLECTIONS[pillar];
+
+  if (pillar === 'relationship') return <Timeline />;
+
+  const illo = pillar === 'self' ? <Orbit /> : pillar === 'other' ? <Venn /> : null;
+  return (
+    <>
+      <p className="kicker">{r.kicker}</p>
+      <h1>{personalize(r.heading, nickname)}</h1>
+      <p className="sub">{personalize(r.subheading, nickname)}</p>
+      {illo}
+      {pillar === 'other' && !state.person?.birthAdded && (
+        <p className="small muted" style={{ textAlign: 'center' }}>
+          {nickname}’s birth details aren’t added, so this uses your chart and what you’ve told us.
+        </p>
+      )}
+      {pillar === 'other' && <p className="sub">{personalize(r.question, nickname)}</p>}
+      {pillar === 'purpose' && (
+        <div className="card soft spread">
+          <div>
+            <p className="small muted" style={{ margin: 0 }}>
+              One small step
+            </p>
+            <p style={{ margin: 0 }}>{r.step}</p>
+          </div>
+          <Leaf />
+        </div>
+      )}
+      {pillar !== 'other' && <PurposeCard />}
+      <div className="btn-row">
+        <Link className={pillar === 'other' ? 'btn secondary' : 'btn'} to={`/reflection/${pillar}`}>
+          {pillar === 'self' ? 'Explore my patterns' : pillar === 'other' ? 'Explore this insight' : 'Open the reflection'}
+        </Link>
+        {pillar === 'purpose' && (
+          <Link className="btn quiet" to="/growth">
+            Change my purpose
+          </Link>
+        )}
+      </div>
+    </>
+  );
+}
+
+export function YouSpace() {
+  const { pillar = 'self' } = useParams();
+  const p = (pillar === 'purpose' ? 'purpose' : 'self') as Pillar;
+  return (
+    <>
+      <Back to="/relationships" label="Relationships" />
+      <nav className="segmented" aria-label="You" style={{ gridTemplateColumns: 'repeat(2, 1fr)' }}>
+        <NavLink to="/you/self">Self</NavLink>
+        <NavLink to="/you/purpose">Purpose</NavLink>
+      </nav>
+      <PillarBody pillar={p} />
+    </>
+  );
+}
+
+export function RelationshipHome() {
+  const { pillar = 'self' } = useParams();
+  const { state, dispatch } = useStore();
+  const nav = useNavigate();
+  const p = state.person;
+  if (!p) {
+    return (
+      <>
+        <Back to="/relationships" label="Relationships" />
+        <p>No relationship added.</p>
+      </>
+    );
+  }
+  return (
+    <>
+      <Back to="/relationships" label="Relationships" />
+      <h2 style={{ margin: '4px 0 0', textAlign: 'center' }}>{p.nickname}</h2>
+      <nav className="segmented" aria-label={`Pillars for ${p.nickname}`}>
+        {PILLARS.map((x) => (
+          <NavLink key={x.id} to={`/relationship/${x.id}`}>
+            {x.label}
+          </NavLink>
+        ))}
+      </nav>
+      {state.safety.flagged && <SafetyPanel compact />}
+      <PillarBody pillar={(PILLARS.find((x) => x.id === pillar)?.id ?? 'self') as Pillar} />
+      <hr />
+      <details>
+        <summary className="link">Manage this relationship</summary>
+        <div className="btn-row">
+          {p.status === 'active' ? (
+            <button type="button" className="btn quiet" onClick={() => dispatch({ type: 'person/archive' })}>
+              Archive {p.nickname}
+            </button>
+          ) : (
+            <button type="button" className="btn quiet" onClick={() => dispatch({ type: 'person/unarchive' })}>
+              Make active again
+            </button>
+          )}
+          <p className="small muted">Archiving keeps everything readable and exportable. It isn’t a judgement, and you can undo it.</p>
+          <button
+            type="button"
+            className="btn danger"
+            onClick={() => {
+              if (window.confirm(`Delete ${p.nickname} and all their milestones? This can’t be undone.`)) {
+                dispatch({ type: 'person/delete' });
+                nav('/relationships');
+              }
+            }}
+          >
+            Delete {p.nickname} and their milestones
+          </button>
+        </div>
+      </details>
+    </>
+  );
+}
+
+function Node({ m }: { m: Milestone }) {
+  const cls = m.date.kind === 'approximate' ? 'approx' : m.date.kind === 'range' ? 'range' : '';
+  return <span className={`node ${cls} ${m.excluded ? 'excluded' : ''}`} aria-hidden="true" />;
+}
+
+/** Relationship pillar: user-entered milestones only, precision always visible (D5). */
+function Timeline() {
+  const { state } = useStore();
+  const r = REFLECTIONS.relationship;
+  const ms = state.person?.milestones ?? [];
+  return (
+    <>
+      <p className="kicker">Relationship</p>
+      <h1>{r.heading}</h1>
+      <p className="sub">{r.subheading}</p>
+      <div className="landscape-wrap">
+        <Landscape />
+      </div>
+      <h2 className="sr-only">Milestones</h2>
+      {ms.length === 0 ? (
+        <p className="sub muted">No milestones yet. Only dates you add appear here.</p>
+      ) : (
+        <ol className="timeline">
+          {ms.map((m) => (
+            <li key={m.id}>
+              <Link to={`/milestone/${m.id}`} aria-label={`${m.title}, ${describePrecision(m.date.kind)}: ${formatFuzzyDate(m.date)}${m.excluded ? ', excluded from reflections' : ''}`}>
+                <Node m={m} />
+                <span className="tl-title">{m.title}</span>
+                <span className="tl-date">{formatFuzzyDate(m.date)}</span>
+              </Link>
+            </li>
+          ))}
+          <li>
+            <span className="node-static">
+              <span className="node today" aria-hidden="true" />
+              <span className="tl-title">Today</span>
+            </span>
+          </li>
+        </ol>
+      )}
+      <div className="legend" aria-hidden="true">
+        <span>
+          <span className="node" /> Exact
+        </span>
+        <span>
+          <span className="node approx" /> Approximate
+        </span>
+        <span>
+          <span className="node range" /> Range
+        </span>
+      </div>
+      <div className="btn-row">
+        <Link className="btn" to="/milestone/new">
+          Add a meaningful date
+        </Link>
+        <Link className="btn quiet" to="/reflection/relationship">
+          Open this chapter’s reflection
+        </Link>
+      </div>
+    </>
+  );
+}
+
+export function MilestoneDetail() {
+  const { id } = useParams();
+  const { state, dispatch } = useStore();
+  const nav = useNavigate();
+  const m = state.person?.milestones.find((x) => x.id === id);
+  if (!m) {
+    return (
+      <>
+        <Back to="/relationship/relationship" />
+        <p>That milestone no longer exists.</p>
+      </>
+    );
+  }
+  return (
+    <>
+      <Back to="/relationship/relationship" label="Timeline" />
+      <p className="kicker">{m.type}</p>
+      <h1>{m.title}</h1>
+      <p className="sub muted">
+        {formatFuzzyDate(m.date)} · {describePrecision(m.date.kind)}
+      </p>
+      <section className="voice user">
+        <h3>You told us this happened</h3>
+        <p>{m.meaning || 'You didn’t add a description.'}</p>
+      </section>
+      {m.excluded ? (
+        <p className="banner">You’ve excluded this from reflections, so no interpretation is shown.</p>
+      ) : (
+        <>
+          <section className="voice trad">
+            <h3>The Western tradition offers</h3>
+            <p>
+              {MILESTONE_INTERPRETATION.western} <span className="sample-tag">Sample text</span>
+            </p>
+          </section>
+          <section className="voice trad" style={{ borderColor: 'var(--sage)' }}>
+            <h3>The Vedic tradition offers</h3>
+            <p>
+              {MILESTONE_INTERPRETATION.vedic} <span className="sample-tag">Sample text</span>
+            </p>
+            {m.date.kind !== 'exact' && <p className="unavailable">This date isn’t exact, so interpretations use a broader window.</p>}
+          </section>
+        </>
+      )}
+      <section className="voice q">
+        <h3>A question to consider</h3>
+        <p>{MILESTONE_INTERPRETATION.question}</p>
+      </section>
+      <div className="btn-row">
+        <Link className="btn quiet" to={`/milestone/${m.id}/edit`}>
+          Edit or correct
+        </Link>
+        <button
+          type="button"
+          className="btn danger"
+          onClick={() => {
+            if (window.confirm('Delete this milestone?')) {
+              dispatch({ type: 'milestone/delete', id: m.id });
+              nav('/relationship/relationship');
+            }
+          }}
+        >
+          Delete milestone
+        </button>
+      </div>
+    </>
+  );
+}
+
+export function MilestoneForm() {
+  const { id } = useParams();
+  const { state, dispatch } = useStore();
+  const nav = useNavigate();
+  const existing = state.person?.milestones.find((x) => x.id === id);
+  const [type, setType] = useState<MilestoneType>(existing?.type ?? 'Custom');
+  const [title, setTitle] = useState(existing?.title ?? '');
+  const [meaning, setMeaning] = useState(existing?.meaning ?? '');
+  const [kind, setKind] = useState<DateKind>(existing?.date.kind ?? 'exact');
+  const [start, setStart] = useState(existing?.date.start ?? '');
+  const [end, setEnd] = useState(existing?.date.end ?? '');
+  const [excluded, setExcluded] = useState(existing?.excluded ?? false);
+
+  // Month inputs give YYYY-MM; store as the first of the month.
+  const monthToIso = (v: string) => (v.length === 7 ? `${v}-01` : v);
+  const valid = title.trim() && start && (kind !== 'range' || (end && end >= start));
+
+  const save = () => {
+    dispatch({
+      type: 'milestone/save',
+      milestone: {
+        id: existing?.id ?? Math.random().toString(36).slice(2, 10),
+        type,
+        title: title.trim(),
+        meaning: meaning.trim(),
+        date: { kind, start: monthToIso(start), end: kind === 'range' ? monthToIso(end) : undefined },
+        excluded,
+      },
+    });
+    nav('/relationship/relationship');
+  };
+
+  return (
+    <>
+      <Back />
+      <h1>{existing ? 'Edit milestone' : 'Add a meaningful date'}</h1>
+      <p className="sub muted">You decide what this moment meant. Nothing is added for you.</p>
+      <label htmlFor="m-type">Kind of moment</label>
+      <select id="m-type" value={type} onChange={(e) => setType(e.target.value as MilestoneType)}>
+        {MILESTONE_TYPES.map((t) => (
+          <option key={t}>{t}</option>
+        ))}
+      </select>
+      <label htmlFor="m-title">Name it</label>
+      <input id="m-title" type="text" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. A turning point" />
+      <fieldset className="radio-list">
+        <legend>How sure are you of the date?</legend>
+        {(
+          [
+            ['exact', 'I know the exact date'],
+            ['approximate', 'Roughly (month and year)'],
+            ['range', 'It happened over a period'],
+          ] as const
+        ).map(([v, l]) => (
+          <label key={v}>
+            <input
+              type="radio"
+              name="dk"
+              checked={kind === v}
+              onChange={() => {
+                setKind(v);
+                setStart('');
+                setEnd('');
+              }}
+            />
+            {l}
+          </label>
+        ))}
+      </fieldset>
+      <label htmlFor="m-start">{kind === 'range' ? 'From' : 'When'}</label>
+      <input
+        id="m-start"
+        type={kind === 'exact' ? 'date' : 'month'}
+        value={kind === 'exact' ? start : start.slice(0, 7)}
+        onChange={(e) => setStart(e.target.value)}
+      />
+      {kind === 'range' && (
+        <>
+          <label htmlFor="m-end">To</label>
+          <input id="m-end" type="month" value={end.slice(0, 7)} onChange={(e) => setEnd(e.target.value)} />
+        </>
+      )}
+      <label htmlFor="m-meaning">
+        What it meant to you <span className="hint">Optional. Private.</span>
+      </label>
+      <textarea id="m-meaning" value={meaning} onChange={(e) => setMeaning(e.target.value)} />
+      <label className="toggle" style={{ marginTop: 16 }}>
+        Leave this out of future reflections
+        <input type="checkbox" checked={excluded} onChange={(e) => setExcluded(e.target.checked)} />
+      </label>
+      <div className="btn-row">
+        <button type="button" className="btn" disabled={!valid} onClick={save}>
+          Save
+        </button>
+      </div>
+    </>
+  );
+}
