@@ -3,6 +3,8 @@ import { Link, NavLink, useNavigate, useParams } from 'react-router-dom';
 import { MILESTONE_INTERPRETATION, MILESTONE_TYPES, REFLECTIONS, type Milestone, type MilestoneType, type Pillar } from '../data/fixtures';
 import { describePrecision, formatFuzzyDate, type DateKind } from '../lib/dates';
 import { Landscape, Leaf, Orbit, Venn } from '../components/Illustrations';
+import { Paywall } from '../components/Paywall';
+import { useAccount } from '../services/AccountContext';
 import { Back, ConfirmButton, PromptChips, PurposeCard, SafetyPanel } from '../components/ui';
 import { MILESTONE_MEANINGS, MILESTONE_TITLES } from '../data/prompts';
 import { personalize, SAMPLE_BIRTH, useStore, type Birth } from '../state';
@@ -16,6 +18,7 @@ import { antardashas, vimshottari } from '../astro/chart';
 /** List: the "You" space always, plus at most one relationship in the MVP. */
 export function RelationshipsList() {
   const { state, dispatch } = useStore();
+  const { entitlement } = useAccount();
   const [adding, setAdding] = useState(false);
   const [nick, setNick] = useState('');
   const p = state.person;
@@ -74,6 +77,8 @@ export function RelationshipsList() {
               </button>
             </div>
           </div>
+        ) : !entitlement.active ? (
+          <Paywall what="A relationship space">{null}</Paywall>
         ) : (
           <div className="btn-row">
             <button type="button" className="btn secondary" onClick={() => setAdding(true)}>
@@ -191,7 +196,7 @@ function OtherBirth() {
     return (
       <div className="card">
         <h2 style={{ marginTop: 0 }}>{p.nickname}’s birth details</h2>
-        <p className="small muted">Optional. Adding them doesn’t mean {p.nickname} agreed to this, so keep it respectful. Nothing is saved or sent.</p>
+        <p className="small muted">Optional. Adding them doesn’t mean {p.nickname} agreed to this, so keep it respectful. Saved only on this device, never sent anywhere.</p>
         <BirthFields value={draft} onChange={setDraft} idPrefix="other" />
         <div className="btn-row">
           <button

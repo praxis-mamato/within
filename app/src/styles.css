@@ -288,3 +288,17 @@ details > summary { cursor: pointer; margin: 8px 0; }
 .reading-item h3 { font-size: 1.125rem; margin: 0 0 2px; }
 .reading-item p { margin: 0; }
 .reading-item .basis { font-size: 0.8125rem; color: var(--ink-muted); margin-top: 4px; font-variant-numeric: tabular-nums; }
+
+/* Account and paywall */
+.btn.auth { background: #fff; color: #1f1f1f; border-color: #cdbfb0; }
+.btn.auth:hover { background: var(--surface-2); }
+.btn.auth.apple { background: #000; color: #fff; border-color: #000; }
+.btn.auth.apple:hover { background: #222; }
+.paywall { border-color: var(--accent); }
+.paywall .price { font-size: 1.0625rem; }
+.demo-note { font-size: 0.8125rem; background: #eef1f6; border: 1px solid #c9d2e3; color: #2d3a52; border-radius: 10px; padding: 8px 12px; }
+.plans { display: grid; gap: 8px; margin: 12px 0 4px; }
+.plan { display: flex; gap: 10px; align-items: flex-start; border: 1px solid var(--line); border-radius: 12px; padding: 12px; font-weight: 400; color: var(--ink-body); cursor: pointer; margin: 0; }
+.plan.on { border-color: var(--accent); background: var(--accent-soft); }
+.plan input { width: 20px; height: 20px; accent-color: var(--accent); margin-top: 2px; flex: none; }
+.paywall a, .card a:not(.btn):not(.list-link) { color: var(--ink-display); text-underline-offset: 3px; }

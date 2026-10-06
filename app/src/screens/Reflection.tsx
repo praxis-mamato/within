@@ -6,6 +6,7 @@ import { SIGN_ELEMENT } from '../content/templates';
 import { PILLAR_ANSWERS } from '../data/prompts';
 import { Link, useParams } from 'react-router-dom';
 import { REFLECTIONS, type Pillar } from '../data/fixtures';
+import { Paywall } from '../components/Paywall';
 import { Back, ChipGroup, PerspectiveCard, PromptChips, SafetyPanel, TogetherCard } from '../components/ui';
 import { factsFor } from '../astro/facts';
 import { useCharts } from '../astro/useCharts';
@@ -67,58 +68,8 @@ export default function Reflection() {
     });
   };
 
-  return (
+  const reflectionBody = (
     <>
-      <Back />
-      <p className="kicker">{r.kicker} · Reflection</p>
-      <h1>{personalize(r.heading, nickname)}</h1>
-      <p className="sub muted">About three minutes</p>
-
-      {state.stale && (
-        <div className="banner" role="status">
-          <strong>Your birth details changed.</strong> This reflection was made with the old details.{' '}
-          <button type="button" className="link" onClick={() => dispatch({ type: 'stale/refresh' })}>
-            Refresh this reflection
-          </button>
-        </div>
-      )}
-      {state.safety.flagged && <SafetyPanel compact />}
-
-      <section aria-labelledby="sit-h">
-        <h2 id="sit-h">Your situation</h2>
-        {editing ? (
-          <>
-            <label htmlFor="sit" className="sr-only">
-              Your situation
-            </label>
-            <PromptChips label="Or pick one" options={SITUATIONS} value={situation} onChange={setSituation} mode="replace" />
-            <textarea id="sit" value={situation} onChange={(e) => setSituation(e.target.value)} />
-            <button
-              type="button"
-              className="btn quiet"
-              onClick={() => {
-                dispatch({ type: 'text/screen', text: situation });
-                setEditing(false);
-              }}
-            >
-              Done
-            </button>
-          </>
-        ) : (
-          <div className="spread">
-            <p style={{ margin: 0 }}>“{situation}”</p>
-            <button type="button" className="link" onClick={() => setEditing(true)}>
-              Edit
-            </button>
-          </div>
-        )}
-      </section>
-
-      <section aria-labelledby="pur-h">
-        <h2 id="pur-h">Your purpose</h2>
-        <p>{intention ? intention.behavior : 'No purpose set yet.'}</p>
-      </section>
-
       <section aria-labelledby="persp-h">
         <h2 id="persp-h">Two perspectives</h2>
         <p className="small muted">
@@ -198,6 +149,62 @@ export default function Reflection() {
           </>
         )}
       </section>
+    </>
+  );
+
+  return (
+    <>
+      <Back />
+      <p className="kicker">{r.kicker} · Reflection</p>
+      <h1>{personalize(r.heading, nickname)}</h1>
+      <p className="sub muted">About three minutes</p>
+
+      {state.stale && (
+        <div className="banner" role="status">
+          <strong>Your birth details changed.</strong> This reflection was made with the old details.{' '}
+          <button type="button" className="link" onClick={() => dispatch({ type: 'stale/refresh' })}>
+            Refresh this reflection
+          </button>
+        </div>
+      )}
+      {state.safety.flagged && <SafetyPanel compact />}
+
+      <section aria-labelledby="sit-h">
+        <h2 id="sit-h">Your situation</h2>
+        {editing ? (
+          <>
+            <label htmlFor="sit" className="sr-only">
+              Your situation
+            </label>
+            <PromptChips label="Or pick one" options={SITUATIONS} value={situation} onChange={setSituation} mode="replace" />
+            <textarea id="sit" value={situation} onChange={(e) => setSituation(e.target.value)} />
+            <button
+              type="button"
+              className="btn quiet"
+              onClick={() => {
+                dispatch({ type: 'text/screen', text: situation });
+                setEditing(false);
+              }}
+            >
+              Done
+            </button>
+          </>
+        ) : (
+          <div className="spread">
+            <p style={{ margin: 0 }}>“{situation}”</p>
+            <button type="button" className="link" onClick={() => setEditing(true)}>
+              Edit
+            </button>
+          </div>
+        )}
+      </section>
+
+      <section aria-labelledby="pur-h">
+        <h2 id="pur-h">Your purpose</h2>
+        <p>{intention ? intention.behavior : 'No purpose set yet.'}</p>
+      </section>
+
+      {pillar === 'self' ? reflectionBody : <Paywall what="This reflection">{reflectionBody}</Paywall>}
     </>
   );
 }

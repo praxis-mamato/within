@@ -1,0 +1,204 @@
+/**
+ * Sign-in (Apple, Google), the email-link second step, and subscription status.
+ * One interface, two implementations: live (Supabase + Stripe) and demo (simulated, on this device).
+ */
+import { LIVE, siteUrl } from './config';
+import { supabase } from './supabase';
+
+export type Provider = 'google' | 'apple';
+export type Plan = 'monthly' | 'yearly';
+
+export interface Account {
+  id: string;
+  email: string;
+  provider: Provider | 'email';
+  /** True once this device has passed the email-link check for this account. */
+  deviceVerified: boolean;
+}
+
+export interface Entitlement {
+  active: boolean;
+  status: 'none' | 'active' | 'trialing' | 'past_due' | 'canceled';
+  renewsAt: string | null;
+  cancelAtPeriodEnd: boolean;
+  source: 'stripe' | 'app_store' | 'play_store' | 'demo' | null;
+  plan?: Plan | null;
+}
+
+export const NO_ENTITLEMENT: Entitlement = { active: false, status: 'none', renewsAt: null, cancelAtPeriodEnd: false, source: null };
+
+export interface AccountService {
+  mode: 'live' | 'demo';
+  current(): Promise<Account | null>;
+  onChange(cb: (a: Account | null) => void): () => void;
+  signIn(provider: Provider): Promise<void>;
+  sendEmailLink(): Promise<{ sentTo: string }>;
+  signOut(): Promise<void>;
+  deleteAccount(): Promise<void>;
+  entitlement(): Promise<Entitlement>;
+  startCheckout(plan: Plan): Promise<void>;
+  manageSubscription(): Promise<void>;
+}
+
+// ─── Device trust (the email link as a second factor on each new device) ──────────────────
+const TRUST = 'within.trusted.';
+const PENDING = 'within.pendingStepUp';
+const ls = {
+  get: (k: string) => {
+    try {
+      return localStorage.getItem(k);
+    } catch {
+      return null;
+    }
+  },
+  set: (k: string, v: string) => {
+    try {
+      localStorage.setItem(k, v);
+    } catch {
+      /* storage blocked: device simply stays unverified */
+    }
+  },
+  del: (k: string) => {
+    try {
+      localStorage.removeItem(k);
+    } catch {
+      /* ignore */
+    }
+  },
+};
+
+/** Reads the auth methods from a Supabase access token (the `amr` claim). */
+export function authMethods(accessToken: string): string[] {
+  try {
+    const payload = JSON.parse(atob(accessToken.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+    return (payload.amr ?? []).map((x: { method: string }) => x.method);
+  } catch {
+    return [];
+  }
+}
+
+// ─── Live ──────────────────────────────────────────────────────────────────────────────────
+function live(): AccountService {
+  const sb = supabase()!;
+  const toAccount = (session: { access_token: string; user: { id: string; email?: string; app_metadata: { provider?: string } } } | null): Account | null => {
+    if (!session) return null;
+    const { user } = session;
+    const methods = authMethods(session.access_token);
+    // Coming back from the email link we sent for this account marks this device as trusted.
+    if (ls.get(PENDING) === user.id && methods.some((m) => m === 'otp' || m === 'magiclink')) {
+      ls.set(TRUST + user.id, new Date().toISOString());
+      ls.del(PENDING);
+    }
+    const p = user.app_metadata.provider;
+    return { id: user.id, email: user.email ?? '', provider: p === 'google' || p === 'apple' ? p : 'email', deviceVerified: Boolean(ls.get(TRUST + user.id)) };
+  };
+  return {
+    mode: 'live',
+    current: async () => toAccount((await sb.auth.getSession()).data.session),
+    onChange: (cb) => sb.auth.onAuthStateChange((_e, s) => cb(toAccount(s))).data.subscription.unsubscribe,
+    signIn: async (provider) => {
+      const { error } = await sb.auth.signInWithOAuth({ provider, options: { redirectTo: siteUrl() } });
+      if (error) throw error;
+    },
+    sendEmailLink: async () => {
+      const { data } = await sb.auth.getUser();
+      if (!data.user?.email) throw new Error('This account has no email address to send a link to.');
+      ls.set(PENDING, data.user.id);
+      const { error } = await sb.auth.signInWithOtp({ email: data.user.email, options: { shouldCreateUser: false, emailRedirectTo: siteUrl() } });
+      if (error) throw error;
+      return { sentTo: data.user.email };
+    },
+    signOut: async () => void (await sb.auth.signOut()),
+    deleteAccount: async () => {
+      const { error } = await sb.functions.invoke('delete-account', { method: 'POST' });
+      if (error) throw error;
+      await sb.auth.signOut();
+    },
+    entitlement: async () => {
+      const { data } = await sb.from('entitlements').select('status, current_period_end, cancel_at_period_end, source, plan').maybeSingle();
+      if (!data) return NO_ENTITLEMENT;
+      return {
+        active: ['active', 'trialing'].includes(data.status),
+        status: data.status,
+        renewsAt: data.current_period_end,
+        cancelAtPeriodEnd: data.cancel_at_period_end,
+        source: data.source,
+        plan: data.plan,
+      };
+    },
+    startCheckout: async (plan) => {
+      const { data, error } = await sb.functions.invoke('create-checkout', { body: { plan, returnUrl: siteUrl() } });
+      if (error || !data?.url) throw error ?? new Error('Checkout could not start.');
+      location.assign(data.url);
+    },
+    manageSubscription: async () => {
+      const { data, error } = await sb.functions.invoke('billing-portal', { body: { returnUrl: siteUrl() } });
+      if (error || !data?.url) throw error ?? new Error('Could not open subscription settings.');
+      location.assign(data.url);
+    },
+  };
+}
+
+// ─── Demo ──────────────────────────────────────────────────────────────────────────────────
+const DEMO = 'within.demoAccount';
+const DEMO_ENT = 'within.demoEntitlement';
+function demo(): AccountService {
+  const listeners = new Set<(a: Account | null) => void>();
+  const read = (): Account | null => {
+    const raw = ls.get(DEMO);
+    if (!raw) return null;
+    const a = JSON.parse(raw) as Account;
+    return { ...a, deviceVerified: Boolean(ls.get(TRUST + a.id)) };
+  };
+  const emit = () => listeners.forEach((l) => l(read()));
+  return {
+    mode: 'demo',
+    current: async () => read(),
+    onChange: (cb) => (listeners.add(cb), () => listeners.delete(cb)),
+    signIn: async (provider) => {
+      ls.set(DEMO, JSON.stringify({ id: `demo-${provider}`, email: provider === 'apple' ? 'demo@privaterelay.appleid.com' : 'demo@gmail.com', provider, deviceVerified: false }));
+      emit();
+    },
+    sendEmailLink: async () => {
+      const a = read();
+      if (!a) throw new Error('Sign in first.');
+      // Demo: the "link" is followed immediately.
+      ls.set(TRUST + a.id, new Date().toISOString());
+      emit();
+      return { sentTo: a.email };
+    },
+    signOut: async () => {
+      ls.del(DEMO);
+      emit();
+    },
+    deleteAccount: async () => {
+      const a = read();
+      if (a) ls.del(TRUST + a.id);
+      ls.del(DEMO);
+      ls.del(DEMO_ENT);
+      emit();
+    },
+    entitlement: async () => {
+      const raw = ls.get(DEMO_ENT);
+      return raw ? (JSON.parse(raw) as Entitlement) : NO_ENTITLEMENT;
+    },
+    startCheckout: async (plan) => {
+      const renews = new Date(Date.now() + (plan === 'yearly' ? 365 : 30) * 86400000).toISOString();
+      ls.set(DEMO_ENT, JSON.stringify({ active: true, status: 'active', renewsAt: renews, cancelAtPeriodEnd: false, source: 'demo', plan } satisfies Entitlement));
+      emit();
+    },
+    manageSubscription: async () => {
+      const raw = ls.get(DEMO_ENT);
+      if (!raw) return;
+      const e = JSON.parse(raw) as Entitlement;
+      ls.set(DEMO_ENT, JSON.stringify({ ...e, cancelAtPeriodEnd: !e.cancelAtPeriodEnd }));
+      emit();
+    },
+  };
+}
+
+let service: AccountService | null = null;
+export function accountService(): AccountService {
+  service ??= LIVE ? live() : demo();
+  return service;
+}

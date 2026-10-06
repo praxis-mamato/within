@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { METHOD } from '../data/fixtures';
 import { Back, ConfirmButton, SafetyPanel } from '../components/ui';
 import { BirthFields } from '../components/BirthFields';
@@ -28,6 +28,15 @@ export default function Settings() {
     <>
       <Back />
       <h1>Settings</h1>
+      <Link className="card soft list-link" to="/account" style={{ textDecoration: 'none' }}>
+        <span>
+          <strong>Account and subscription</strong>
+          <span className="small muted" style={{ display: 'block' }}>
+            Sign in with Apple or Google, subscribe, or delete your account
+          </span>
+        </span>
+        <span aria-hidden="true">›</span>
+      </Link>
 
       <section aria-labelledby="m-h">
         <h2 id="m-h">How the readings work</h2>
@@ -101,9 +110,9 @@ export default function Settings() {
             </div>
           )}
           <ConfirmButton
-            label="Delete my account and data"
-            question="Delete everything? In this prototype, this resets the demo."
-            confirmLabel="Delete everything"
+            label="Erase everything on this device"
+            question="Erase your birth details, journal, milestones, and reflections from this device? Your account and subscription aren’t affected. This can’t be undone."
+            confirmLabel="Erase this device"
             onConfirm={() => {
               dispatch({ type: 'reset' });
               nav('/');
@@ -119,7 +128,7 @@ export default function Settings() {
       </section>
 
       <hr />
-      <p className="small muted">Prototype 0.2 · charts calculated in your browser · nothing is saved or sent.</p>
+      <p className="small muted">Prototype 0.3 · charts calculated on this device · entries saved encrypted on this device only.</p>
       <p className="small muted">
         Place data © GeoNames (CC BY 4.0). Planet positions: Astronomy Engine (MIT).
       </p>

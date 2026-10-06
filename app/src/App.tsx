@@ -8,6 +8,8 @@ import Reflection from './screens/Reflection';
 import { MilestoneDetail, MilestoneForm, RelationshipHome, RelationshipsList, YouChart, YouReading, YouSpace } from './screens/Relationships';
 import Growth, { FollowUp } from './screens/Growth';
 import Settings from './screens/Settings';
+import AccountScreen from './screens/Account';
+import { AccountProvider } from './services/AccountContext';
 
 function Shell() {
   const { state } = useStore();
@@ -25,7 +27,7 @@ function Shell() {
       <a className="skip" href="#main" onClick={(e) => (e.preventDefault(), main.current?.focus())}>
         Skip to content
       </a>
-      <div className="proto-banner">Prototype · live chart, draft interpretations · nothing is saved</div>
+      <div className="proto-banner">Prototype · draft interpretations · your entries stay on this device</div>
       <header className="topbar">
         <Link className="wordmark" to={state.onboarded ? '/today' : '/'}>
           WITHIN
@@ -61,6 +63,7 @@ function Shell() {
               <Route path="/growth" element={<Growth />} />
               <Route path="/follow-up/:id" element={<FollowUp />} />
               <Route path="/settings" element={<Settings />} />
+              <Route path="/account" element={<AccountScreen />} />
               <Route path="*" element={<Navigate to="/today" replace />} />
             </>
           )}
@@ -74,6 +77,7 @@ function Shell() {
 export default function App() {
   return (
     <StoreProvider>
+      <AccountProvider>
       {/* Hash routing so the static build works on any host without rewrites; memory routing
           for the single-file artifact build, whose host frame doesn't pass hash state through. */}
       {import.meta.env.MODE === 'artifact' ? (
@@ -85,6 +89,7 @@ export default function App() {
           <Shell />
         </HashRouter>
       )}
+      </AccountProvider>
     </StoreProvider>
   );
 }

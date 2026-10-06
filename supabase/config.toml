@@ -1,0 +1,26 @@
+# Supabase project configuration, deployed by the Supabase GitHub integration.
+# Only the settings Within depends on are listed; everything else uses Supabase defaults.
+project_id = "within"
+
+[auth]
+site_url = "https://praxis-mamato.github.io/within/"
+additional_redirect_urls = ["https://praxis-mamato.github.io/within/", "http://localhost:5173/", "http://localhost:4173/"]
+
+[auth.email]
+# The email link is the second sign-in step (docs/next-features.md B1).
+enable_signup = false
+otp_expiry = 900
+
+[auth.external.google]
+enabled = true
+client_id = "env(SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID)"
+secret = "env(SUPABASE_AUTH_EXTERNAL_GOOGLE_SECRET)"
+
+[auth.external.apple]
+enabled = true
+client_id = "env(SUPABASE_AUTH_EXTERNAL_APPLE_CLIENT_ID)"
+secret = "env(SUPABASE_AUTH_EXTERNAL_APPLE_SECRET)"
+
+# Stripe calls this without a Supabase session; the function checks Stripe's signature instead.
+[functions.stripe-webhook]
+verify_jwt = false

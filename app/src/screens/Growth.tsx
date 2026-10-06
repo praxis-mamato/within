@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { OUTCOME_OPTIONS } from '../data/fixtures';
 import { Back, ChipGroup, PromptChips, PurposeCard } from '../components/ui';
+import { Paywall } from '../components/Paywall';
 import { FOLLOW_UP_NOTES, JOURNAL_STARTERS, OBSERVED, PURPOSES } from '../data/prompts';
 import { useStore, type Action, type Attempt, type Usefulness } from '../state';
 
@@ -190,7 +191,9 @@ export function FollowUp() {
     <>
       <Back />
       <p className="kicker">Check in</p>
-      <h1>How did it go?</h1>
+<h1>How did it go?</h1>
+      <Paywall what="Check-ins">
+
       <p className="sub">“{a.text}”</p>
       <fieldset>
         <legend>Did you try it?</legend>
@@ -247,6 +250,7 @@ export function FollowUp() {
           Save my reflection
         </button>
       </div>
+      </Paywall>
     </>
   );
 }

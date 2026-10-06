@@ -30,6 +30,12 @@ jobs:
       - run: npm ci
       - run: npm test
       - run: npm run build
+        env:
+          # Set these in GitHub: Settings → Secrets and variables → Actions → Variables.
+          # Without them the site builds in demo mode.
+          VITE_SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ vars.SUPABASE_ANON_KEY }}
+          VITE_SITE_URL: https://praxis-mamato.github.io/within/
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

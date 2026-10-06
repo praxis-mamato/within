@@ -1,8 +1,8 @@
 /**
- * Prototype state. In memory only, by design: Gate 0 allows sample data, and nothing
- * should survive the tab closing (docs/decisions/G0-gate-record.md).
+ * App state. Saved encrypted on this device only (storage/vault.ts); never sent anywhere.
  */
-import { createContext, useContext, useMemo, useReducer, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, useMemo, useReducer, useRef, useState, type ReactNode } from 'react';
+import { deviceVault } from './storage/vault';
 import { SAMPLE_MILESTONES, type Milestone, type Tradition } from './data/fixtures';
 import { screen, type ScreenResult } from './lib/screener';
 
@@ -142,7 +142,8 @@ export type Event =
   | { type: 'text/screen'; text: string }
   | { type: 'notifications/set'; on: boolean }
   | { type: 'today/finish' }
-  | { type: 'reset' };
+  | { type: 'reset' }
+  | { type: 'hydrate'; state: State };
 
 function addIntention(s: State, value: string, behavior: string): State {
   const intentions = s.intentions.map((i) => (i.status === 'active' ? { ...i, status: 'changed' as const } : i));
@@ -207,6 +208,9 @@ export function reducer(s: State, e: Event): State {
       return { ...s, todayDone: true };
     case 'reset':
       return initialState();
+    case 'hydrate':
+      // Safety flags are per session: a past flag shouldn't keep suppressing steps forever.
+      return { ...initialState(), ...e.state, safety: { flagged: false, suppressContactActions: false }, todayDone: false };
   }
 }
 
@@ -216,10 +220,36 @@ export function activeIntention(s: State): Intention | undefined {
 
 const Ctx = createContext<{ state: State; dispatch: (e: Event) => void } | null>(null);
 
+const VAULT_KEY = 'state.v1';
+
 export function StoreProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(reducer, undefined, initialState);
+  const [ready, setReady] = useState(false);
+  const vault = useRef(deviceVault());
+
+  // Load saved entries once; render nothing until then so onboarding doesn't flash.
+  useEffect(() => {
+    const v = vault.current;
+    if (!v) return setReady(true);
+    const done = setTimeout(() => setReady(true), 1500);
+    v.load<State>(VAULT_KEY)
+      .then((saved) => saved && dispatch({ type: 'hydrate', state: saved }))
+      .catch(() => undefined)
+      .finally(() => (clearTimeout(done), setReady(true)));
+  }, []);
+
+  // Save after each change (debounced). "Delete everything" wipes the vault.
+  useEffect(() => {
+    const v = vault.current;
+    if (!ready || !v) return;
+    const t = setTimeout(() => {
+      (state.onboarded ? v.save(VAULT_KEY, state) : v.wipe()).catch(() => undefined);
+    }, 300);
+    return () => clearTimeout(t);
+  }, [state, ready]);
+
   const value = useMemo(() => ({ state, dispatch }), [state]);
-  return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
+  return ready ? <Ctx.Provider value={value}>{children}</Ctx.Provider> : null;
 }
 
 export function useStore() {

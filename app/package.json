@@ -13,6 +13,7 @@
     "places": "node scripts/build-places.mjs"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.117.2",
     "astronomy-engine": "^2.1.19",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",

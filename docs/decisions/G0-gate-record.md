@@ -55,7 +55,7 @@ Product owner decisions ("they should sso in or oauth via apple or google. we ne
 1. Approve the template library up front instead of reviewing each reading.
 2. Personal data stays on the device and syncs through the person's own iCloud or Google Drive. We host only sign-in, subscription status, and opt-in safety check-ins.
 3. Native iOS and Android apps (Capacitor), with minimal hosting.
-4. Price: $9.99 a month.
+4. Price: $9.99 a month or $100 a year, also payable on the website (Stripe).
 5. Launch in all countries (China mainland excluded pending an ICP filing), in English.
 
 ## Not authorized yet (needs G1/G2)

@@ -11,7 +11,7 @@ Draft 0.1 · October 6, 2026 · Builds on [`build-spec.md`](build-spec.md) and [
 | Readings | Short reflections personalized from each chart, plus a **full reading** per tradition (6 Western and 7 Vedic sections: planets in signs and houses, chart ruler, aspects, temperament, lunar phase, dignities, nakshatra details, yogas, dashas, panchang, and the sky now). Draft libraries, **none approved yet**. |
 | Prompts | Tap-to-fill options on every text field; "What's happening?" covers yourself, the sky now, people around you, and relationships. Step 7 is built from the person's own answers. |
 | Safety | In-app screener, safety ops agent, runbook, drills passed twice. Region resources not written. |
-| Accounts, payment, storage | **Decided Oct 6:** Apple/Google sign-in, paid subscription, personal data on the device only. Not built yet (Group B). |
+| Accounts, payment, storage | **Built for web (Oct 6):** Apple/Google sign-in with email-link second step, Stripe web checkout ($9.99/month, $100/year), encrypted on-device storage. Runs in demo mode until the keys in `docs/setup/accounts-and-payments.md` are added. Native apps and in-app purchase not built yet. |
 | Tests | 147 passing; content lint, Swiss Ephemeris reference, drill fixtures run in CI. |
 
 **What blocks the pilot (G2):** approved templates, region safety resources, accounts and storage, consent, privacy review, the out-of-hours decision. Features are grouped by the gate they serve.
@@ -111,7 +111,7 @@ Native apps are recommended because a browser can delete locally stored data (Sa
 - What's paid: weekly chapters after the first, full history, follow-ups and reminders, adding a relationship. **Always free:** the first full reflection, safety resources, privacy controls, export, and delete (PRD §10).
 - **Store rules:** subscriptions sold inside the app must use Apple In-App Purchase and Google Play Billing, except that the US App Store now allows a link to your own web checkout ([Apple, 2025–26](https://www.iclarified.com/97192/apple-updates-app-store-rules-to-allow-external-purchase-links-in-us)) and Google allows alternative billing in the US, UK, and EEA from June 30, 2026 ([Android Developers Blog](https://android-developers.googleblog.com/2026/06/play-expanded-billing.html)).
 - **Fees:** Apple takes 15% under its Small Business Program (under $1M a year) or 30% otherwise; Google takes 10% service + 5% billing on subscriptions, or 10% plus your own processor's fee with alternative billing ([Adapty](https://adapty.io/blog/google-play-billing-changes-subscriptions-fees/)).
-- **Price (decided):** $9.99 a month, one product in every store; Apple and Google set local prices per country.
+- **Price (decided):** $9.99 a month or $100 a year, in every store and on the web; Apple and Google set local prices per country.
 - **Recommended:** RevenueCat to handle App Store, Google Play, and web (Stripe) subscriptions with one entitlement check. Launch with in-app purchase everywhere; add the US web-checkout link later to lower fees.
 - Subscription status is cached on the device so the app works offline.
 - **Guardrails (PRD §10):** price and renewal shown before purchase; cancellation explained in plain words; **no paywall or upsell right after a safety flag or inside a reflection**; paywall appears only at the start of a new chapter.
@@ -167,7 +167,7 @@ People's entries live **on their phone**, and copies go to **their own cloud acc
 | 1 | **Approve the template library up front**; no per-reading review | A1 (review console) is required before launch. PRD §11 changes from "human-reviewed readings" to "readings composed only from human-approved templates". Build spec B2 reading queue is dropped. |
 | 2 | **Data on the device and in the person's own iCloud/Google Drive**; we host only sign-in, subscription status, and opt-in safety check-ins | See the table above. Safety flags are sent only when the person asks for a check-in (runbook and agent inputs to be updated). |
 | 3 | **Native iOS and Android apps** (no added hosting; distributed through the stores) | Capacitor wraps the existing app. Web stays for demos and web sign-up. |
-| 4 | **$9.99 a month** | One product, `within_monthly`, in both stores and on the web. Apple and Google set local prices in each country automatically from the US price. The first full reflection stays free. Yearly plan and free trial: not offered at launch (can be added later). |
+| 4 | **$9.99 a month or $100 a year** | Two prices in both stores and on the web (Stripe). Apple and Google set local prices per country from the US price; if a store requires a .99 price point, use $99.99. The first full reflection stays free. No free trial at launch. |
 | 5 | **All countries** | See "Launching everywhere" below. |
 
 ### Launching everywhere: what it takes

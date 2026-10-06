@@ -162,7 +162,7 @@ export default function Onboarding() {
       {step === 4 && (
         <>
           <Heading ref={heading}>Your birth details</Heading>
-          <p className="sub">Calculated in your browser. Nothing you enter is saved or sent anywhere.</p>
+          <p className="sub">Calculated on this device and saved there, encrypted. Never sent to us.</p>
           <BirthFields value={birth} onChange={setBirth} idPrefix="ob" />
           <div className="btn-row">
             <button className="btn" type="button" disabled={!birth.date || !birth.tz} onClick={next}>

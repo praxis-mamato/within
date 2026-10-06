@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { useCharts } from '../astro/useCharts';
 import { READING_VERSION, vedicReading, westernReading, type ReadingSection } from '../content/fullReading';
 import { useStore } from '../state';
+import { Paywall } from '../components/Paywall';
 
 /** The full traditional reading. Long by design; reflections stay short and link here. */
 export default function Reading({ initial = 'western' }: { initial?: 'western' | 'vedic' }) {
@@ -32,7 +33,8 @@ export default function Reading({ initial = 'western' }: { initial?: 'western' |
           </a>
         ))}
       </nav>
-      {sections.map((s) => (
+      {sections.map((s, i) => {
+        const body = (
         <section key={s.id} id={s.id} className={`card lens ${tab}`} aria-labelledby={`${s.id}-h`}>
           <h2 id={`${s.id}-h`} style={{ marginTop: 0 }}>
             {s.title}
@@ -48,10 +50,41 @@ export default function Reading({ initial = 'western' }: { initial?: 'western' |
             ))}
           </div>
         </section>
-      ))}
+        );
+        if (i === 0) return body;
+        if (i === 1)
+          return (
+            <Paywall key="paywall" what={`The rest of your ${tab === 'western' ? 'Western' : 'Vedic'} reading`}>
+              {sections.slice(1).map((x) => (
+                <ReadingBlock key={x.id} s={x} tab={tab} />
+              ))}
+            </Paywall>
+          );
+        return null;
+      })}
       <p className="small muted">
         Draft interpretations awaiting the approver’s review · <code>{READING_VERSION}</code>
       </p>
     </>
+  );
+}
+
+function ReadingBlock({ s, tab }: { s: ReadingSection; tab: string }) {
+  return (
+    <section id={s.id} className={`card lens ${tab}`} aria-labelledby={`${s.id}-h`}>
+      <h2 id={`${s.id}-h`} style={{ marginTop: 0 }}>
+        {s.title}
+      </h2>
+      {s.intro && <p className="small muted">{s.intro}</p>}
+      <div className="reading-items">
+        {s.items.map((it) => (
+          <article key={it.heading} className="reading-item">
+            <h3>{it.heading}</h3>
+            <p>{it.text}</p>
+            {it.basis && <p className="basis">{it.basis}</p>}
+          </article>
+        ))}
+      </div>
+    </section>
   );
 }
