@@ -302,3 +302,30 @@ details > summary { cursor: pointer; margin: 8px 0; }
 .plan.on { border-color: var(--accent); background: var(--accent-soft); }
 .plan input { width: 20px; height: 20px; accent-color: var(--accent); margin-top: 2px; flex: none; }
 .paywall a, .card a:not(.btn):not(.list-link) { color: var(--ink-display); text-underline-offset: 3px; }
+
+/* Template review console (#/review) */
+.review { max-width: 760px; margin: 0 auto; padding: 8px 16px 48px; }
+.review-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 0; }
+.review h1 { text-align: left; }
+.review .sub { text-align: left; margin-left: 0; max-width: none; }
+.review .btn { width: auto; }
+.review .btn-row { display: flex; flex-wrap: wrap; }
+.progress { height: 8px; border-radius: 999px; background: var(--surface-2); overflow: hidden; margin-bottom: 8px; }
+.progress span { display: block; height: 100%; background: var(--sage); }
+.file-btn { margin: 0; font-weight: 600; }
+.fragment.approved { border-left: 4px solid var(--sage); }
+.fragment.rejected { border-left: 4px solid #c98b7d; }
+.fragment.changed { border-left: 4px solid var(--gold); }
+.frag-id { font-size: 0.8125rem; color: var(--ink-muted); word-break: break-word; }
+.frag-text { font-size: 1.0625rem; color: var(--ink-display); margin: 10px 0; }
+.frag-actions { margin-top: 12px; }
+.frag-actions .btn { min-height: 40px; padding: 0 18px; }
+.status-tag { font-size: 0.75rem; font-weight: 600; padding: 2px 8px; border-radius: 999px; background: var(--surface-2); color: var(--ink-display); white-space: nowrap; }
+.status-tag.approved { background: #e3e8d6; color: #3f4a2a; }
+.status-tag.rejected { background: #f3dcd5; color: #8a2b1d; }
+.status-tag.changed { background: #f5e8cf; color: #6b4e17; }
+.lint-fail { color: #8a2b1d; font-weight: 600; }
+.samples blockquote { margin: 8px 0; padding: 8px 12px; background: var(--surface-2); border-radius: 10px; }
+.samples blockquote p { margin: 4px 0 0; }
+.samples mark { background: #f3e1a8; color: inherit; border-radius: 3px; padding: 0 2px; }
+.review-top .wordmark { font-size: 1.125rem; }
