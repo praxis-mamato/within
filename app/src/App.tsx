@@ -67,6 +67,7 @@ function Shell() {
             <>
               <Route path="/" element={<Onboarding />} />
               <Route path="/interview" element={<Interview />} />
+              <Route path="/interview/check" element={<ComprehensionCheck />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </>
           ) : (

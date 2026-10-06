@@ -52,7 +52,7 @@ test('onboarding and main screens have no serious accessibility issues', async (
   expect(found, found.join('\n')).toEqual([]);
 });
 
-const SCREENS = ['/today', '/reflection/self', '/reflection/purpose', '/relationships', '/you/chart', '/you/reading', '/growth', '/settings', '/account'];
+const SCREENS = ['/interview', '/today', '/reflection/self', '/reflection/purpose', '/relationships', '/you/chart', '/you/reading', '/growth', '/settings', '/account'];
 
 async function sideways(page: Page) {
   await page.addStyleTag({ content: 'html { font-size: 200% !important; }' });

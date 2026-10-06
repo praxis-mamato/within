@@ -1,4 +1,4 @@
-import { forwardRef, useEffect, useMemo, useRef, useState } from 'react';
+import { forwardRef, startTransition, useEffect, useMemo, useRef, useState } from 'react';
 import { BirthFields } from '../components/BirthFields';
 import { computeNatal } from '../astro/natal';
 import { factsFor } from '../astro/facts';
@@ -73,7 +73,9 @@ export default function Onboarding() {
     }
     setStep(step + 1);
   };
-  const finish = () => {
+  // One transition for the state change and the navigation (the router's updates are transitions),
+  // so the signed-in routes never render at the old address and redirect away from the check.
+  const finish = () => startTransition(() => {
     dispatch({
       type: 'onboarding/finish',
       birth,
@@ -99,7 +101,7 @@ export default function Onboarding() {
       updateInterview((s) => ({ ...s, finishedAt: Date.now(), choice: choice === 'pause' || choice === 'none' ? choice : choice ? 'step' : null }));
       nav('/interview/check');
     } else nav('/today');
-  };
+  });
 
 
   return (

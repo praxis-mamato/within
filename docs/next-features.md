@@ -10,9 +10,10 @@ Draft 0.1 · October 6, 2026 · Builds on [`build-spec.md`](build-spec.md) and [
 | Place + time zone | 49,025 towns, historical daylight saving, manual override. |
 | Readings | Short reflections personalized from each chart, plus a **full reading** per tradition (6 Western and 7 Vedic sections: planets in signs and houses, chart ruler, aspects, temperament, lunar phase, dignities, nakshatra details, yogas, dashas, panchang, and the sky now). Draft libraries, **none approved yet**. |
 | Prompts | Tap-to-fill options on every text field; "What's happening?" covers yourself, the sky now, people around you, and relationships. Step 7 is built from the person's own answers. |
-| Safety | In-app screener, safety ops agent, runbook, drills passed twice. Region resources not written. |
+| Safety | In-app screener, safety ops agent, runbook, drills passed twice. Per-country emergency numbers and Find A Helpline in the app; **not yet human-verified**. |
 | Accounts, payment, storage | **Built for web (Oct 6):** Apple/Google sign-in with email-link second step, Stripe web checkout ($9.99/month, $100/year), encrypted on-device storage. Runs in demo mode until the keys in `docs/setup/accounts-and-payments.md` are added. Native apps and in-app purchase not built yet. |
-| Tests | 147 passing; content lint, Swiss Ephemeris reference, drill fixtures run in CI. |
+| Tests | 206 unit tests plus browser tests (axe accessibility on every screen, 200% text, interview mode) in CI. |
+| Measurement | Opt-in usage counts and crash reports (B5), off by default, enums and numbers only. Interview mode (A2) built. |
 
 **What blocks the pilot (G2):** approved templates, region safety resources, accounts and storage, consent, privacy review, the out-of-hours decision. Features are grouped by the gate they serve.
 
