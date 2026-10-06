@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { composeReflection } from '../content/compose';
 import { OUTCOME_STEPS, planFor, SITUATIONS } from '../content/topics';
+import { skyNotes } from '../content/fullReading';
 import { SIGN_ELEMENT } from '../content/templates';
 import { PILLAR_ANSWERS } from '../data/prompts';
 import { Link, useParams } from 'react-router-dom';
@@ -37,8 +38,8 @@ export default function Reflection() {
   // other pillars use the chart-based question and step, plus the outcome's step where it fits.
   const moonSign = me?.western.moonSign.value ?? me?.western.planets.find((x) => x.body === 'Moon')?.sign;
   const plan = useMemo(
-    () => planFor(situation, state.focus, state.outcome, moonSign ? SIGN_ELEMENT[moonSign] : null),
-    [situation, state.focus, state.outcome, moonSign],
+    () => planFor(situation, state.focus, state.outcome, moonSign ? SIGN_ELEMENT[moonSign] : null, me ? skyNotes(me) : []),
+    [situation, state.focus, state.outcome, moonSign, me],
   );
   const question = pillar === 'self' ? plan.question : (composed?.question ?? personalize(r.question, nickname));
   const answerIdeas = pillar === 'self' ? plan.answers : PILLAR_ANSWERS[r.pillar];

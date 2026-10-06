@@ -5,7 +5,7 @@ import { TabBar } from './components/ui';
 import Onboarding from './screens/Onboarding';
 import Today from './screens/Today';
 import Reflection from './screens/Reflection';
-import { MilestoneDetail, MilestoneForm, RelationshipHome, RelationshipsList, YouChart, YouSpace } from './screens/Relationships';
+import { MilestoneDetail, MilestoneForm, RelationshipHome, RelationshipsList, YouChart, YouReading, YouSpace } from './screens/Relationships';
 import Growth, { FollowUp } from './screens/Growth';
 import Settings from './screens/Settings';
 
@@ -52,6 +52,7 @@ function Shell() {
               <Route path="/reflection/:pillar" element={<Reflection />} />
               <Route path="/relationships" element={<RelationshipsList />} />
               <Route path="/you/chart" element={<YouChart />} />
+              <Route path="/you/reading" element={<YouReading />} />
               <Route path="/you/:pillar" element={<YouSpace />} />
               <Route path="/relationship/:pillar" element={<RelationshipHome />} />
               <Route path="/milestone/new" element={<MilestoneForm />} />

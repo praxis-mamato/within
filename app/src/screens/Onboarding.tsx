@@ -6,7 +6,8 @@ import { composeReflection } from '../content/compose';
 import { useNavigate } from 'react-router-dom';
 import { FOCUS_OPTIONS, REFLECTIONS } from '../data/fixtures';
 import { OUTCOMES, PURPOSES } from '../data/prompts';
-import { planFor, SITUATIONS } from '../content/topics';
+import { planFor, SITUATION_GROUPS } from '../content/topics';
+import { skyNotes } from '../content/fullReading';
 import { SIGN_ELEMENT } from '../content/templates';
 import { ChipGroup, PerspectiveCard, PromptChips, SafetyPanel } from '../components/ui';
 import { Orbit } from '../components/Illustrations';
@@ -50,8 +51,8 @@ export default function Onboarding() {
   // Step 7 comes from the person's own answers in steps 1–2; the chart only suggests a style.
   const moonSign = chart?.western.moonSign.value ?? chart?.western.planets.find((p) => p.body === 'Moon')?.sign;
   const plan = useMemo(
-    () => planFor(focusText, focus, outcome[0] ?? '', moonSign ? SIGN_ELEMENT[moonSign] : null),
-    [focusText, focus, outcome, moonSign],
+    () => planFor(focusText, focus, outcome[0] ?? '', moonSign ? SIGN_ELEMENT[moonSign] : null, chart ? skyNotes(chart) : []),
+    [focusText, focus, outcome, moonSign, chart],
   );
   const stepOptions = plan.steps.filter((x) => !(state.safety.suppressContactActions && x.involvesOther));
 
@@ -110,12 +111,14 @@ export default function Onboarding() {
         <>
           <Orbit />
           <Heading ref={heading}>What would you like help understanding?</Heading>
-          <p className="sub">Choose any that fit, then pick a situation that sounds like yours or describe it.</p>
+          <p className="sub">About you, the sky right now, the people around you, or a relationship. Choose any that fit.</p>
           <ChipGroup label="Topics" multi options={FOCUS_OPTIONS} value={focus} onChange={setFocus} />
           <label htmlFor="focus-text">
             What’s happening? <span className="hint">Tap one below or write your own. You can edit it.</span>
           </label>
-          <PromptChips label="Situations other people describe" options={SITUATIONS} value={focusText} onChange={setFocusText} mode="replace" />
+          {SITUATION_GROUPS.map((g) => (
+            <PromptChips key={g.label} label={g.label} options={Object.keys(g.items)} value={focusText} onChange={setFocusText} mode="replace" limit={4} />
+          ))}
           <textarea id="focus-text" value={focusText} onChange={(e) => setFocusText(e.target.value)} placeholder="In your own words" />
           <div className="btn-row">
             <button className="btn" type="button" disabled={!focus.length && !focusText.trim()} onClick={next}>

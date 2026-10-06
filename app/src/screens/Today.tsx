@@ -45,6 +45,16 @@ export default function Today() {
         </div>
       )}
 
+      <Link className="card soft list-link" to="/you/reading" style={{ textDecoration: 'none' }}>
+        <span>
+          <strong>Your full reading</strong>
+          <span className="small muted" style={{ display: 'block' }}>
+            Every placement in both traditions, and what the sky is doing for you now
+          </span>
+        </span>
+        <span aria-hidden="true">›</span>
+      </Link>
+
       {action ? (
         <div className="card">
           <p className="small muted">Your next step</p>

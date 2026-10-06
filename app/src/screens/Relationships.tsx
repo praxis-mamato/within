@@ -8,6 +8,7 @@ import { MILESTONE_MEANINGS, MILESTONE_TITLES } from '../data/prompts';
 import { personalize, SAMPLE_BIRTH, useStore, type Birth } from '../state';
 import { BirthFields } from '../components/BirthFields';
 import Chart, { ChartTables } from './Chart';
+import Reading from './Reading';
 import { useCharts } from '../astro/useCharts';
 import { currentTransits } from '../astro/facts';
 import { antardashas, vimshottari } from '../astro/chart';
@@ -150,11 +151,22 @@ export function YouSpace() {
 
 function YouNav() {
   return (
-    <nav className="segmented" aria-label="You" style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}>
+    <nav className="segmented" aria-label="You" style={{ gridTemplateColumns: 'repeat(4, 1fr)' }}>
       <NavLink to="/you/self">Self</NavLink>
       <NavLink to="/you/purpose">Purpose</NavLink>
+      <NavLink to="/you/reading">Reading</NavLink>
       <NavLink to="/you/chart">Chart</NavLink>
     </nav>
+  );
+}
+
+export function YouReading() {
+  return (
+    <>
+      <Back to="/relationships" label="Relationships" />
+      <YouNav />
+      <Reading />
+    </>
   );
 }
 

@@ -8,7 +8,8 @@ Draft 0.1 · October 6, 2026 · Builds on [`build-spec.md`](build-spec.md) and [
 | Prototype (E1) | Live at https://praxis-mamato.github.io/within/. All PRD §4–§5 screens, nothing stored. |
 | Charts | Live Western + Vedic in the browser; within 0.01° of Swiss Ephemeris on 6 reference charts. |
 | Place + time zone | 49,025 towns, historical daylight saving, manual override. |
-| Readings | Personalized from each chart by a draft template library (274 text fragments). **None approved yet.** |
+| Readings | Short reflections personalized from each chart, plus a **full reading** per tradition (6 Western and 7 Vedic sections: planets in signs and houses, chart ruler, aspects, temperament, lunar phase, dignities, nakshatra details, yogas, dashas, panchang, and the sky now). Draft libraries, **none approved yet**. |
+| Prompts | Tap-to-fill options on every text field; "What's happening?" covers yourself, the sky now, people around you, and relationships. Step 7 is built from the person's own answers. |
 | Safety | In-app screener, safety ops agent, runbook, drills passed twice. Region resources not written. |
 | Accounts, payment, storage | **Decided Oct 6:** Apple/Google sign-in, paid subscription, personal data on the device only. Not built yet (Group B). |
 | Tests | 147 passing; content lint, Swiss Ephemeris reference, drill fixtures run in CI. |

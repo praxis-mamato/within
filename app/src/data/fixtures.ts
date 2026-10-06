@@ -152,7 +152,7 @@ export const REFLECTIONS: Record<Pillar, Reflection> = {
   },
 };
 
-export const FOCUS_OPTIONS = ['Recurring patterns', 'Communication', 'Boundaries', 'Uncertainty', 'A transition'];
+export const FOCUS_OPTIONS = ['Understanding myself', 'The sky right now', 'People around me', 'Relationships', 'Work and purpose', 'A decision', 'Recurring patterns', 'Communication', 'Boundaries', 'Uncertainty', 'A transition'];
 export const OUTCOME_OPTIONS = ['Clarity', 'Expressing a need', 'Preparing a conversation', 'Acceptance', 'Defining a boundary'];
 export const MILESTONE_TYPES = ['Meeting', 'Commitment', 'Conflict', 'Separation', 'Reconciliation', 'Custom'] as const;
 export type MilestoneType = (typeof MILESTONE_TYPES)[number];

@@ -149,6 +149,9 @@ export function PerspectiveCard({ p, reflectionId, nickname, facts, composed }: 
         <p className="small muted">
           {METHOD[p.tradition].summary} Method version: <code>{METHOD[p.tradition].version}</code>.
         </p>
+        <Link className="link small" to="/you/reading">
+          Read your full {p.tradition === 'western' ? 'Western' : 'Vedic'} reading
+        </Link>
         {composed && (
           <p className="small muted">
             Draft templates, awaiting approval: <code>{composed.templateIds.join(', ')}</code>
