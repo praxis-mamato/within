@@ -10,6 +10,7 @@
   --accent-pressed: #a84d36;
   --accent-soft: #f3e1d9;
   --gold: #b8904f;
+  --desk: #ede3d7;
   --sage: #7d8466;
   --focus: #4a1d33;
   --radius-card: 16px;
@@ -41,7 +42,7 @@ body {
   flex-direction: column;
 }
 @media (min-width: 520px) {
-  body { background: #ede3d7; }
+  body { background: var(--desk); }
   .app { box-shadow: 0 0 0 1px var(--line), 0 20px 60px rgb(74 29 51 / 0.08); }
 }
 

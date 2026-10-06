@@ -12,6 +12,13 @@ npm install
 npm run dev        # http://localhost:5173
 npm test           # date precision, safety screener (incl. drill fixtures), app state rules
 npm run build      # static site in app/dist, works from any path
+npm run build:artifact  # one self-contained file in app/dist-artifact, for the hosted preview
+```
+
+Hosted preview (private until shared): https://claude.ai/artifact/Sn9CXDfgYTVTtM5Sh4J8QE
+
+```sh
+# republish after changes: npm run build:artifact, then publish dist-artifact/within-prototype.html again
 ```
 
 ## What's in it

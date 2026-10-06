@@ -3,7 +3,7 @@ import { Link, NavLink, useNavigate, useParams } from 'react-router-dom';
 import { MILESTONE_INTERPRETATION, MILESTONE_TYPES, REFLECTIONS, type Milestone, type MilestoneType, type Pillar } from '../data/fixtures';
 import { describePrecision, formatFuzzyDate, type DateKind } from '../lib/dates';
 import { Landscape, Leaf, Orbit, Venn } from '../components/Illustrations';
-import { Back, PurposeCard, SafetyPanel } from '../components/ui';
+import { Back, ConfirmButton, PurposeCard, SafetyPanel } from '../components/ui';
 import { personalize, useStore } from '../state';
 
 /** List: the "You" space always, plus at most one relationship in the MVP. */
@@ -189,18 +189,15 @@ export function RelationshipHome() {
             </button>
           )}
           <p className="small muted">Archiving keeps everything readable and exportable. It isn’t a judgement, and you can undo it.</p>
-          <button
-            type="button"
-            className="btn danger"
-            onClick={() => {
-              if (window.confirm(`Delete ${p.nickname} and all their milestones? This can’t be undone.`)) {
-                dispatch({ type: 'person/delete' });
-                nav('/relationships');
-              }
+          <ConfirmButton
+            label={`Delete ${p.nickname} and their milestones`}
+            question={`Delete ${p.nickname} and all their milestones? This can’t be undone.`}
+            confirmLabel="Delete permanently"
+            onConfirm={() => {
+              dispatch({ type: 'person/delete' });
+              nav('/relationships');
             }}
-          >
-            Delete {p.nickname} and their milestones
-          </button>
+          />
         </div>
       </details>
     </>
@@ -322,18 +319,15 @@ export function MilestoneDetail() {
         <Link className="btn quiet" to={`/milestone/${m.id}/edit`}>
           Edit or correct
         </Link>
-        <button
-          type="button"
-          className="btn danger"
-          onClick={() => {
-            if (window.confirm('Delete this milestone?')) {
-              dispatch({ type: 'milestone/delete', id: m.id });
-              nav('/relationship/relationship');
-            }
+        <ConfirmButton
+          label="Delete milestone"
+          question="Delete this milestone? This can’t be undone."
+          confirmLabel="Delete milestone"
+          onConfirm={() => {
+            dispatch({ type: 'milestone/delete', id: m.id });
+            nav('/relationship/relationship');
           }}
-        >
-          Delete milestone
-        </button>
+        />
       </div>
     </>
   );

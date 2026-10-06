@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { METHOD } from '../data/fixtures';
-import { Back, SafetyPanel } from '../components/ui';
+import { Back, ConfirmButton, SafetyPanel } from '../components/ui';
 import { useStore, type Birth } from '../state';
 
 export default function Settings() {
@@ -10,16 +10,17 @@ export default function Settings() {
   const [birth, setBirth] = useState<Birth>(state.birth);
   const [saved, setSaved] = useState(false);
 
-  const exportData = () => {
-    const blob = new Blob([JSON.stringify({ exportedAt: new Date().toISOString(), note: 'Prototype sample data', data: state }, null, 2)], {
-      type: 'application/json',
-    });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'within-export.json';
-    a.click();
-    URL.revokeObjectURL(url);
+  const [exportOpen, setExportOpen] = useState(false);
+  const [copied, setCopied] = useState('');
+  const exportJson = JSON.stringify({ exportedAt: new Date().toISOString(), note: 'Prototype sample data', data: state }, null, 2);
+  const copyExport = async () => {
+    try {
+      await navigator.clipboard.writeText(exportJson);
+      setCopied('Copied.');
+    } catch {
+      (document.getElementById('export-json') as HTMLTextAreaElement | null)?.select();
+      setCopied('Copying is blocked here. The text is selected; copy it with your keyboard.');
+    }
   };
 
   return (
@@ -92,21 +93,34 @@ export default function Settings() {
           <li>Adding someone’s details doesn’t mean they agreed. Keep it to a nickname.</li>
         </ul>
         <div className="btn-row">
-          <button type="button" className="btn quiet" onClick={exportData}>
-            Export my data
+          <button type="button" className="btn quiet" aria-expanded={exportOpen} onClick={() => setExportOpen(!exportOpen)}>
+            {exportOpen ? 'Hide my data' : 'Export my data'}
           </button>
-          <button
-            type="button"
-            className="btn danger"
-            onClick={() => {
-              if (window.confirm('Delete everything? In this prototype, this resets the demo.')) {
-                dispatch({ type: 'reset' });
-                nav('/');
-              }
+          {exportOpen && (
+            <div>
+              <label htmlFor="export-json">
+                Everything you’ve entered, with every reflection <span className="hint">JSON. The real app also offers a readable copy.</span>
+              </label>
+              <textarea id="export-json" readOnly value={exportJson} style={{ minHeight: 180, fontFamily: 'monospace', fontSize: '0.8125rem' }} />
+              <button type="button" className="btn quiet" onClick={copyExport}>
+                Copy
+              </button>
+              {copied && (
+                <p role="status" className="small">
+                  {copied}
+                </p>
+              )}
+            </div>
+          )}
+          <ConfirmButton
+            label="Delete my account and data"
+            question="Delete everything? In this prototype, this resets the demo."
+            confirmLabel="Delete everything"
+            onConfirm={() => {
+              dispatch({ type: 'reset' });
+              nav('/');
             }}
-          >
-            Delete my account and data
-          </button>
+          />
         </div>
       </section>
 

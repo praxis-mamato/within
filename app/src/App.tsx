@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { HashRouter, Link, Navigate, Route, Routes, useLocation } from 'react-router-dom';
+import { HashRouter, Link, MemoryRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { StoreProvider, useStore } from './state';
 import { TabBar } from './components/ui';
 import Onboarding from './screens/Onboarding';
@@ -72,10 +72,17 @@ function Shell() {
 export default function App() {
   return (
     <StoreProvider>
-      {/* Hash routing so the static build works on any host without rewrites. */}
-      <HashRouter>
-        <Shell />
-      </HashRouter>
+      {/* Hash routing so the static build works on any host without rewrites; memory routing
+          for the single-file artifact build, whose host frame doesn't pass hash state through. */}
+      {import.meta.env.MODE === 'artifact' ? (
+        <MemoryRouter>
+          <Shell />
+        </MemoryRouter>
+      ) : (
+        <HashRouter>
+          <Shell />
+        </HashRouter>
+      )}
     </StoreProvider>
   );
 }

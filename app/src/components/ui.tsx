@@ -221,3 +221,28 @@ export function PurposeCard() {
     </div>
   );
 }
+
+/** Two-step destructive button. In-page, because browser confirm dialogs are blocked in some hosts. */
+export function ConfirmButton({ label, question, confirmLabel, onConfirm }: { label: string; question: string; confirmLabel: string; onConfirm: () => void }) {
+  const [asking, setAsking] = useState(false);
+  if (!asking) {
+    return (
+      <button type="button" className="btn danger" onClick={() => setAsking(true)}>
+        {label}
+      </button>
+    );
+  }
+  return (
+    <div className="card soft" role="group" aria-label={question}>
+      <p>{question}</p>
+      <div className="btn-row">
+        <button type="button" className="btn danger" onClick={onConfirm} autoFocus>
+          {confirmLabel}
+        </button>
+        <button type="button" className="btn quiet" onClick={() => setAsking(false)}>
+          Cancel
+        </button>
+      </div>
+    </div>
+  );
+}
