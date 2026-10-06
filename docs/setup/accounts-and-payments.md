@@ -10,13 +10,23 @@ The app already runs in **demo mode** at https://praxis-mamato.github.io/within/
 | 2. Stripe test products, webhook, portal | Claude, once the Stripe connector is on (or you) | 10 min |
 | 3. Google sign-in credentials | **You** (Google Cloud Console; no connector exists) | 10 min |
 | 4. Apple sign-in credentials | **You** (needs an Apple Developer Program membership, $99/year) | 20 min |
-| 5. Two GitHub variables | You, or paste the two values to Claude | 2 min |
+| 5. Turn live mode on for everyone | Claude (one line in `app/.env.production`) | 1 min |
 
 To let Claude do steps 1–2: connect **Supabase** and **Stripe** at https://claude.ai/customize/connectors, then start a new session (connectors load when a session starts).
 
-Throughout, `<ref>` is your Supabase project reference, the part before `.supabase.co` in the project URL.
+Throughout, `<ref>` is your Supabase project reference: **`lykmusmsfwvaeqxtsbrc`**.
 
 ---
+
+## Status (Oct 6, 2026)
+
+Done through the Supabase connector, project `lykmusmsfwvaeqxtsbrc` ("praxis-mamato's Project", us-east-1):
+- `entitlements` table with row-level security (one policy: people read their own row). Security advisor: clean apart from an empty test table, `within_ping`, which is locked down; delete it in the Table Editor.
+- Edge functions deployed and active: `create-checkout`, `stripe-webhook` (signature-checked, no JWT), `billing-portal`, `delete-account`.
+- The web app has the project URL and publishable key (`app/.env.production`).
+- **Live mode is off for everyone** (`VITE_LIVE=false`). Open https://praxis-mamato.github.io/within/?live=1 to use live mode in your own browser; `?live=0` switches back.
+
+Still needed: the Supabase dashboard settings in step 1 (URL configuration, providers, secrets; the connector can't change these), Stripe (step 2), Google (step 3), Apple (step 4). Then set `VITE_LIVE=true`.
 
 ## 1. Supabase
 
@@ -87,14 +97,7 @@ Requires an Apple Developer Program membership. At https://developer.apple.com/a
 
 ## 5. Switch the public site to live test mode
 
-GitHub → **praxis-mamato/within → Settings → Secrets and variables → Actions → Variables → New repository variable**:
-
-| Name | Value |
-|---|---|
-| `SUPABASE_URL` | `https://<ref>.supabase.co` |
-| `SUPABASE_ANON_KEY` | the anon / publishable key |
-
-Then re-run **Actions → Publish prototype**. The demo-mode note disappears from the Account screen when live mode is on.
+The Supabase URL and publishable key are already in `app/.env.production`. When steps 1–4 are done, change `VITE_LIVE=false` to `VITE_LIVE=true` there (or ask Claude to) and push; the site rebuilds in about a minute. Before that, test live mode in your own browser with `?live=1`. The demo-mode note disappears from the Account screen when live mode is on.
 
 ---
 

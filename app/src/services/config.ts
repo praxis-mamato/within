@@ -15,8 +15,24 @@ export const CONFIG = {
   },
 };
 
-/** The single-file artifact build can't do redirects, so it always uses demo mode. */
-export const LIVE = Boolean(CONFIG.supabaseUrl && CONFIG.supabaseAnonKey) && env.MODE !== 'artifact';
+/** Lets one browser try live mode before it's on for everyone: visit with ?live=1 (or ?live=0 to undo). */
+function personalOverride(): boolean | null {
+  try {
+    const q = new URLSearchParams(location.search).get('live');
+    if (q === '1' || q === '0') localStorage.setItem('within.live', q);
+    const v = localStorage.getItem('within.live');
+    return v === '1' ? true : v === '0' ? false : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Live mode needs the Supabase settings, and either VITE_LIVE=true or a personal ?live=1.
+ * The single-file artifact build can't do redirects, so it always uses demo mode.
+ */
+export const LIVE =
+  Boolean(CONFIG.supabaseUrl && CONFIG.supabaseAnonKey) && env.MODE !== 'artifact' && (personalOverride() ?? env.VITE_LIVE === 'true');
 
 export function siteUrl(): string {
   if (CONFIG.siteUrl) return CONFIG.siteUrl;

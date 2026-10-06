@@ -16,8 +16,7 @@ create table if not exists public.entitlements (
 alter table public.entitlements enable row level security;
 
 -- People can read their own status. Only server functions (service role) can write.
-drop policy if exists "read own entitlement" on public.entitlements;
 create policy "read own entitlement" on public.entitlements
-  for select to authenticated using (auth.uid() = user_id);
+  for select to authenticated using ((select auth.uid()) = user_id);
 
 comment on table public.entitlements is 'Subscription status per user. Written only by the stripe-webhook and create-checkout functions.';
