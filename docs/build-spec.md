@@ -18,16 +18,16 @@ The renderings set the tone well and get the three-tab IA right. They need these
 | # | What the rendering shows | PRD requirement | Build decision |
 |---|---|---|---|
 | D1 | No screen labels a **Western** or **Vedic** perspective | §6, §7: both traditions as labeled, equal-weight perspectives | Add the reflection layout in §5.3: two side-by-side/stacked perspective cards with a tradition label, then a "Together" card. This is the most important missing screen. |
-| D2 | Pillars are mapped one-per-tab (Self→Today, Other/Relationship→Relationships, Purpose→My Growth) | §4: Today = intention + one reflection + next step; four pillars live under Relationships; self-only use must be complete | Today shows the **current reflection** (it can be Self-focused). Four pillars are a segmented control inside a relationship. Self-only users get a "You" space with Self + Purpose and no empty Other/Relationship states. |
+| D2 | Pillars are mapped one-per-tab (Self→Today, Other/Relationship→Relationships, Purpose→My Growth) | §4: Today = intention + one reflection + next step; four pillars live under Relationships; self-only use must be complete | Today shows the **current reflection** (it can be Self-focused). Four pillars are a segmented control inside a relationship. Self-only users get a "You" space with Self + Purpose and no empty Other/Relationship states. **Decided (Oct 6).** |
 | D3 | "$9.99/month" footer | §10: no price selected; test alternatives | Treat as concept copy only. Billing is out of the pilot build (Epic 11). |
-| D4 | Side taglines: "A brighter tomorrow", "A stronger bond", "A more peaceful us" | §1: preserving the relationship isn't inherently the goal; no outcome forecasts | Marketing copy must not imply the app predicts or targets relationship continuation. Swap for user-centered lines ("Look within", "Small steps", "Real moments"). Editorial review item. |
+| D4 | Side taglines: "A brighter tomorrow", "A stronger bond", "A more peaceful us" | §1: preserving the relationship isn't inherently the goal; no outcome forecasts | Marketing copy must not imply the app predicts or targets relationship continuation. Swap for user-centered lines ("Look within", "Small steps", "Real moments"). **Decided (Oct 6): replace.** |
 | D5 | Relationship timeline: "First meeting / A turning point / Today" | §5C, §8: exact/approximate/range dates; meaning supplied by the user; no invented events | Timeline nodes render date precision visibly (e.g., "~Spring 2023", "2021–2022"). Only user-entered milestones appear. |
 | D6 | "What could you ask instead of assuming?" on the Other screen | §5B: possibilities and questions, never claims about the other person's mind | Good model. Every Other-pillar string follows this question pattern. Content lint rule (§8.3). |
 | D7 | Purpose screen: "What did you learn? More clarity / Still exploring" | §5E: attempted / not attempted / deliberately paused; helpful / neutral / unhelpful; notes; next intention | Expand into the follow-up flow in §5.6. The chips stay as a quick first step. |
 | D8 | Tab labels ~10px; light grey secondary text | §9: adjustable text, adequate contrast | Minimum 12px tab labels; support dynamic type up to 200%. Measured: terracotta CTA `#B5583F` on white text = 4.74:1 (passes AA). A light grey like `#8C8178` on cream = 3.36:1 (**fails** for body text). Use `#6E625A` (5.22:1) or darker. |
 | D9 | Active tab marked by color + filled icon | §9: non-color status indicators | Keep the filled icon and bold label. Add `aria-current="page"`. |
 
-**Rendering A vs. B:** the screens are identical. B's botanical and landscape illustrations suit marketing and onboarding. **Use A's restraint inside the product.** B's illustrated landscape behind the timeline (Relationship screen) is the one in-app exception worth testing, provided it stays decorative (`aria-hidden`).
+**Rendering A vs. B:** the screens are identical. B's botanical and landscape illustrations suit marketing and onboarding. **Use A's restraint inside the product, with one exception (decided Oct 6):** B's illustrated landscape sits behind the Relationship timeline in the app. Requirements: decorative only (`aria-hidden`); timeline nodes and labels sit on a cream scrim so text keeps ≥ 4.5:1 contrast; WebP ≤ 120 KB with a flat-color fallback; disabled under `prefers-reduced-data`.
 
 ---
 
@@ -63,14 +63,14 @@ The renderings set the tone well and get the three-tab IA right. They need these
 | Client | Next.js + TypeScript, installable PWA | PRD rules out a native-app commitment. One codebase covers participant + operator. |
 | UI | Headless accessible primitives (e.g., Radix) + CSS tokens (§6) | Keyboard and screen-reader behavior come built in. |
 | API/DB | TypeScript service, Postgres, migrations in repo | Relational data (relationships ↔ milestones ↔ reflections) and auditability. |
-| Calculation | Separate service wrapping a validated ephemeris (e.g., Swiss Ephemeris) | Isolates licensing (Swiss Ephemeris is AGPL or commercial; this is open decision #4). Lets each tradition's conventions be versioned. |
+| Calculation | Separate service wrapping **Swiss Ephemeris under the Professional License** (see §3.4) | Isolates the dependency behind one interface. Lets each tradition's conventions be versioned. |
 | Field encryption | Envelope encryption (KMS-held key, per-record data keys) for birth data, notes, journal, milestones | §9: encrypt sensitive data; limit staff access. |
 | Hosting | Region chosen by launch geography (decision #1) | Data residency follows the privacy review. |
 | Analytics | First-party event table; no third-party ad SDKs | §9: no advertising based on intimate data. Events never contain free text. |
 
 ### 3.2 Calculation service contract
 
-Input: birth date, time (or `null`), time precision, place (lat/long + resolved IANA timezone + UTC offset used), and a **convention profile id** per tradition (e.g., `western.tropical.placidus.v1`, `vedic.sidereal.<ayanamsa>.v1`). Practitioners pick the conventions at Gate 0. The code takes them as config, never hard-codes them.
+Input: birth date, time (or `null`), time precision, place (lat/long + resolved IANA timezone + UTC offset used), and a **convention profile id** per tradition (e.g., `western.tropical.placidus.v1`, `vedic.sidereal.<ayanamsa>.v1`). The approver (§3.5) picks the conventions at Gate 0. The code takes them as config, never hard-codes them.
 
 Output: a `CalculationSnapshot`:
 - `engine`, `engine_version`, `ephemeris_version`, `convention_profile`, `inputs_hash`
@@ -83,10 +83,39 @@ Snapshots are immutable. Editing birth inputs creates a new snapshot and marks d
 
 1. **Select:** rules map `facts` + chosen purpose + pillar to **approved content templates** for each tradition independently.
 2. **Compose:** fill templates. Optional AI phrasing comes only after Gate 3 and is constrained to the selected templates and facts. A validator rejects any output that mentions a placement, degree, or date not present in `facts`.
-3. **Review:** in the pilot, every reading enters the operator queue and a human approves it. Post-pilot, sampling plus user error reports.
+3. **Review:** in the pilot, every reading enters the operator queue and the approver (§3.5) approves it. Post-pilot, sampling plus user error reports.
 4. **Persist provenance:** each rendered perspective stores `snapshot_id`, `template_ids@revision`, `reviewer_id`, `reviewed_at`, `assembler_version`.
 
 There is no combined score and no averaging. "Together" is authored from a template set for agreement and divergence that the practitioners approve (contradiction handling, PRD §7).
+
+### 3.4 Calculation licensing (decided Oct 6)
+
+**Decision: buy the Swiss Ephemeris Professional License (listed at CHF 700, one-time; confirm on Astrodienst's price page at purchase) before any build that serves users over a network.**
+
+| Option | Cost | What it means for WITHIN | Verdict |
+|---|---|---|---|
+| Swiss Ephemeris, Professional License | ~CHF 700 one-time | Covers server use where users connect through a browser. No obligation to publish WITHIN's source. It is the reference engine most Western and Vedic software uses, so practitioner reference cases are easiest to match. | **Chosen** |
+| Swiss Ephemeris under AGPL-3.0 | Free | AGPL's network clause requires offering the **complete source of the whole service** to every user. Not acceptable for a commercial product. | Rejected |
+| Skyfield (MIT) + JPL ephemerides (public domain) | Free | Licensing is clean, but Skyfield is astronomy-only. We would write and validate house systems, ayanamsas, nakshatras, and dashas ourselves. That is weeks of work and a source of calculation defects, which the PRD treats as release-blocking. | Fallback only |
+| Skyfield-based astrology wrappers (e.g., libephemeris) | Free | Checked: libephemeris is **AGPL-3.0-only**, the same problem as free Swiss Ephemeris. | Rejected |
+| Hosted astrology APIs (VedicAstroAPI, StarsAPI, AstroAPI, etc.) | ~$10–50/month | Sends every user's birth data to a third party. That adds a processor to the privacy review, puts calculations outside our provenance controls, and creates vendor lock-in. | Rejected |
+
+Sequencing:
+- **E1 prototype:** no license needed. Fixture readings are precomputed offline and contain no real people's data.
+- **Before E3 is deployed anywhere reachable by participants (G2):** license purchased, contract filed in `docs/decisions/`.
+- Keep the engine behind the §3.2 interface so a Skyfield-based engine could replace it later without schema changes.
+
+### 3.5 Interpretation approval (decided Oct 6)
+
+**Maggie Amato is the single approver for both traditions** (combined Western + Vedic review), for conventions, reference cases, templates, and pilot readings.
+
+This changes the PRD, which asks for a separate practitioner per tradition (§7) and a relationship-safety reviewer (§10). To keep the PRD's intent with one approver:
+- **The PRD needs an amendment** to §7 and §10 recording this decision. Draft it at G0.
+- **Separate passes per tradition.** The console shows the Western and Vedic perspectives as separate approval steps with separate checklists, so one lens can't be approved as an afterthought of the other.
+- **Safety is a different hat.** Content and safety review stay separate queues. The safety ops agent (§8.4) does first-pass triage, and safety flags never wait behind the reading queue.
+- **Provenance still records the approver** on each perspective. If more reviewers are added later, nothing in the schema changes.
+- **Capacity sets the pilot size.** Estimate: 25 participants × (1 initial + 4 weekly + ~1 milestone) ≈ 150 readings over 4 weeks, about 38 a week. At ~10 minutes each that is **~6–7 hours a week of approval**. Readings are promised within **48 hours**. If approval runs longer than 10 minutes per reading, cap the pilot at 20.
+- **Backup:** name a delegate or pause intake when the approver is unavailable for more than 48 hours. Participants see "Your reflection is being prepared", never a silent delay.
 
 ---
 
@@ -210,6 +239,30 @@ The primary metric dashboard reports **numerator, denominator, and withdrawals s
 ### 8.3 Content lint (CI on the template repo)
 Rejects templates containing certainty and destiny language ("will", "destined", "soulmate", "karmic debt", "always", "never" when said of a person), mind-reading verbs about the Other ("they feel", "they want", "they intend"), diagnoses, stay/leave directives, and scores. Every template needs a tradition, a reviewer, a review date, and a revision.
 
+### 8.4 Safety operations (decided Oct 6: an ops agent)
+
+Safety flags are watched by a **safety ops agent** ([`.claude/agents/safety-ops.md`](../.claude/agents/safety-ops.md)), with Maggie as the human escalation contact. Full procedure: [`ops/safety-runbook.md`](ops/safety-runbook.md).
+
+The design splits safety into two layers so nothing urgent waits on the agent or a person:
+
+| Layer | Runs | Does |
+|---|---|---|
+| **In-app (deterministic)** | Instantly, at the moment of disclosure | Shows the region's crisis resources, suppresses contact-the-person actions, creates the `SafetyFlag`. Requires no AI and no human. |
+| **Safety ops agent** | Every hour during the pilot, and on each new P0/P1 flag | Triages flags by severity, checks that the in-app response fired correctly, drafts a participant follow-up from approved templates **for human approval**, escalates to Maggie, writes a shift log. |
+| **Human (Maggie)** | Per the SLAs below | Approves or edits every outbound message; decides on pausing the pilot. |
+
+**What the agent may never do:** message a participant, contact any third party or emergency service, promise anyone will intervene, diagnose, or change or delete participant data. It reads only flags and the text attached to them.
+
+**Response targets during the pilot:**
+
+| Severity | Example | Agent | Human |
+|---|---|---|---|
+| **P0** immediate danger / self-harm intent | "I'm scared to go home tonight" | Escalates within 15 min of flag | Reviews within 2 h (waking hours); the in-app resources already showed |
+| **P1** fear, coercion, abuse without immediate danger | "He checks my phone and I'm afraid to say no" | Triage + draft within 1 h | Approve within 24 h |
+| **P2** distress, unclear signal, harmful-output report | "This reading made me feel doomed" | Triage + draft within 4 h | Approve within 48 h |
+
+The consent form must tell participants that safety-related text is processed by an AI model for triage, reviewed by a person, never used for training, and that the service is **not monitored around the clock and is not an emergency service**. A serious incident pauses the pilot (PRD §11).
+
 ---
 
 ## 9. Epics
@@ -219,12 +272,12 @@ Rejects templates containing certainty and destiny language ("will", "destined",
 | **E0 Decisions** | Resolve PRD §13 items 1–6; pick conventions, calc source, region | Written sign-offs on file | G0 |
 | **E1 Prototype** | Clickable PWA on fixture data covering all §5 screens, using Rendering A visuals + the D1–D9 fixes | Usable in Stage 1 interviews; contains no real data | G1 |
 | **E2 Accounts & birth data** | Auth, onboarding, precision-aware birth profile, timezone resolution | No invented birth time; every field explained | G2 |
-| **E3 Calculation service** | Western + Vedic per convention profile, snapshots, time-sensitivity | Practitioner reference cases match within agreed tolerance | G2 |
+| **E3 Calculation service** | Swiss Ephemeris (Professional License), Western + Vedic per convention profile, snapshots, time-sensitivity | Approver's reference cases match within agreed tolerance; license on file | G2 |
 | **E4 Content system** | Templates, review workflow, provenance, lint, correction notices | Each perspective traceable to template revision + reviewer | G2 |
 | **E5 Reflection & Today** | §5.2–5.3, order randomization, stale handling, does-not-fit | Both lenses equal; unavailable elements named | G2 |
 | **E6 Relationships** | Pillars, Other (question-framed), timeline, milestones, archive | Date precision visible; no invented events | G2 |
 | **E7 My Growth & follow-up** | Intentions, journal, actions, §5.6 follow-up | Every journey links to an intention; pause is first-class | G2 |
-| **E8 Safety** | Screener, resources, human queue, test suite | Safety suite green; human owner staffed | G2 |
+| **E8 Safety** | Screener, resources, human queue, safety ops agent (§8.4), test suite | Safety suite green; agent drill passed; escalation contact staffed | G2 |
 | **E9 Privacy & ops** | Encryption, audit, export, deletion, notifications | Dummy-record export/delete passes; staff access logged | G2 |
 | **E10 Pilot console & metrics** | Operator reading queue, research flags, §7 dashboard | Every pilot reading human-approved | G2 |
 | **E11 Billing** | Subscription, disclosure, cancellation | Only if a commercial test is approved; no distress-triggered upsell | G3+ |
@@ -240,17 +293,21 @@ Deferred per PRD (do not build, but don't block in the schema): multiple simulta
 |---|---|---|
 | **G0 Decisions** | Building E1 | Product owner authorizes prototype work; brand name cleared enough for interview materials |
 | **G1 Stage 1 complete** | Building E2–E10 | 15–20 interviews done; reviewed examples for communication / patterns / transition; D1–D9 validated or revised; §13 decisions 1–4 made |
-| **G2 Pilot-ready** | Collecting real pilot birth data (20–30 adults, 4 weeks) | Privacy review for chosen region; practitioner sign-off on calc conventions + reference cases + templates (both traditions); safety suite green and human owners named; export/delete verified with dummy data; a11y audit with assistive tech; separate authorization to recruit |
+| **G2 Pilot-ready** | Collecting real pilot birth data (20–30 adults, 4 weeks) | Privacy review for chosen region (including AI processing of safety disclosures); Swiss Ephemeris license on file; approver sign-off on calc conventions + reference cases + templates, with separate Western and Vedic passes; PRD §7/§10 amendment recorded; safety ops agent drill passed; safety suite green and human owners named; export/delete verified with dummy data; a11y audit with assistive tech; separate authorization to recruit |
 | **G3 Beta decision** | Automation of assembly, optional AI phrasing, E11 | Pilot vs. thresholds: ≥80% unassisted journey, ≥80% comprehension, ≥60% action/pause + follow-up by day 7, ≥50% voluntary week-2 return, dual-lens value without more confusion/anxiety; raw counts + withdrawals reported; zero open critical defects |
 | **G4 Release** | Limited beta | PRD §12 checklist complete |
 
 ---
 
-## 11. Open questions for the product owner
+## 11. Decisions log
 
-1. **IA (D2):** confirm that pillars live inside relationships and that self-only users get a "You" space, rather than one pillar per tab as rendered.
-2. **Taglines (D4):** OK to replace relationship-continuation phrasing in marketing?
-3. **Calculation source:** commercial Swiss Ephemeris license vs. AGPL-compliant open-sourcing of the calc service vs. a third-party API. This affects cost and the architecture boundary.
-4. **Practitioners:** who are the named Western and Vedic reviewers, and what is their turnaround SLA for pilot readings? That SLA sets pilot capacity.
-5. **Operator staffing:** who owns the safety queue during the pilot, and in what hours?
-6. **Rendering B illustrations:** in-app timeline background, or marketing only?
+| Date | Decision | Where it's applied |
+|---|---|---|
+| Oct 6, 2026 | Pillars live inside relationships; self-only users get a "You" space | D2, §5.4 |
+| Oct 6, 2026 | Replace relationship-continuation taglines | D4 |
+| Oct 6, 2026 | Swiss Ephemeris Professional License | §3.4 |
+| Oct 6, 2026 | Maggie Amato is the combined Western + Vedic approver (PRD §7/§10 amendment pending) | §3.5 |
+| Oct 6, 2026 | Safety flags watched by a safety ops agent, Maggie as escalation | §8.4 |
+| Oct 6, 2026 | Rendering B landscape behind the in-app timeline | §2 |
+
+Still open (PRD §13): launch geography and privacy review; third-party data and consent model (self-only by default until decided); pilot recruitment, budget, and commercial test permissions; brand/name clearance, pricing, distribution.

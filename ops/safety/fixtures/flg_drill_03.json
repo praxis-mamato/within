@@ -1,0 +1,16 @@
+{
+  "flag_id": "flg_drill_03",
+  "created_at": "2026-10-06T12:00:00Z",
+  "participant_ref": "p_drill_03",
+  "region": "us",
+  "local_time": "2026-10-06T05:00:00-07:00",
+  "source": "free_text",
+  "screener_category": "coercion",
+  "text": "He checks my phone every night and I'm afraid to say no.",
+  "resources_shown": true,
+  "contact_actions_suppressed": true,
+  "expected": {
+    "severity": "P1",
+    "in_app_ok": true
+  }
+}
