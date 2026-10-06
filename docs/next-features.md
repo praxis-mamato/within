@@ -111,19 +111,20 @@ Native apps are recommended because a browser can delete locally stored data (Sa
 - What's paid: weekly chapters after the first, full history, follow-ups and reminders, adding a relationship. **Always free:** the first full reflection, safety resources, privacy controls, export, and delete (PRD §10).
 - **Store rules:** subscriptions sold inside the app must use Apple In-App Purchase and Google Play Billing, except that the US App Store now allows a link to your own web checkout ([Apple, 2025–26](https://www.iclarified.com/97192/apple-updates-app-store-rules-to-allow-external-purchase-links-in-us)) and Google allows alternative billing in the US, UK, and EEA from June 30, 2026 ([Android Developers Blog](https://android-developers.googleblog.com/2026/06/play-expanded-billing.html)).
 - **Fees:** Apple takes 15% under its Small Business Program (under $1M a year) or 30% otherwise; Google takes 10% service + 5% billing on subscriptions, or 10% plus your own processor's fee with alternative billing ([Adapty](https://adapty.io/blog/google-play-billing-changes-subscriptions-fees/)).
+- **Price (decided):** $9.99 a month, one product in every store; Apple and Google set local prices per country.
 - **Recommended:** RevenueCat to handle App Store, Google Play, and web (Stripe) subscriptions with one entitlement check. Launch with in-app purchase everywhere; add the US web-checkout link later to lower fees.
 - Subscription status is cached on the device so the app works offline.
 - **Guardrails (PRD §10):** price and renewal shown before purchase; cancellation explained in plain words; **no paywall or upsell right after a safety flag or inside a reflection**; paywall appears only at the start of a new chapter.
 
 **Acceptance:** purchase, renewal, cancellation, refund, restore purchases, and an expired subscription all tested in Apple and Google sandboxes; a test confirms no paywall appears within a session that raised a safety flag.
 
-**Size:** M–L · **Needs:** price and trial decision; Apple and Google developer accounts; business and tax details in both stores.
+**Size:** M–L · **Needs:** Apple Developer Program and Google Play Console accounts in the business's name; bank and tax details in both stores; a RevenueCat account.
 
 ### B3. On-device private storage
 **Scope**
 - Encrypted SQLite on the device (SQLCipher), with its key in the iOS Keychain or Android Keystore. Web: IndexedDB with a non-extractable WebCrypto key, plus a clear warning that browsers can clear it.
 - Same data model as build spec §4, minus server-only fields.
-- **Backup is the person's choice:** "Save a backup" writes an encrypted file they keep (Files, iCloud Drive, Google Drive) and "Restore" reads it back. Nothing is backed up to us.
+- **Sync and backup through the person's own cloud (decided):** CloudKit private database on Apple devices, the Google Drive app-data folder on Android and web, encrypted on the device before upload. Plus "Save a backup file" for moving between iPhone and Android. Nothing is backed up to us.
 - Plain warning at sign-up and in Settings: if you lose your phone without a backup, your entries are gone.
 - Export (readable + JSON) and delete-all already exist in the prototype; they move to the device store.
 
@@ -140,17 +141,44 @@ Pilot measures (PRD §11) need some data to leave the device. Proposed: an opt-i
 ### B6. Consent screens
 Updated for the new model: what stays on the device, what the server holds (identity, subscription), what is sent only with consent (safety check-in, research counts), "not an emergency service", and the third-party notice when adding someone. **Size:** S.
 
-### Conflicts this creates (decisions needed)
+### Where people's data lives (decided Oct 6: host as little as possible)
 
-**1. Reviewing each reading is no longer possible.** The concierge pilot had the approver approve every reading before a participant saw it. If readings never leave the device, nobody can review them.
-- **Recommended:** approve the template library up front (A1), so every reading is composed on the device from approved text. Update PRD §11 from "human-reviewed readings" to "readings composed only from human-approved templates". A1 becomes required before the pilot.
-- Alternative: an opt-in "Send this reading for review" button. More work for you, and few people would use it.
+People's entries live **on their phone**, and copies go to **their own cloud account**, not ours. Apple and Google store it, it counts against the person's own storage, and we can't read it.
 
-**2. Safety flags can't reach the safety ops agent.** The runbook assumes flags arrive in a queue.
-- **Recommended:** when the screener matches, the app still shows resources instantly, then asks "Would you like a person from Within to check in with you?". Only on "yes" does it send a minimal flag (the sentence they approve, severity, region, no birth data) to the queue. The runbook, the agent's inputs, and the drill fixtures change to match.
-- Alternative: in-app resources only, with no human follow-up. Simpler and honest, but no one is ever alerted.
+| Data | Where it lives | Who pays to store it | Can we read it? |
+|---|---|---|---|
+| Birth details, journal, milestones, steps, readings | On the device, encrypted | Nobody (the person's phone) | No |
+| Sync and backup between their own devices | iPhone/iPad: Apple **CloudKit private database** (inside their iCloud). Android and web: a hidden **Google Drive app folder** in their Drive. Both encrypted before upload. | The person's own iCloud or Google storage | No |
+| Moving between iPhone and Android | An encrypted backup file they save and open on the new phone | Nobody | No |
+| Account (who signed in) | Small auth service (Supabase or Firebase) | Us: a few hundred bytes per person | Only the sign-in identity |
+| Subscription status | RevenueCat (and Apple/Google) | Included in RevenueCat's pricing | Only payment status |
+| Safety check-in requests (opt-in only) | A small queue in the same auth service | Us: a few hundred bytes per request | Only what the person chose to send |
 
-**3. Native apps before validation.** The PRD said no native-app commitment until usability and return use are validated. On-device storage and store payments effectively require native apps. Confirm you want to bring that forward.
+**What we host in total:** sign-in records, subscription status, and the occasional safety check-in, which is a few hundred bytes per person, kilobytes per thousand people. No birth data, journals, or readings ever reach our servers. Readings are calculated on the phone, so there is no calculation server either.
+
+**Trade-offs, stated plainly to users:**
+- If someone turns off iCloud or Google backup and loses their phone, their entries are gone. Settings shows whether backup is on.
+- Their data travels with their Apple or Google account, not their Within account. Signing into Within on a phone with a different Apple/Google account starts fresh (the email-link check still applies).
+
+### Decisions recorded (Oct 6, 2026)
+
+| # | Decision | What changes |
+|---|---|---|
+| 1 | **Approve the template library up front**; no per-reading review | A1 (review console) is required before launch. PRD §11 changes from "human-reviewed readings" to "readings composed only from human-approved templates". Build spec B2 reading queue is dropped. |
+| 2 | **Data on the device and in the person's own iCloud/Google Drive**; we host only sign-in, subscription status, and opt-in safety check-ins | See the table above. Safety flags are sent only when the person asks for a check-in (runbook and agent inputs to be updated). |
+| 3 | **Native iOS and Android apps** (no added hosting; distributed through the stores) | Capacitor wraps the existing app. Web stays for demos and web sign-up. |
+| 4 | **$9.99 a month** | One product, `within_monthly`, in both stores and on the web. Apple and Google set local prices in each country automatically from the US price. The first full reflection stays free. Yearly plan and free trial: not offered at launch (can be added later). |
+| 5 | **All countries** | See "Launching everywhere" below. |
+
+### Launching everywhere: what it takes
+
+- **Stores handle tax and local pricing.** Apple and Google act as the seller in every country, collect sales tax and VAT, and convert the $9.99 tier into local prices.
+- **Web checkout links** are allowed only on the US App Store; everywhere else the app uses in-app purchase. Web sign-ups use Stripe through RevenueCat.
+- **Privacy laws** (GDPR in the EU and UK, LGPD in Brazil, and others) are much lighter when personal data never reaches our servers, but we still need: a privacy policy, in-app account deletion, a data-request contact, and consent for the opt-in safety check-in. Privacy review is still required before launch.
+- **Safety resources in every country.** We can't hand-verify 190+ countries before launch. Proposed: an emergency number for each country (a public, verifiable list) plus a link to a global helpline directory such as findahelpline.com, with hand-verified local lines added for the top countries by sign-ups. Needs your approval.
+- **Language:** the content is English only. The app can launch everywhere in English; translation is a separate project, because every translated template needs approval too.
+- **China mainland** requires a government ICP filing for App Store apps. Recommend excluding it at launch.
+- **Age:** 18+, per the PRD. Set the store age ratings to match.
 
 ---
 
@@ -166,7 +194,7 @@ Multiple relationships, friendships and family, progressions and Davison charts,
 2. **A2 Interview mode**, so Stage 1 can start while A1 is in review.
 3. **A4 Accessibility pass** (small, catches structural issues early).
 4. **A3 Deeper personalization**, reviewed through A1 as it lands.
-5. **B1 sign-in, B3 on-device storage, B2 payment** (in that order: storage and identity first, then the paywall on top), once the conflicts above are decided.
+5. **B3 on-device storage with iCloud/Google Drive sync, B1 sign-in, B2 payment**, inside the Capacitor iOS and Android apps.
 6. B4–B6 alongside the pilot setup.
 
 ## Decisions needed
@@ -174,12 +202,13 @@ Multiple relationships, friendships and family, progressions and Davison charts,
 | # | Decision | Needed for |
 |---|---|---|
 | 1 | Review templates in-app (A1) or in a spreadsheet? | A1 |
-| 2 | Approve templates up front instead of reviewing each reading (conflict 1) | Pilot design, A1 |
-| 3 | Opt-in "a person can check in" for safety flags (conflict 2) | Safety runbook, B6 |
-| 4 | Build native iOS and Android apps now (conflict 3) | B1–B3 |
-| 5 | Price, free trial length, monthly and/or yearly | B2 |
-| 6 | Launch countries (decides store rules, fees, safety resources, privacy review) | B2, safety, B6 |
-| 7 | Auth provider: Supabase Auth or Firebase Auth | B1 |
-| 8 | Out-of-hours P0 coverage (runbook §3) | Safety |
+| 2 | Auth provider: Supabase Auth or Firebase Auth (recommend Supabase) | B1 |
+| 3 | Safety resources plan for all countries (emergency numbers + global directory) | Safety, launch |
+| 4 | Out-of-hours coverage for opt-in safety check-ins (runbook §3) | Safety |
+| ~~—~~ | ~~Per-reading review~~ **Decided: approve templates up front** | A1 |
+| ~~—~~ | ~~Where data lives~~ **Decided: device + the person's own iCloud/Google Drive** | B3 |
+| ~~—~~ | ~~Native apps~~ **Decided: yes, via Capacitor** | B1–B3 |
+| ~~—~~ | ~~Price~~ **Decided: $9.99/month** | B2 |
+| ~~—~~ | ~~Countries~~ **Decided: all (China mainland excluded pending ICP filing)** | Launch |
 | ~~—~~ | ~~Sign-in method~~ **Decided: Apple and Google, with an email link as the second factor** | B1 |
 | ~~—~~ | ~~Reminder channel~~ **Decided by on-device storage: local notifications** | B4 |

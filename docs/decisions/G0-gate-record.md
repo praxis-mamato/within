@@ -50,9 +50,17 @@ Product owner decisions ("they should sso in or oauth via apple or google. we ne
 - Personal data stays on the person's device. Servers hold only sign-in identity and subscription status.
 - Open conflicts with the pilot design and the PRD are listed in `docs/next-features.md` (Group B, "Conflicts this creates").
 
+## Amendment, Oct 6, 2026: launch decisions
+
+1. Approve the template library up front instead of reviewing each reading.
+2. Personal data stays on the device and syncs through the person's own iCloud or Google Drive. We host only sign-in, subscription status, and opt-in safety check-ins.
+3. Native iOS and Android apps (Capacitor), with minimal hosting.
+4. Price: $9.99 a month.
+5. Launch in all countries (China mainland excluded pending an ICP filing), in English.
+
 ## Not authorized yet (needs G1/G2)
 
-Collecting birth data on our servers (now ruled out by design), recruitment for the pilot, AI phrasing, charging real customers before the price is set.
+Collecting birth data on our servers (now ruled out by design), recruitment for the pilot, AI phrasing, charging real customers before template approval, privacy review, and store setup are complete.
 
 ## Open for the product owner before G2
 
