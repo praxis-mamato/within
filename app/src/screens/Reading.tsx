@@ -1,4 +1,5 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { track } from '../services/telemetry';
 import { useCharts } from '../astro/useCharts';
 import { READING_VERSION, vedicReading, westernReading, type ReadingSection } from '../content/fullReading';
 import { useStore } from '../state';
@@ -10,6 +11,7 @@ export default function Reading({ initial = 'western' }: { initial?: 'western' |
   const { me } = useCharts();
   const [tab, setTab] = useState<'western' | 'vedic'>(initial);
   const sections = useMemo<ReadingSection[]>(() => (me ? (tab === 'western' ? westernReading(me) : vedicReading(me, state.birth.date)) : []), [me, tab, state.birth.date]);
+  useEffect(() => track('reading_opened', { tradition: tab }), [tab]);
 
   if (!me) return <p className="banner">These birth details can’t be calculated. Check the date, place, and time zone in Settings.</p>;
   return (
@@ -54,7 +56,7 @@ export default function Reading({ initial = 'western' }: { initial?: 'western' |
         if (i === 0) return body;
         if (i === 1)
           return (
-            <Paywall key="paywall" what={`The rest of your ${tab === 'western' ? 'Western' : 'Vedic'} reading`}>
+            <Paywall key="paywall" where="reading" what={`The rest of your ${tab === 'western' ? 'Western' : 'Vedic'} reading`}>
               {sections.slice(1).map((x) => (
                 <ReadingBlock key={x.id} s={x} tab={tab} />
               ))}

@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { track } from '../services/telemetry';
 import { REFLECTIONS } from '../data/fixtures';
 import { HorizonSun } from '../components/Illustrations';
 import { PurposeCard, SafetyPanel } from '../components/ui';
@@ -60,7 +61,7 @@ export default function Today() {
           <p className="small muted">Your next step</p>
           <p>{action.text}</p>
           <div className="btn-row">
-            <button type="button" className="btn" onClick={() => dispatch({ type: 'today/finish' })}>
+            <button type="button" className="btn" onClick={() => (dispatch({ type: 'today/finish' }), track('today_finished'))}>
               Finish for today
             </button>
             <Link className="btn quiet" to="/reflection/self">

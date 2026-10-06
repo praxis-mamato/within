@@ -198,6 +198,9 @@ main:focus { outline: none; }
   margin: 16px 0 4px;
 }
 h1, h2, h3 { font-family: var(--font-display); color: var(--ink-display); font-weight: 600; }
+/* Long words wrap instead of pushing the page sideways when text is enlarged (WCAG 1.4.4, 1.4.10). */
+body { overflow-wrap: break-word; }
+h1, h2, h3 { hyphens: auto; }
 h1 { font-size: 2.25rem; line-height: 1.05; margin: 0 0 8px; text-align: center; }
 h2 { font-size: 1.5rem; line-height: 1.15; margin: 24px 0 8px; }
 h3 { font-size: 1.25rem; margin: 0 0 4px; }

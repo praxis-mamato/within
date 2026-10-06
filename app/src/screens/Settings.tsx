@@ -4,6 +4,8 @@ import { METHOD } from '../data/fixtures';
 import { Back, ConfirmButton, SafetyPanel } from '../components/ui';
 import { BirthFields } from '../components/BirthFields';
 import { useStore, type Birth } from '../state';
+import { SharingLog, SharingToggles } from '../components/Sharing';
+import { forgetInstall } from '../services/telemetry';
 
 export default function Settings() {
   const { state, dispatch } = useStore();
@@ -114,11 +116,19 @@ export default function Settings() {
             question="Erase your birth details, journal, milestones, and reflections from this device? Your account and subscription aren’t affected. This can’t be undone."
             confirmLabel="Erase this device"
             onConfirm={() => {
+              forgetInstall();
               dispatch({ type: 'reset' });
               nav('/');
             }}
           />
         </div>
+      </section>
+
+      <section aria-labelledby="sh-h">
+        <h2 id="sh-h">Help improve Within</h2>
+        <p className="small">Optional, and off unless you turn it on.</p>
+        <SharingToggles />
+        <SharingLog />
       </section>
 
       <section aria-labelledby="sr-h">

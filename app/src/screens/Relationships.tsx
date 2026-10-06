@@ -78,7 +78,7 @@ export function RelationshipsList() {
             </div>
           </div>
         ) : !entitlement.active ? (
-          <Paywall what="A relationship space">{null}</Paywall>
+          <Paywall where="relationship" what="A relationship space">{null}</Paywall>
         ) : (
           <div className="btn-row">
             <button type="button" className="btn secondary" onClick={() => setAdding(true)}>

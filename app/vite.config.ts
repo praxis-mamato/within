@@ -7,5 +7,5 @@ export default defineConfig(({ mode }) => ({
   plugins: [react()],
   base: './',
   build: mode === 'artifact' ? { rollupOptions: { output: { inlineDynamicImports: true } } } : {},
-  test: { environment: 'node', globals: true },
+  test: { environment: 'node', globals: true, exclude: ['e2e/**', 'node_modules/**'] },
 }));
