@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect, useRef } from 'react';
 import { HashRouter, Link, MemoryRouter, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { StoreProvider, useStore } from './state';
 import { TabBar } from './components/ui';
+import { LogoMark } from './components/Illustrations';
 import Onboarding from './screens/Onboarding';
 import Today from './screens/Today';
 import Reflection from './screens/Reflection';
@@ -68,6 +69,7 @@ function Shell() {
       <InterviewBar />
       <header className="topbar">
         <Link className="wordmark" to={state.onboarded ? '/today' : '/'}>
+          <LogoMark />
           WITHIN
         </Link>
         {state.onboarded && (

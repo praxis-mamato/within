@@ -91,3 +91,18 @@ export function Landscape() {
     </svg>
   );
 }
+
+/** The Within mark: the Western circle and Vedic square overlapping, with the planet from the orbit. */
+export function LogoMark({ size = 28 }: { size?: number }) {
+  return (
+    <svg viewBox="6 12 82 82" width={size} height={size} aria-hidden="true" focusable="false">
+      <clipPath id="logo-overlap">
+        <circle cx="60" cy="42" r="26" />
+      </clipPath>
+      <path d="M24 34 L66 26 L74 68 L32 76 Z" style={{ fill: 'var(--logo-gold)' }} fillOpacity="0.8" clipPath="url(#logo-overlap)" />
+      <path d="M24 34 L66 26 L74 68 L32 76 Z" fill="none" style={{ stroke: 'var(--ink-display)' }} strokeWidth="6" strokeLinejoin="round" />
+      <circle cx="60" cy="42" r="26" fill="none" style={{ stroke: 'var(--ink-display)' }} strokeWidth="6" />
+      <circle cx="18" cy="80" r="8" style={{ fill: 'var(--logo-gold)' }} />
+    </svg>
+  );
+}
