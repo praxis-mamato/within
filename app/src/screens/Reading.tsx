@@ -65,7 +65,7 @@ export default function Reading({ initial = 'western' }: { initial?: 'western' |
         return null;
       })}
       <p className="small muted">
-        Draft interpretations awaiting the approver’s review · <code>{READING_VERSION}</code>
+        Reading version <code>{READING_VERSION}</code>
       </p>
     </>
   );

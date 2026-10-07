@@ -404,14 +404,14 @@ export function MilestoneDetail() {
           <section className="voice trad">
             <h3>The Western tradition offers</h3>
             <p>
-              {MILESTONE_INTERPRETATION.western} <span className="sample-tag">Draft text</span>
+              {MILESTONE_INTERPRETATION.western}
             </p>
             {me && <SkyOnDate milestone={m} kind="western" />}
           </section>
           <section className="voice trad" style={{ borderColor: 'var(--sage)' }}>
             <h3>The Vedic tradition offers</h3>
             <p>
-              {MILESTONE_INTERPRETATION.vedic} <span className="sample-tag">Draft text</span>
+              {MILESTONE_INTERPRETATION.vedic}
             </p>
             {me && <SkyOnDate milestone={m} kind="vedic" />}
             {m.date.kind !== 'exact' && <p className="unavailable">This date isn’t exact, so interpretations use a broader window.</p>}

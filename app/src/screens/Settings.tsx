@@ -15,7 +15,7 @@ export default function Settings() {
 
   const [exportOpen, setExportOpen] = useState(false);
   const [copied, setCopied] = useState('');
-  const exportJson = JSON.stringify({ exportedAt: new Date().toISOString(), note: 'Prototype sample data', data: state }, null, 2);
+  const exportJson = JSON.stringify({ exportedAt: new Date().toISOString(), note: 'Within data export', data: state }, null, 2);
   const copyExport = async () => {
     try {
       await navigator.clipboard.writeText(exportJson);
@@ -138,7 +138,7 @@ export default function Settings() {
       </section>
 
       <hr />
-      <p className="small muted">Prototype 0.3 · charts calculated on this device · entries saved encrypted on this device only.</p>
+      <p className="small muted">Version 0.3 · charts calculated on this device · entries saved encrypted on this device only.</p>
       <p className="small muted">
         Place data © GeoNames (CC BY 4.0). Planet positions: Astronomy Engine (MIT).
       </p>

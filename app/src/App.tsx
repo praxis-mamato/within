@@ -65,7 +65,7 @@ function Shell() {
       <a className="skip" href="#main" onClick={(e) => (e.preventDefault(), main.current?.focus())}>
         Skip to content
       </a>
-      <div className="proto-banner">Prototype · draft interpretations · your entries stay on this device</div>
+      <div className="proto-banner">Your entries stay on this device</div>
       <InterviewBar />
       <header className="topbar">
         <Link className="wordmark" to={state.onboarded ? '/today' : '/'}>

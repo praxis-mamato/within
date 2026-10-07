@@ -8,7 +8,7 @@
  *
  * Each fragment has a stable ID so a rendered reading can name exactly which text it used.
  */
-export const LIBRARY_VERSION = 'draft-1';
+export const LIBRARY_VERSION = 'v1';
 
 export type Element = 'fire' | 'earth' | 'air' | 'water';
 export const SIGN_ELEMENT: Record<string, Element> = {
