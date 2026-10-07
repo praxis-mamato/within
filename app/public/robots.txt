@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://praxis-mamato.github.io/within/sitemap.xml

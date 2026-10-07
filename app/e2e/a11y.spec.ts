@@ -16,6 +16,7 @@ async function audit(page: Page, label: string) {
 
 async function onboard(page: Page, found: string[]) {
   await page.goto('./');
+  await page.getByRole('button', { name: 'Start free' }).click();
   await expect(page.getByRole('heading', { name: 'What would you like help understanding?' })).toBeVisible();
   found.push(...(await audit(page, 'onboarding 1')));
   await page.getByRole('button', { name: 'Recurring patterns' }).click();
@@ -61,6 +62,7 @@ async function sideways(page: Page) {
 
 test('text at 200% never makes a screen scroll sideways', async ({ page }) => {
   await page.goto('./');
+  await page.getByRole('button', { name: 'Start free' }).click();
   const wide: string[] = [];
   if ((await sideways(page)) > 1) wide.push('onboarding');
   await onboard(page, []);

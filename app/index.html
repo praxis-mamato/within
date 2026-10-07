@@ -5,8 +5,55 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#F3EBE1" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#1B1624" media="(prefers-color-scheme: dark)" />
-    <meta name="robots" content="noindex" />
-    <title>Within</title>
+    <meta name="robots" content="index, follow" />
+    <title>Within: Astrology in plain words | Your patterns, cycles, and relationships</title>
+    <meta name="description" content="Know your patterns. Live your timing. Within reads your birth chart in Western and Vedic astrology, side by side, in plain words: the patterns that shape you, the cycles you're in, and your relationships. Private by design." />
+    <link rel="canonical" href="https://praxis-mamato.github.io/within/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Within" />
+    <meta property="og:title" content="Within: Know your patterns. Live your timing." />
+    <meta property="og:description" content="Western and Vedic astrology, side by side, in plain words. See what shapes you, what you're moving through, and one small step for this week." />
+    <meta property="og:url" content="https://praxis-mamato.github.io/within/" />
+    <meta property="og:image" content="https://praxis-mamato.github.io/within/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Within: a natal chart wheel in a night sky over a dawn landscape, with the headline Know your patterns. Live your timing." />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Within: Know your patterns. Live your timing." />
+    <meta name="twitter:description" content="Western and Vedic astrology in plain words: your patterns, your cycles, your relationships." />
+    <meta name="twitter:image" content="https://praxis-mamato.github.io/within/og.png" />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebApplication",
+            "name": "Within",
+            "url": "https://praxis-mamato.github.io/within/",
+            "description": "Western and Vedic astrology, side by side, in plain words: personal patterns, life cycles with dates, relationship readings, and reflection steps. Charts are calculated on your device.",
+            "applicationCategory": "LifestyleApplication",
+            "operatingSystem": "Web, iOS, Android",
+            "inLanguage": "en",
+            "image": "https://praxis-mamato.github.io/within/og.png",
+            "offers": [
+              { "@type": "Offer", "name": "Free", "price": "0", "priceCurrency": "USD" },
+              { "@type": "Offer", "name": "Monthly", "price": "9.99", "priceCurrency": "USD" },
+              { "@type": "Offer", "name": "Yearly", "price": "100.00", "priceCurrency": "USD" }
+            ]
+          },
+          {
+            "@type": "FAQPage",
+            "mainEntity": [
+              { "@type": "Question", "name": "What is Within?", "acceptedAnswer": { "@type": "Answer", "text": "Within is an astrology app that reads your birth chart in two traditions, Western (tropical) and Vedic (sidereal), side by side and in plain words. It shows the patterns that shape you, the cycles you are moving through with dates, and readings for your relationships, with a small reflection step each week." } },
+              { "@type": "Question", "name": "Is Within free?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. Your chart tables, your first reflection, your two strongest patterns, and your main current cycle are free. A subscription ($9.99 a month or $100 a year) unlocks every pattern and cycle, the full Western and Vedic readings, timing with progressions and transits, and relationship readings." } },
+              { "@type": "Question", "name": "How accurate are the charts?", "acceptedAnswer": { "@type": "Answer", "text": "Planet positions come from the open-source Astronomy Engine and are checked against Swiss Ephemeris reference charts to within a fraction of a degree. Houses use the Placidus system; Vedic charts use the Lahiri ayanamsa and Vimshottari dashas." } },
+              { "@type": "Question", "name": "Is my data private?", "acceptedAnswer": { "@type": "Answer", "text": "Your chart is calculated on your device, and your birth details, journal, and readings are stored encrypted on your device. Within's servers keep only your sign-in and subscription status." } },
+              { "@type": "Question", "name": "Does Within predict the future?", "acceptedAnswer": { "@type": "Answer", "text": "No. Within offers astrology as interpretations for reflection, not predictions. Timing shows themes to notice, not events to expect." } }
+            ]
+          }
+        ]
+      }
+    </script>
     <link rel="manifest" href="./manifest.webmanifest" />
     <link rel="icon" href="./icon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="./icon-180.png" />
@@ -15,7 +62,25 @@
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet" />
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <main class="seo-landing" style="max-width: 640px; margin: 0 auto; padding: 24px 16px; font-family: 'Source Sans 3', system-ui, sans-serif; color: #3b302a">
+        <img src="./hero.svg" alt="A natal chart wheel in a night sky over a dawn landscape" width="400" height="300" style="display: block; width: 100%; max-width: 420px; height: auto; margin: 0 auto" />
+        <p style="text-align: center; text-transform: uppercase; letter-spacing: 0.12em; font-size: 0.75rem">Western + Vedic astrology, in plain words</p>
+        <h1 style="text-align: center; font-family: 'Cormorant Garamond', serif; color: #3a1a2c; font-size: 2.5rem; line-height: 1.02">Know your patterns. Live your timing.</h1>
+        <p style="text-align: center">Within reads your birth chart in two traditions and turns it into something you can use: what shapes you, what you’re moving through, and one small step for this week.</p>
+        <h2>Your patterns</h2>
+        <p>Plain-language themes drawn from your whole birth chart, such as “You guard your feelings until it feels safe” or “You need room to be yourself, even in closeness”, with the astrology behind each one.</p>
+        <h2>Your cycles</h2>
+        <p>The periods you’re moving through, from Saturn and Jupiter transits to your progressed Moon and Vedic dasha, with when each starts, peaks, and eases.</p>
+        <h2>Western and Vedic, side by side</h2>
+        <p>Your full natal chart in both traditions: planets in signs and houses, aspects, nakshatras, navamsa, yogas, progressions, solar arcs, and your solar return.</p>
+        <h2>Relationships</h2>
+        <p>Read two charts together: synastry, house overlays, and the composite chart, with reflection questions instead of compatibility scores.</p>
+        <h2>Private by design</h2>
+        <p>Your chart is calculated on your phone. Your birth details and journal stay there, encrypted.</p>
+        <p><a href="./">Start free</a></p>
+      </main>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

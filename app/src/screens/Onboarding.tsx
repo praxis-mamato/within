@@ -11,6 +11,7 @@ import { skyNotes } from '../content/fullReading';
 import { SIGN_ELEMENT } from '../content/templates';
 import { ChipGroup, PerspectiveCard, PromptChips, SafetyPanel } from '../components/ui';
 import { Orbit } from '../components/Illustrations';
+import { Hero } from '../components/Hero';
 import { SharingToggles } from '../components/Sharing';
 import { track } from '../services/telemetry';
 import { load as loadInterview, markStep, update as updateInterview, visibleLenses } from '../interview/session';
@@ -31,6 +32,8 @@ export default function Onboarding() {
   const { state, dispatch } = useStore();
   const nav = useNavigate();
   const [step, setStep] = useState(1);
+  // Research interview sessions skip the welcome and start at the first question.
+  const [welcome, setWelcome] = useState(() => !loadInterview());
   const [focus, setFocus] = useState<string[]>([]);
   const [focusText, setFocusText] = useState('');
   const [outcome, setOutcome] = useState<string[]>([]);
@@ -103,6 +106,8 @@ export default function Onboarding() {
     } else nav('/today');
   });
 
+
+  if (welcome) return <Welcome onStart={() => setWelcome(false)} />;
 
   return (
     <>
@@ -328,5 +333,79 @@ export default function Onboarding() {
         </>
       )}
     </>
+  );
+}
+
+const FEATURES: { title: string; text: string; icon: JSX.Element }[] = [
+  {
+    title: 'Your patterns',
+    text: 'Plain-language themes drawn from your whole chart, with the astrology behind each one a tap away.',
+    icon: <path d="M4 18c3-8 5-8 8 0s5 8 8 0" />,
+  },
+  {
+    title: 'Your cycles',
+    text: 'What you’re moving through now, when it peaks, and when it eases, with dates.',
+    icon: (
+      <>
+        <circle cx="12" cy="12" r="8" />
+        <path d="M12 7v5l3 2" />
+      </>
+    ),
+  },
+  {
+    title: 'Two traditions',
+    text: 'Western and Vedic side by side, compared but never blended into one verdict.',
+    icon: (
+      <>
+        <circle cx="9" cy="12" r="6" />
+        <rect x="11" y="6" width="10" height="12" rx="1" />
+      </>
+    ),
+  },
+  {
+    title: 'Private by design',
+    text: 'Your chart is calculated on your phone. Your journal and birth details stay there.',
+    icon: (
+      <>
+        <rect x="6" y="11" width="12" height="9" rx="2" />
+        <path d="M9 11V8a3 3 0 0 1 6 0v3" />
+      </>
+    ),
+  },
+];
+
+function Welcome({ onStart }: { onStart: () => void }) {
+  useEffect(() => track('onboarding_step', { step: 0 }), []);
+  return (
+    <div className="welcome">
+      <Hero />
+      <p className="kicker">Western + Vedic astrology, in plain words</p>
+      <h1>Know your patterns. Live your timing.</h1>
+      <p className="sub">Within reads your birth chart in two traditions and turns it into something you can use: what shapes you, what you’re moving through, and one small step for this week.</p>
+      <div className="btn-row">
+        <button type="button" className="btn" onClick={onStart}>
+          Start free
+        </button>
+      </div>
+      <p className="small muted" style={{ textAlign: 'center' }}>
+        About three minutes. No account needed to begin.
+      </p>
+      <ul className="features">
+        {FEATURES.map((f) => (
+          <li key={f.title}>
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              {f.icon}
+            </svg>
+            <span>
+              <strong>{f.title}</strong>
+              {f.text}
+            </span>
+          </li>
+        ))}
+      </ul>
+      <p className="small muted" style={{ textAlign: 'center' }}>
+        Interpretations for reflection, not predictions.
+      </p>
+    </div>
   );
 }
