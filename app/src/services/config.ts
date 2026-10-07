@@ -34,6 +34,9 @@ function personalOverride(): boolean | null {
 export const LIVE =
   Boolean(CONFIG.supabaseUrl && CONFIG.supabaseAnonKey) && env.MODE !== 'artifact' && (personalOverride() ?? env.VITE_LIVE === 'true');
 
+/** Sign in with Apple needs an Apple Developer account; until VITE_APPLE_SIGN_IN=true, live mode offers Google only. */
+export const APPLE_SIGN_IN = !LIVE || env.VITE_APPLE_SIGN_IN === 'true';
+
 export function siteUrl(): string {
   if (CONFIG.siteUrl) return CONFIG.siteUrl;
   if (typeof location === 'undefined') return '';

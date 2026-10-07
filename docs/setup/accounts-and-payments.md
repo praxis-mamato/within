@@ -27,7 +27,7 @@ Done through the Supabase connector, project `lykmusmsfwvaeqxtsbrc` ("praxis-mam
 - The web app has the project URL and publishable key (`app/.env.production`).
 - **Live mode is off for everyone** (`VITE_LIVE=false`). Open https://praxis-mamato.github.io/within/?live=1 to use live mode in your own browser; `?live=0` switches back.
 
-Still needed: the Supabase dashboard settings in step 1 (URL configuration, providers, secrets; the connector can't change these), Stripe (step 2), Google (step 3), Apple (step 4). Then set `VITE_LIVE=true`. For AI readings, also add the `ANTHROPIC_API_KEY` secret (step 6).
+Still needed: the Supabase dashboard settings in step 1 (URL configuration, providers, secrets; the connector can't change these), Stripe (step 2), Google (step 3), and later Apple (step 4, optional for testing). Then set `VITE_LIVE=true`. For AI readings, also add the `ANTHROPIC_API_KEY` secret (step 6).
 
 ## 1. Supabase
 
@@ -84,6 +84,8 @@ In the Supabase dashboard:
 4. Paste the Client ID and Client secret into Supabase → Google provider.
 
 ## 4. Apple sign-in
+
+**Optional for testing.** Live mode shows only Google until `VITE_APPLE_SIGN_IN=true` is set in `app/.env.production`. Apple's Developer Program needs a D-U-N-S number to enroll as an organization (free, from Dun & Bradstreet through Apple's lookup page, https://developer.apple.com/enroll/duns-lookup/, usually about 5 business days). Enrolling as an individual needs no D-U-N-S number, but the app is then listed under your personal name. An iPhone app that offers Google sign-in has to offer Sign in with Apple too, so this is needed before an App Store release, not for the website.
 
 Requires an Apple Developer Program membership. At https://developer.apple.com/account → **Certificates, Identifiers & Profiles**:
 

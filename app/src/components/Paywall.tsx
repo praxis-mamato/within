@@ -3,7 +3,7 @@ import { track } from '../services/telemetry';
 import { Link } from 'react-router-dom';
 import { accountService, type Plan, type Provider } from '../services/account';
 import { useAccount } from '../services/AccountContext';
-import { CONFIG } from '../services/config';
+import { APPLE_SIGN_IN, CONFIG } from '../services/config';
 import { useStore } from '../state';
 
 export function SignInButtons() {
@@ -22,12 +22,14 @@ export function SignInButtons() {
   };
   return (
     <div className="btn-row">
-      <button type="button" className="btn auth apple" disabled={!!busy} onClick={() => go('apple')}>
-        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
-          <path fill="currentColor" d="M16.4 12.6c0-2.4 2-3.6 2.1-3.7-1.2-1.7-3-1.9-3.6-2-1.5-.2-3 .9-3.8.9-.8 0-2-.9-3.3-.9-1.7 0-3.3 1-4.2 2.5-1.8 3.1-.5 7.7 1.3 10.2.9 1.2 1.9 2.6 3.2 2.6 1.3-.1 1.8-.8 3.3-.8 1.6 0 2 .8 3.3.8 1.4 0 2.3-1.2 3.1-2.5 1-1.4 1.4-2.8 1.4-2.9 0 0-2.8-1.1-2.8-4.2zM14 5.3c.7-.9 1.2-2 1.1-3.2-1 0-2.3.7-3 1.6-.7.8-1.3 2-1.1 3.1 1.1.1 2.3-.6 3-1.5z" />
-        </svg>
-        {busy === 'apple' ? 'Opening Apple…' : 'Continue with Apple'}
-      </button>
+      {APPLE_SIGN_IN && (
+        <button type="button" className="btn auth apple" disabled={!!busy} onClick={() => go('apple')}>
+          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+            <path fill="currentColor" d="M16.4 12.6c0-2.4 2-3.6 2.1-3.7-1.2-1.7-3-1.9-3.6-2-1.5-.2-3 .9-3.8.9-.8 0-2-.9-3.3-.9-1.7 0-3.3 1-4.2 2.5-1.8 3.1-.5 7.7 1.3 10.2.9 1.2 1.9 2.6 3.2 2.6 1.3-.1 1.8-.8 3.3-.8 1.6 0 2 .8 3.3.8 1.4 0 2.3-1.2 3.1-2.5 1-1.4 1.4-2.8 1.4-2.9 0 0-2.8-1.1-2.8-4.2zM14 5.3c.7-.9 1.2-2 1.1-3.2-1 0-2.3.7-3 1.6-.7.8-1.3 2-1.1 3.1 1.1.1 2.3-.6 3-1.5z" />
+          </svg>
+          {busy === 'apple' ? 'Opening Apple…' : 'Continue with Apple'}
+        </button>
+      )}
       <button type="button" className="btn auth google" disabled={!!busy} onClick={() => go('google')}>
         <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
           <path fill="#4285F4" d="M22.6 12.2c0-.8-.1-1.5-.2-2.2H12v4.2h5.9c-.3 1.4-1 2.5-2.2 3.3v2.7h3.6c2.1-1.9 3.3-4.8 3.3-8z" />
