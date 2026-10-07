@@ -128,10 +128,10 @@ export default function Onboarding() {
           <p className="sub">About you, the sky right now, the people around you, or a relationship. Choose any that fit.</p>
           <ChipGroup label="Topics" multi options={FOCUS_OPTIONS} value={focus} onChange={setFocus} />
           <label htmlFor="focus-text">
-            What’s happening? <span className="hint">Tap one below or write your own. You can edit it.</span>
+            What’s happening? <span className="hint">Tap any that fit, or write your own. You can edit it.</span>
           </label>
           {SITUATION_GROUPS.map((g) => (
-            <PromptChips key={g.label} label={g.label} options={Object.keys(g.items)} value={focusText} onChange={setFocusText} mode="replace" limit={4} />
+            <PromptChips key={g.label} label={g.label} options={Object.keys(g.items)} value={focusText} onChange={setFocusText} limit={4} />
           ))}
           <textarea id="focus-text" value={focusText} onChange={(e) => setFocusText(e.target.value)} placeholder="In your own words" />
           <div className="btn-row">

@@ -239,6 +239,9 @@ const KEYWORDS: [RegExp, Topic][] = [
 export function topicFor(situation: string, focus: string[]): Topic {
   const s = situation.trim();
   if (SITUATION_TOPIC[s]) return SITUATION_TOPIC[s];
+  // Several ready-made situations picked together: the first one in the text leads.
+  const picked = SITUATIONS.map((k) => [s.indexOf(k), k] as const).filter(([i]) => i >= 0).sort((a, b) => a[0] - b[0]);
+  if (picked.length) return SITUATION_TOPIC[picked[0][1]];
   for (const [re, t] of KEYWORDS) if (re.test(s)) return t;
   for (const f of focus) if (FOCUS_TOPIC[f]) return FOCUS_TOPIC[f];
   return 'general';

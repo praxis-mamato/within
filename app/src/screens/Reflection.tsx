@@ -181,7 +181,7 @@ export default function Reflection() {
             <label htmlFor="sit" className="sr-only">
               Your situation
             </label>
-            <PromptChips label="Or pick one" options={SITUATIONS} value={situation} onChange={setSituation} mode="replace" />
+            <PromptChips label="Or pick any that fit" options={SITUATIONS} value={situation} onChange={setSituation} />
             <textarea id="sit" value={situation} onChange={(e) => setSituation(e.target.value)} />
             <button
               type="button"

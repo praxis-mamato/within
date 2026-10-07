@@ -311,8 +311,10 @@ export function PromptChips({ label, options, value, onChange, mode = 'append', 
               className="prompt"
               aria-pressed={used}
               onClick={() => {
-                if (mode === 'replace' || !value.trim()) onChange(o.endsWith('…') ? o.slice(0, -1) + ' ' : o);
-                else if (!used) onChange(`${value.trim()} ${o.endsWith('…') ? o.slice(0, -1) : o}`);
+                const text = o.replace(/…$/, '');
+                if (mode === 'append' && used) onChange(value.replace(text, '').replace(/\s{2,}/g, ' ').trim());
+                else if (mode === 'replace' || !value.trim()) onChange(o.endsWith('…') ? text + ' ' : o);
+                else onChange(`${value.trim()} ${text}`);
               }}
             >
               {o}
