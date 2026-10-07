@@ -99,6 +99,10 @@ Requires an Apple Developer Program membership. At https://developer.apple.com/a
 5. **Account deletion revokes Apple's token** (App Store 5.1.1(v)). In Supabase → Edge Functions → Secrets, add `APPLE_TEAM_ID`, `APPLE_KEY_ID`, `APPLE_CLIENT_ID` (`com.within.web` for the website; the iOS app's bundle ID once it exists), and `APPLE_PRIVATE_KEY` (the whole `.p8` file). Without them, deletion still works but the token isn't revoked.
 6. So the email-link check reaches people who hid their email with Apple: **Services → Sign in with Apple for Email Communication**, register the address Supabase sends from.
 
+## 7. Tester access codes
+
+Testers can get full access without paying: they sign in, open **Account**, and enter a code under "Have a tester code?". Each code gives a set number of days (default 90) and has a use limit (default 5). Only a SHA-256 hash of each code is stored (`access_codes` table), redemptions are recorded in `access_code_redemptions`, and the entitlement is marked `source = 'comp'` (no renewal, no billing). Ask Claude to create, extend, or switch off a code; to switch one off yourself, set `active` to false in the Table Editor.
+
 ## 6. AI readings (optional, subscribers)
 
 1. Create an API key at https://console.anthropic.com (Settings → API keys). Set a monthly spend limit there too.

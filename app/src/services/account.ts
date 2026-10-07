@@ -21,7 +21,7 @@ export interface Entitlement {
   status: 'none' | 'active' | 'trialing' | 'past_due' | 'canceled';
   renewsAt: string | null;
   cancelAtPeriodEnd: boolean;
-  source: 'stripe' | 'app_store' | 'play_store' | 'demo' | null;
+  source: 'stripe' | 'app_store' | 'play_store' | 'comp' | 'demo' | null;
   plan?: Plan | null;
 }
 
@@ -38,6 +38,8 @@ export interface AccountService {
   entitlement(): Promise<Entitlement>;
   startCheckout(plan: Plan): Promise<void>;
   manageSubscription(): Promise<void>;
+  /** Tester access: redeems a code for full access without payment. */
+  redeemCode(code: string): Promise<string>;
 }
 
 // ─── Device trust (the email link as a second factor on each new device) ──────────────────
@@ -146,6 +148,14 @@ function live(): AccountService {
       if (error || !data?.url) throw error ?? new Error('Could not open subscription settings.');
       location.assign(data.url);
     },
+    redeemCode: async (code) => {
+      const { data, error } = await sb.functions.invoke('redeem-code', { body: { code } });
+      if (error) {
+        const body = await (error as { context?: Response }).context?.json?.().catch(() => null);
+        throw new Error(body?.error ?? 'The code couldn’t be checked right now. Try again.');
+      }
+      return (data?.message as string) ?? 'Tester access is on.';
+    },
   };
 }
 
@@ -203,6 +213,13 @@ function demo(): AccountService {
       const e = JSON.parse(raw) as Entitlement;
       ls.set(DEMO_ENT, JSON.stringify({ ...e, cancelAtPeriodEnd: !e.cancelAtPeriodEnd }));
       emit();
+    },
+    redeemCode: async (code) => {
+      if (code.trim().length < 8) throw new Error('That code isn’t valid.');
+      const ends = new Date(Date.now() + 90 * 86400000).toISOString();
+      ls.set(DEMO_ENT, JSON.stringify({ active: true, status: 'active', renewsAt: ends, cancelAtPeriodEnd: true, source: 'comp' } satisfies Entitlement));
+      emit();
+      return 'Tester access is on (demo).';
     },
   };
 }
