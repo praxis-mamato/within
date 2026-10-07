@@ -95,8 +95,15 @@ Built the same way as today: calculated facts → approved text. New calculation
 
 **Timing (both)**
 - Monthly forecast: each transit to the natal chart in the coming month, **with the exact date it peaks**, plus New and Full Moons in the person's houses, retrograde stations, and eclipses.
-- Yearly: Western solar return chart; Vedic varshaphal-lite (the year's dasha and Jupiter/Saturn gochara).
+- **Year ahead:** Jupiter, Saturn, Uranus, Neptune, and Pluto against the natal planets and angles for 12 months, each as a window (first and last day within 1°) with every exact date, including retrograde re-passes.
+- **Secondary progressions** (a day for a year): progressed Sun, Moon, Mercury, Venus, Mars by sign and natal house; the progressed Moon's current sign chapter, when it began, and when it changes; the progressed lunar phase (Rudhyar's 30-year cycle) and the last progressed New Moon; progressed sign changes in the next 5 years; progressed-to-natal aspects with the month they are exact.
+- **Solar arc directions:** every natal point moved by the solar arc; conjunctions, squares, and oppositions to natal points exact in the next two years.
+- **Solar return:** the exact return moment, its rising sign, the Sun's and Moon's return houses, and where the return Ascendant falls in the natal chart (cast for the birthplace; relocation is a later option).
 - Dasha calendar: the next 24 months of sub-periods.
+
+**Placement tables (free, both traditions)**
+- Western: every planet with sign, degree, house, motion (direct or retrograde), and essential dignity (domicile, exaltation, detriment, fall); the four angles; the 12 Placidus cusps with each house ruler and where it sits; every natal aspect with its orb.
+- Vedic: lagna and each graha with rashi, degree, nakshatra and pada, nakshatra lord, bhava, navamsa sign, and dignity.
 
 **Relationships**
 - Full synastry: every planet-to-planet aspect, and house overlays (where each person's planets fall in the other's houses).
@@ -147,17 +154,36 @@ Results are cached on the device, so re-opening a reading costs nothing. A per-p
 
 **Size:** M (one edge function, prompt, output schema, post-checks, consent screen, device cache). Needs an Anthropic API key stored as a Supabase secret.
 
-### Recommendation
+### Decisions (October 2026)
 
-Do both, in this order:
-1. **Route A first** for the deep natal report, Navamsa, aspect patterns, house rulers, and the monthly forecast with exact dates. This is the subscriber backbone, it works offline, and it can be approved.
-2. **Route B as a subscriber feature on top** ("Go deeper with AI" and "Ask about your chart"), opt-in, grounded in Route A's text.
-
-### Decisions needed
-
-| # | Decision | Options |
+| # | Decision | Chosen |
 |---|---|---|
-| 1 | Use AI-written readings (Route B)? | Yes, opt-in for subscribers / Not now |
-| 2 | If yes, which model? | Claude Opus 5.5 (~$1 per subscriber per month) / Claude Sonnet 5.5 (~$0.50) |
-| 3 | Monthly question limit per subscriber | e.g. 20 |
-| 4 | Order of Route A sections | Recommended: deep natal → Navamsa → monthly forecast → full synastry → yearly |
+| 1 | Use AI-written readings (Route B)? | **Yes, opt-in, subscribers only** |
+| 2 | Model | **Claude Sonnet 5.5**: about $0.06 a reading, about $0.50 per subscriber per month |
+| 3 | Monthly limit | **30 AI readings and questions** per subscriber (`AI_MONTHLY_LIMIT`, changeable without a release) |
+| 4 | Order of Route A | Built together: deep natal, Navamsa and Dashamsa, monthly forecast, year ahead, progressions, solar arcs, solar return, full synastry |
+
+### Status: built
+
+**Route A (on the device, no AI).** Code: `app/src/astro/deep.ts` and `app/src/astro/progressions.ts` (calculations), `app/src/content/deep.ts` and `app/src/content/progressions.ts` (interpretation libraries), `app/src/content/deepReading.ts` and `app/src/content/chartReading.ts` (assembly). The full reading has four tabs:
+
+| Tab | Free | Subscribers |
+|---|---|---|
+| Western | Placement tables, Sun/Moon/rising | Planets in signs and houses, aspects, planet profiles, aspect patterns, house rulers, dominant planet, the sky now |
+| Vedic | Graha table, lagna | Nakshatras, grahas, yogas (incl. Raja, Dhana, Viparita, Neecha Bhanga), dashas, panchang, Navamsa, Dashamsa, graha drishti, gochara |
+| Timing | — | Month ahead by date, lunations and eclipse season, stations, progressed chart, progressed contacts, solar arcs, year ahead, solar return, dasha calendar |
+| Together (when their birth details are added) | — | Synastry aspects, house overlays both ways, composite chart |
+
+All new text is in the review console (`#/review`) for approval and passes the content lint. A typical exact-time chart now produces about 60 Western items, 35 Vedic items, and 70 Timing items, plus 4 Western reference tables.
+
+**Route B (AI, opt-in).** Code: `app/src/components/AiDeepDive.tsx`, `app/src/services/aiReading.ts` (fact sheet), `supabase/functions/deep-reading/` with `supabase/functions/_shared/deepReading.ts` (prompt, schema, checks), and the `ai_usage` table. Deployed to Supabase. To switch it on:
+
+1. Create an API key at console.anthropic.com.
+2. In Supabase, go to **Edge Functions → Secrets** and add `ANTHROPIC_API_KEY`. Optionally add `AI_MONTHLY_LIMIT` (default 30).
+3. Live mode (`VITE_LIVE=true` or `?live=1`) and an active subscription are required; demo mode shows a sample result without calling the API.
+
+### How a reading is made on the fly
+
+1. **Calculate (on the phone, under 0.2 s).** Birth date, time, and place become a UTC instant (historical time zones included). Astronomy Engine gives planet positions; Within's own code adds Placidus houses, Lahiri ayanamsa, nakshatras, dashas, divisional charts, aspects, progressions, solar arcs, transits for the next year, and the solar return.
+2. **Interpret (on the phone, instant).** Each calculated fact looks up its approved meaning (e.g. "progressed Moon in Libra" + "9th house"), and the sections are assembled. The same chart gives the same reading; different charts give different readings.
+3. **Optional AI deep dive (server, about 20–40 s).** When the person opts in and taps "Write my deeper reading" or asks a question, the phone sends only the calculated placements and the approved text for them (no name, birth details, place, or journal). The `deep-reading` function checks the subscription and monthly limit, asks Claude Sonnet 5.5 for a structured reading, drops any section that breaks the content rules or mentions a placement not in the facts, records only a usage count, and returns the result. The phone saves it; Within's servers keep nothing.

@@ -10,6 +10,7 @@ import * as W from './western';
 import * as V from './vedic';
 import * as P from './topics';
 import * as D from './deep';
+import * as PR from './progressions';
 import committed from './approvals.json';
 import { lint } from './lint';
 
@@ -76,6 +77,17 @@ const SOURCES: [section: string, module: string, Record<string, unknown>, [name:
     ['DRISHTI_TEXT', 'Graha drishti'],
     ['LORDSHIP_TEXT', 'Lordship yogas'],
     ['OVERLAY_TEXT', 'House overlays'],
+  ]],
+  ['Progressions, solar arcs, and the year ahead', 'progressions', PR as Record<string, unknown>, [
+    ['PROGRESSED_MOON_SIGN', 'Progressed Moon by sign'],
+    ['PROGRESSED_MOON_HOUSE', 'Progressed Moon by house'],
+    ['PROGRESSED_SUN_SIGN', 'Progressed Sun by sign'],
+    ['PROGRESSED_PLANET_INGRESS', 'Progressed sign changes'],
+    ['PROGRESSED_PHASE', 'Progressed lunar phases'],
+    ['CONTACT_HOW', 'Progressed and directed contacts'],
+    ['SLOW_TRANSIT', 'Slow transits'],
+    ['SR_ASCENDANT', 'Solar return rising'],
+    ['SR_SUN_HOUSE', 'Solar return Sun by house'],
   ]],
   ['Questions and steps', 'topics', P as Record<string, unknown>, [
     ['TOPICS', 'Topics: questions, answers, steps'],

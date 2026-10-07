@@ -6,6 +6,7 @@ import { timingReading, togetherReading, vedicDeep, westernDeep } from '../conte
 import { useStore } from '../state';
 import { Paywall } from '../components/Paywall';
 import { AiDeepDive } from '../components/AiDeepDive';
+import { vedicPlacements, westernPlacements } from '../content/chartReading';
 
 type Tab = 'western' | 'vedic' | 'timing' | 'together';
 
@@ -29,8 +30,8 @@ export default function Reading({ initial = 'western' }: { initial?: Tab }) {
     if (!me) return [];
     // Deep sections go before "the sky now", which stays last.
     const merge = (base: ReadingSection[], deep: ReadingSection[]) => [...base.slice(0, -1), ...deep, base[base.length - 1]];
-    if (tab === 'western') return merge(westernReading(me), westernDeep(me, place));
-    if (tab === 'vedic') return merge(vedicReading(me, state.birth.date), vedicDeep(me));
+    if (tab === 'western') return [westernPlacements(me, place), ...merge(westernReading(me), westernDeep(me, place))];
+    if (tab === 'vedic') return [vedicPlacements(me), ...merge(vedicReading(me, state.birth.date), vedicDeep(me))];
     if (tab === 'timing') return timingReading(me, place);
     if (other && theirBirth) return togetherReading(me, place, other, { lat: theirBirth.lat, lon: theirBirth.lon }, state.person!.nickname);
     return [];
@@ -40,8 +41,8 @@ export default function Reading({ initial = 'western' }: { initial?: Tab }) {
 
   if (!me) return <p className="banner">These birth details can’t be calculated. Check the date, place, and time zone in Settings.</p>;
 
-  // Western and Vedic show their first section free; Timing and Together are for subscribers.
-  const free = tab === 'western' || tab === 'vedic' ? 1 : 0;
+  // Western and Vedic show the placements table and the first reading section free; Timing and Together are for subscribers.
+  const free = tab === 'western' || tab === 'vedic' ? 2 : 0;
   return (
     <>
       <p className="kicker">Your full reading</p>
@@ -84,6 +85,37 @@ function ReadingBlock({ s, tab }: { s: ReadingSection; tab: string }) {
         {s.title}
       </h2>
       {s.intro && <p className="small muted">{s.intro}</p>}
+      {s.tables?.map((t) => (
+        <div className="table-wrap" key={t.caption} tabIndex={0} role="region" aria-label={t.caption}>
+          <table className="chart-table">
+            <caption>{t.caption}</caption>
+            <thead>
+              <tr>
+                {t.columns.map((col) => (
+                  <th key={col} scope="col">
+                    {col}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {t.rows.map((r, i) => (
+                <tr key={i}>
+                  {r.map((cell, j) =>
+                    j === 0 ? (
+                      <th key={j} scope="row">
+                        {cell}
+                      </th>
+                    ) : (
+                      <td key={j}>{cell}</td>
+                    ),
+                  )}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ))}
       <div className="reading-items">
         {s.items.map((it) => (
           <article key={it.heading} className="reading-item">

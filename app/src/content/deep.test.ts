@@ -47,3 +47,31 @@ describe('deep readings', () => {
     expect(text).toMatch(/needs? an exact birth time|needs a known lagna/);
   });
 });
+
+describe('progressions library and chart tables', () => {
+  it('passes the content lint and covers every sign, house, and phase', async () => {
+    const P = await import('./progressions');
+    for (const re of BANNED) expect(strings(P).filter((s) => re.test(s))).toEqual([]);
+    for (const k of ['PROGRESSED_MOON_SIGN', 'PROGRESSED_SUN_SIGN', 'SR_ASCENDANT'] as const) expect(Object.keys(P[k])).toHaveLength(12);
+    for (const k of ['PROGRESSED_MOON_HOUSE', 'SR_SUN_HOUSE'] as const) expect(Object.keys(P[k])).toHaveLength(12);
+    expect(Object.keys(P.PROGRESSED_PHASE)).toHaveLength(8);
+    for (const m of Object.keys(P.SLOW_TRANSIT)) expect(Object.keys(P.SLOW_TRANSIT[m])).toHaveLength(5);
+  });
+  it('fill the placement tables for every chart', async () => {
+    const { westernPlacements, vedicPlacements } = await import('./chartReading');
+    charts.forEach((c, i) => {
+      const w = westernPlacements(c, { lat: people[i].lat, lon: people[i].lon });
+      const v = vedicPlacements(c);
+      expect(w.tables![0].rows).toHaveLength(11);
+      expect(v.tables![0].rows.length).toBeGreaterThanOrEqual(9);
+      const cells = [...w.tables!, ...v.tables!].flatMap((t) => t.rows.flat()).join(' ');
+      expect(cells).not.toMatch(/undefined|NaN/);
+      // Houses, cusps, and angles only with an exact time.
+      expect(w.tables!.some((t) => t.caption.startsWith('House cusps'))).toBe(c.timePrecision === 'exact');
+    });
+  });
+  it('timing includes progressions, solar arc, the year ahead, and the solar return', () => {
+    const t = timingReading(charts[0], { lat: people[0].lat, lon: people[0].lon }, now);
+    for (const id of ['t-progressed', 't-prog-contacts', 't-solar-arc', 't-year', 't-solar-return']) expect(t.map((s) => s.id)).toContain(id);
+  });
+});

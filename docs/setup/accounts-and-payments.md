@@ -18,15 +18,16 @@ Throughout, `<ref>` is your Supabase project reference: **`lykmusmsfwvaeqxtsbrc`
 
 ---
 
-## Status (Oct 6, 2026)
+## Status (Oct 7, 2026)
 
 Done through the Supabase connector, project `lykmusmsfwvaeqxtsbrc` ("praxis-mamato's Project", us-east-1):
 - `entitlements` table with row-level security (one policy: people read their own row). Security advisor: clean apart from an empty test table, `within_ping`, which is locked down; delete it in the Table Editor.
-- Edge functions deployed and active: `create-checkout`, `stripe-webhook` (signature-checked, no JWT), `billing-portal`, `delete-account`.
+- Edge functions deployed and active: `create-checkout`, `stripe-webhook` (signature-checked, no JWT), `billing-portal`, `delete-account`, `deep-reading` (AI readings for subscribers).
+- `ai_usage` table (monthly AI reading counts and token totals only, no reading content) with row-level security; only the server can write to it.
 - The web app has the project URL and publishable key (`app/.env.production`).
 - **Live mode is off for everyone** (`VITE_LIVE=false`). Open https://praxis-mamato.github.io/within/?live=1 to use live mode in your own browser; `?live=0` switches back.
 
-Still needed: the Supabase dashboard settings in step 1 (URL configuration, providers, secrets; the connector can't change these), Stripe (step 2), Google (step 3), Apple (step 4). Then set `VITE_LIVE=true`.
+Still needed: the Supabase dashboard settings in step 1 (URL configuration, providers, secrets; the connector can't change these), Stripe (step 2), Google (step 3), Apple (step 4). Then set `VITE_LIVE=true`. For AI readings, also add the `ANTHROPIC_API_KEY` secret (step 6).
 
 ## 1. Supabase
 
@@ -95,6 +96,12 @@ Requires an Apple Developer Program membership. At https://developer.apple.com/a
 4. Supabase → Apple provider: Client IDs `com.within.web`. For the secret key, use Supabase's Apple secret generator (linked from the provider panel) with the Team ID, Key ID, Services ID, and `.p8`. **This secret expires every 6 months**; set a reminder.
 5. **Account deletion revokes Apple's token** (App Store 5.1.1(v)). In Supabase → Edge Functions → Secrets, add `APPLE_TEAM_ID`, `APPLE_KEY_ID`, `APPLE_CLIENT_ID` (`com.within.web` for the website; the iOS app's bundle ID once it exists), and `APPLE_PRIVATE_KEY` (the whole `.p8` file). Without them, deletion still works but the token isn't revoked.
 6. So the email-link check reaches people who hid their email with Apple: **Services → Sign in with Apple for Email Communication**, register the address Supabase sends from.
+
+## 6. AI readings (optional, subscribers)
+
+1. Create an API key at https://console.anthropic.com (Settings → API keys). Set a monthly spend limit there too.
+2. Supabase dashboard → **Edge Functions → Secrets** → add `ANTHROPIC_API_KEY`. Optionally add `AI_MONTHLY_LIMIT` (default 30 per subscriber per month).
+3. Test: in live mode, subscribe with a Stripe test card, open your full reading, turn on AI readings, and tap **Write my deeper reading**.
 
 ## 5. Switch the public site to live test mode
 

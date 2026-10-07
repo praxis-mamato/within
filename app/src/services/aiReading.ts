@@ -8,6 +8,7 @@ import { allAspects, aspectPatterns, dashaCalendar, lordshipYogas, monthAhead, s
 import { vedicYogas } from '../content/fullReading';
 import type { ReadingSection } from '../content/fullReading';
 import { placidusCusps } from '../astro/chart';
+import { progressions, solarArc, solarReturn, yearAhead } from '../astro/progressions';
 import type { DeepResult, Kind } from '../../../supabase/functions/_shared/deepReading';
 import { LIMITS } from '../../../supabase/functions/_shared/deepReading';
 import { LIVE } from './config';
@@ -17,6 +18,21 @@ export type { DeepResult, Kind };
 interface Place {
   lat: number;
   lon: number;
+}
+
+function progressionFacts(c: NatalChart, place: Place): string[] {
+  const now = new Date();
+  const pr = progressions(c, place.lat, place.lon, now);
+  const f = pr.planets.map((p) => `Progressed ${p.body} in ${p.sign} ${fmtDeg(p.degree)}${p.house ? `, natal house ${p.house}` : ''}${p.retrograde ? ', retrograde' : ''} (Western, secondary progression)`);
+  if (pr.moon.nextIngress) f.push(`Progressed Moon enters ${pr.moon.nextSign} around ${pr.moon.nextIngress} (Western)`);
+  f.push(`Progressed lunar phase angle ${Math.round(pr.phase.angle)}°${pr.phase.lastNewMoon ? `, last progressed New Moon around ${pr.phase.lastNewMoon.slice(0, 7)}` : ''} (Western)`);
+  for (const x of pr.contacts.slice(0, 8)) f.push(`Progressed ${x.progressed} ${x.aspect} natal ${x.natal}${x.exact ? `, exact around ${x.exact.slice(0, 7)}` : `, within ${fmtDeg(x.orbNow)}`} (Western)`);
+  const sa = solarArc(c, place.lat, place.lon, now);
+  for (const x of sa.contacts.slice(0, 6)) f.push(`Solar arc ${x.directed} ${x.aspect} natal ${x.natal}${x.exact ? `, exact around ${x.exact.slice(0, 7)}` : ''} (Western)`);
+  for (const w of yearAhead(c, place.lat, place.lon, now).slice(0, 14)) f.push(`${w.start} to ${w.end}: transiting ${w.transiting} ${w.aspect} natal ${w.natal}, closest ${w.exact.join(', ')} (Western)`);
+  const sr = solarReturn(c, place.lat, place.lon, now);
+  if (sr) f.push(`Solar return this year: ${sr.ascendant} rising${sr.sunHouse ? `, Sun in return house ${sr.sunHouse}` : ''}, return Moon in ${sr.moonSign} (Western)`);
+  return f;
 }
 
 function westernFacts(c: NatalChart): string[] {
@@ -54,6 +70,7 @@ export function factSheet(kind: Kind, me: NatalChart, place: Place, other?: { ch
       ...m.lunar.map((l) => `${l.date}: ${l.kind} in ${l.sign}${l.house ? `, natal house ${l.house}` : ''}${l.eclipse ? ', eclipse season' : ''} (Western)`),
       ...m.stations.map((s) => `${s.date}: ${s.body} turns ${s.turns} in ${s.sign} (Western)`),
       ...dashaCalendar(me, new Date(), 12).slice(0, 12).map((d) => `${d.start} to ${d.end}: ${d.lord} ${d.level} within ${d.within} (Vedic)`),
+      ...progressionFacts(me, place),
     ];
   } else if (kind === 'together' && other) {
     const s = synastry(me, other.chart, placidusCusps(other.chart.utc, other.place.lat, other.place.lon), placidusCusps(me.utc, place.lat, place.lon));

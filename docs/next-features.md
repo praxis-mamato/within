@@ -185,7 +185,7 @@ People's entries live **on their phone**, and copies go to **their own cloud acc
 
 ## Subscriber depth
 
-Specified in [`readings-engine.md`](readings-engine.md) Part 2: a deeper rule-based library (deep natal report, Navamsa and Dashamsa, aspect patterns, house rulers, monthly and yearly timing with exact dates, full synastry and composite) and an optional AI-written layer grounded in the calculated chart, pending a decision.
+Specified in [`readings-engine.md`](readings-engine.md) Part 2: a deeper rule-based library (deep natal report, Navamsa and Dashamsa, aspect patterns, house rulers, monthly and yearly timing with exact dates, full synastry and composite) plus progressions, solar arcs, a year-ahead transit calendar, the solar return, and free placement tables. Built. The optional AI layer (Claude Sonnet 5.5, opt-in, 30 a month) is built and deployed; it goes live once `ANTHROPIC_API_KEY` is added to Supabase secrets.
 
 ---
 

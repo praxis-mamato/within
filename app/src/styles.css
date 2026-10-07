@@ -465,3 +465,12 @@ details > summary { cursor: pointer; margin: 8px 0; }
 .samples blockquote p { margin: 4px 0 0; }
 .samples mark { background: var(--mark); color: inherit; border-radius: 3px; padding: 0 2px; }
 .review-top .wordmark { font-size: 1.125rem; }
+
+/* Chart placement tables */
+.table-wrap { overflow-x: auto; margin: 12px 0; border: 1px solid var(--line); border-radius: 12px; }
+.table-wrap:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+.chart-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; font-variant-numeric: tabular-nums; }
+.chart-table caption { text-align: left; font-weight: 600; color: var(--ink-display); padding: 10px 12px 6px; }
+.chart-table th, .chart-table td { text-align: left; padding: 7px 12px; border-top: 1px solid var(--line); white-space: nowrap; }
+.chart-table thead th { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--ink-muted); font-weight: 600; background: var(--surface-2); }
+.chart-table tbody th { font-weight: 600; color: var(--ink-display); }

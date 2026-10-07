@@ -7,6 +7,7 @@ import { aspectPatterns, allAspects, dashaCalendar, dominantPlanet, drishti, hou
 import { fmtDeg, type NatalChart } from '../astro/natal';
 import type { ReadingItem, ReadingSection } from './fullReading';
 import * as D from './deep';
+import { progressionSections } from './chartReading';
 import * as V from './vedic';
 import * as W from './western';
 
@@ -182,6 +183,7 @@ export function timingReading(c: NatalChart, place: Place, now = new Date()): Re
       title: 'Planets changing direction',
       items: m.stations.map((s) => ({ heading: `${fmtDate(s.date)}: ${s.body} turns ${s.turns} in ${s.sign}`, text: `${cap(D.STATION_TEXT[s.body][s.turns])}.`, basis: 'Station (apparent change of direction)' })),
     });
+  out.push(...progressionSections(c, place, now));
   const cal = dashaCalendar(c, now, 24);
   out.push({
     id: 't-dasha',

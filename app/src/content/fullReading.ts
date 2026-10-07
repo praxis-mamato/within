@@ -20,6 +20,8 @@ export interface ReadingSection {
   title: string;
   intro?: string;
   items: ReadingItem[];
+  /** Reference tables (placements, cusps, aspects), shown before the items. */
+  tables?: { caption: string; columns: string[]; rows: string[][] }[];
 }
 
 const PERSONAL = ['Sun', 'Moon', 'Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn'];
