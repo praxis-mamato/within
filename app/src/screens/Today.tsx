@@ -4,10 +4,17 @@ import { REFLECTIONS } from '../data/fixtures';
 import { HorizonSun } from '../components/Illustrations';
 import { PurposeCard, SafetyPanel } from '../components/ui';
 import { useStore } from '../state';
+import { useMemo } from 'react';
+import { useCharts } from '../astro/useCharts';
+import { cycles } from '../content/cycles';
+import { CycleCard } from './Patterns';
 
 /** Today: current intention, one reflection, one next step, and a clear finish (PRD §4). */
 export default function Today() {
   const { state, dispatch } = useStore();
+  const { me } = useCharts();
+  const today = new Date().toISOString().slice(0, 10);
+  const nowCycle = useMemo(() => (me ? cycles(me, state.birth.lat, state.birth.lon).now[0] : undefined), [me, state.birth.lat, state.birth.lon]);
   const r = REFLECTIONS.self;
   const action = [...state.actions].reverse().find((a) => a.reflectionId === r.id);
   // Check-ins are for earlier steps; today's own step isn't due yet. (Prototype: no real clock.)
@@ -44,6 +51,21 @@ export default function Today() {
             How did it go?
           </Link>
         </div>
+      )}
+
+      {nowCycle && (
+        <section aria-labelledby="now-cycle-h">
+          <h2 id="now-cycle-h">What you’re moving through</h2>
+          <CycleCard x={nowCycle} today={today} compact />
+          <div className="btn-row">
+            <Link className="btn quiet" to="/you/cycles">
+              All your cycles
+            </Link>
+            <Link className="btn quiet" to="/you/patterns">
+              Your patterns
+            </Link>
+          </div>
+        </section>
       )}
 
       <Link className="card soft list-link" to="/you/reading" style={{ textDecoration: 'none' }}>

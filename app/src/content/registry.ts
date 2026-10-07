@@ -11,6 +11,8 @@ import * as V from './vedic';
 import * as P from './topics';
 import * as D from './deep';
 import * as PR from './progressions';
+import * as PAT from './patterns';
+import * as CY from './cycles';
 import committed from './approvals.json';
 import { lint } from './lint';
 
@@ -88,6 +90,14 @@ const SOURCES: [section: string, module: string, Record<string, unknown>, [name:
     ['SLOW_TRANSIT', 'Slow transits'],
     ['SR_ASCENDANT', 'Solar return rising'],
     ['SR_SUN_HOUSE', 'Solar return Sun by house'],
+  ]],
+  ['Patterns and cycles', 'patterns', { ...PAT, ...CY } as Record<string, unknown>, [
+    ['PATTERNS', 'Patterns'],
+    ['CYCLE_TITLE', 'Cycle names'],
+    ['CYCLE_FEEL', 'How a cycle may feel'],
+    ['CYCLE_HELP', 'What helps in a cycle'],
+    ['TOUCHES', 'What a cycle touches'],
+    ['RETURNS', 'Jupiter and Saturn returns'],
   ]],
   ['Questions and steps', 'topics', P as Record<string, unknown>, [
     ['TOPICS', 'Topics: questions, answers, steps'],

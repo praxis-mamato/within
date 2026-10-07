@@ -27,7 +27,7 @@ export const EVENTS = {
   step_chosen: { pillar: ['self', 'other', 'relationship', 'purpose', 'onboarding'], choice: ['step', 'pause', 'none'] },
   follow_up_done: { attempt: ['attempted', 'not_attempted', 'paused'], usefulness: ['helpful', 'neutral', 'unhelpful', 'skipped'] },
   feedback_given: { kind: ['does_not_fit', 'unclear', 'harmful'], lens: ['western', 'vedic', 'together'] },
-  reading_opened: { tradition: ['western', 'vedic', 'timing', 'together'] },
+  reading_opened: { tradition: ['western', 'vedic', 'timing', 'together', 'patterns', 'cycles'] },
   paywall_shown: { where: ['reflection', 'reading', 'relationship', 'check_ins', 'account'] },
   checkout_started: { plan: ['monthly', 'yearly'] },
   today_finished: {},

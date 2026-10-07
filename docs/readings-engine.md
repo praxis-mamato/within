@@ -182,6 +182,13 @@ All new text is in the review console (`#/review`) for approval and passes the c
 2. In Supabase, go to **Edge Functions → Secrets** and add `ANTHROPIC_API_KEY`. Optionally add `AI_MONTHLY_LIMIT` (default 30).
 3. Live mode (`VITE_LIVE=true` or `?live=1`) and an active subscription are required; demo mode shows a sample result without calling the API.
 
+### Patterns and Cycles (October 2026)
+
+Two plain-language screens sit in front of the full reading, inspired by what makes The Pattern compelling (no jargon, synthesis instead of one paragraph per placement, timing as named periods with dates) and going further (the astrology behind every claim is one tap away, both traditions, reflection questions, nothing leaves the device).
+
+- **Patterns** (`app/src/content/patterns.ts`, rules in `patternRules.ts`): 27 themes such as "You guard your feelings until it feels safe" or "You need room to be yourself, even in closeness". Each pattern is scored from weighted chart evidence (aspects weighted by orb, signs, houses, house emphasis, element balance, aspect figures, Vedic yogas). A chart shows its 6 to 12 strongest. Each has a summary, how it shows up, the gift, the edge, what helps, three things you might notice, a question, and the evidence list. Free: the two strongest.
+- **Cycles** (`app/src/content/cycles.ts`): Jupiter-to-Pluto transits as named periods ("A season of rebuilding", "Breaking free", "Your Saturn return") with start, peak dates, end, phase (coming up, beginning, building, at its peak, integrating), intensity, how it may feel, what it touches, and what helps; plus the progressed Moon's current chapter and the current Vedic dasha period. Free: the strongest current cycle, also shown on Today.
+
 ### How a reading is made on the fly
 
 1. **Calculate (on the phone, under 0.2 s).** Birth date, time, and place become a UTC instant (historical time zones included). Astronomy Engine gives planet positions; Within's own code adds Placidus houses, Lahiri ayanamsa, nakshatras, dashas, divisional charts, aspects, progressions, solar arcs, transits for the next year, and the solar return.

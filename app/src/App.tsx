@@ -6,7 +6,7 @@ import { LogoMark } from './components/Illustrations';
 import Onboarding from './screens/Onboarding';
 import Today from './screens/Today';
 import Reflection from './screens/Reflection';
-import { MilestoneDetail, MilestoneForm, RelationshipHome, RelationshipsList, YouChart, YouReading, YouSpace } from './screens/Relationships';
+import { MilestoneDetail, MilestoneForm, RelationshipHome, RelationshipsList, YouChart, YouCycles, YouPatterns, YouReading, YouSpace } from './screens/Relationships';
 import Growth, { FollowUp } from './screens/Growth';
 import Settings from './screens/Settings';
 import AccountScreen from './screens/Account';
@@ -98,6 +98,8 @@ function Shell() {
               <Route path="/relationships" element={<RelationshipsList />} />
               <Route path="/you/chart" element={<YouChart />} />
               <Route path="/you/reading" element={<YouReading />} />
+              <Route path="/you/patterns" element={<YouPatterns />} />
+              <Route path="/you/cycles" element={<YouCycles />} />
               <Route path="/you/:pillar" element={<YouSpace />} />
               <Route path="/relationship/:pillar" element={<RelationshipHome />} />
               <Route path="/milestone/new" element={<MilestoneForm />} />

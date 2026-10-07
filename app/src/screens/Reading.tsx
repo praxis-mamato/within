@@ -86,7 +86,7 @@ function ReadingBlock({ s, tab }: { s: ReadingSection; tab: string }) {
       </h2>
       {s.intro && <p className="small muted">{s.intro}</p>}
       {s.tables?.map((t) => (
-        <div className="table-wrap" key={t.caption} tabIndex={0} role="region" aria-label={t.caption}>
+        <div className="chart-table-wrap" key={t.caption} tabIndex={0} role="region" aria-label={t.caption}>
           <table className="chart-table">
             <caption>{t.caption}</caption>
             <thead>

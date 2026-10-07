@@ -1,3 +1,4 @@
+import { Cycles, Patterns } from './Patterns';
 import { useState } from 'react';
 import { Link, NavLink, useNavigate, useParams } from 'react-router-dom';
 import { MILESTONE_INTERPRETATION, MILESTONE_TYPES, REFLECTIONS, type Milestone, type MilestoneType, type Pillar } from '../data/fixtures';
@@ -156,9 +157,11 @@ export function YouSpace() {
 
 function YouNav() {
   return (
-    <nav className="segmented" aria-label="You" style={{ gridTemplateColumns: 'repeat(4, 1fr)' }}>
+    <nav className="segmented you-nav" aria-label="You">
       <NavLink to="/you/self">Self</NavLink>
       <NavLink to="/you/purpose">Purpose</NavLink>
+      <NavLink to="/you/patterns">Patterns</NavLink>
+      <NavLink to="/you/cycles">Cycles</NavLink>
       <NavLink to="/you/reading">Reading</NavLink>
       <NavLink to="/you/chart">Chart</NavLink>
     </nav>
@@ -171,6 +174,26 @@ export function YouReading() {
       <Back to="/relationships" label="Relationships" />
       <YouNav />
       <Reading />
+    </>
+  );
+}
+
+export function YouPatterns() {
+  return (
+    <>
+      <Back to="/relationships" label="Relationships" />
+      <YouNav />
+      <Patterns />
+    </>
+  );
+}
+
+export function YouCycles() {
+  return (
+    <>
+      <Back to="/relationships" label="Relationships" />
+      <YouNav />
+      <Cycles />
     </>
   );
 }
