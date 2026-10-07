@@ -36,13 +36,13 @@ export interface Reflection {
 export const METHOD = {
   western: {
     name: 'Western',
-    version: 'western.tropical.placidus.prototype-v1',
+    version: 'western.tropical.placidus.v1',
     summary:
       'Uses the tropical zodiac, tied to the seasons, with Placidus houses. Placements are calculated live in your browser. The conventions are provisional until the approver signs them off.',
   },
   vedic: {
     name: 'Vedic',
-    version: 'vedic.sidereal.lahiri.prototype-v1',
+    version: 'vedic.sidereal.lahiri.v1',
     summary:
       'Uses the sidereal zodiac, tied to the fixed stars, with the Lahiri ayanamsa, whole-sign houses from the lagna, and Vimshottari dashas. Placements are calculated live in your browser. The conventions are provisional until the approver signs them off.',
   },

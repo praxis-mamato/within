@@ -227,7 +227,7 @@ export default function Onboarding() {
           <Heading ref={heading}>Your first reflection</Heading>
           <p className="sub muted">{r.subheading}</p>
           <p className="small muted" style={{ textAlign: 'center' }}>
-            Placements are calculated from your details. The interpretation text is still a draft.
+            Placements are calculated from your details.
           </p>
           {visibleLenses(state.lensOrder).map((t) => (
             <PerspectiveCard key={t} p={r.perspectives[t]} reflectionId="onboarding" facts={chart ? factsFor('self', t, chart, null) : null} composed={composed?.[t]} />

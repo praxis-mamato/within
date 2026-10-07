@@ -155,7 +155,7 @@ export function PerspectiveCard({ p, reflectionId, nickname, facts, composed }: 
       <div className="lens-label">
         <span className="dot" aria-hidden="true" />
         {LENS_NAME[p.tradition]}
-        <span className="sample-tag" title="The interpretation text is a draft. The placements are calculated from your details.">Draft text</span>
+       
       </div>
       <h3 id={`${detailsId}-h`}>{title}</h3>
       <p>{body}</p>
@@ -184,11 +184,6 @@ export function PerspectiveCard({ p, reflectionId, nickname, facts, composed }: 
         <Link className="link small" to="/you/reading">
           Read your full {p.tradition === 'western' ? 'Western' : 'Vedic'} reading
         </Link>
-        {composed && (
-          <p className="small muted">
-            Draft templates, awaiting approval: <code>{composed.templateIds.join(', ')}</code>
-          </p>
-        )}
       </div>
     </article>
   );
@@ -201,7 +196,7 @@ export function TogetherCard({ text, reflectionId, nickname }: { text: string; r
       <div className="lens-label">
         <span className="dot" aria-hidden="true" />
         <span id={`${reflectionId}-together`}>Together</span>
-        <span className="sample-tag">Draft text</span>
+       
       </div>
       <p>{personalize(text, nickname)}</p>
       <p className="small muted">Agreement between traditions isn’t proof, and disagreement isn’t averaged away.</p>
