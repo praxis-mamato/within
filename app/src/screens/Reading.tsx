@@ -1,4 +1,5 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { track } from '../services/telemetry';
 import { useCharts } from '../astro/useCharts';
 import { READING_VERSION, vedicReading, westernReading, type ReadingSection } from '../content/fullReading';
 import { timingReading, togetherReading, vedicDeep, westernDeep } from '../content/deepReading';
@@ -35,6 +36,7 @@ export default function Reading({ initial = 'western' }: { initial?: Tab }) {
     return [];
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [me, other, tab, state.birth.date, state.birth.lat, state.birth.lon, theirBirth]);
+  useEffect(() => track('reading_opened', { tradition: tab }), [tab]);
 
   if (!me) return <p className="banner">These birth details can’t be calculated. Check the date, place, and time zone in Settings.</p>;
 
@@ -62,14 +64,14 @@ export default function Reading({ initial = 'western' }: { initial?: Tab }) {
       {sections.slice(0, free).map((s) => (
         <ReadingBlock key={s.id} s={s} tab={tab} />
       ))}
-      <Paywall what={free ? `The rest of your ${tab === 'western' ? 'Western' : 'Vedic'} reading` : tab === 'timing' ? 'Your timing' : 'Reading the two of you together'}>
+      <Paywall where="reading" what={free ? `The rest of your ${tab === 'western' ? 'Western' : 'Vedic'} reading` : tab === 'timing' ? 'Your timing' : 'Reading the two of you together'}>
         {sections.slice(free).map((s) => (
           <ReadingBlock key={s.id} s={s} tab={tab} />
         ))}
         <AiDeepDive kind={tab} sections={sections} />
       </Paywall>
       <p className="small muted">
-        Draft interpretations awaiting the approver’s review · <code>{READING_VERSION}</code>
+        Reading version <code>{READING_VERSION}</code>
       </p>
     </>
   );

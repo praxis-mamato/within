@@ -1,4 +1,5 @@
-import { useState, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
+import { track } from '../services/telemetry';
 import { Link } from 'react-router-dom';
 import { accountService, type Plan, type Provider } from '../services/account';
 import { useAccount } from '../services/AccountContext';
@@ -88,11 +89,15 @@ export function VerifyDevice() {
  * section, safety, privacy, export, and delete. Never shows a sales pitch in a session that
  * raised a safety flag (PRD §10).
  */
-export function Paywall({ children, what }: { children: ReactNode; what: string }) {
+export function Paywall({ children, what, where }: { children: ReactNode; what: string; where: 'reflection' | 'reading' | 'relationship' | 'check_ins' | 'account' }) {
   const { entitlement, account, loading } = useAccount();
   const { state } = useStore();
   const [error, setError] = useState('');
   const [plan, setPlan] = useState<Plan>('yearly');
+  const pitch = !entitlement.active && !loading && !state.safety.flagged;
+  useEffect(() => {
+    if (pitch) track('paywall_shown', { where });
+  }, [pitch, where]);
   if (entitlement.active) return <>{children}</>;
   if (loading) return null;
   if (state.safety.flagged) {
@@ -138,6 +143,7 @@ export function Paywall({ children, what }: { children: ReactNode; what: string 
             className="btn"
             onClick={async () => {
               setError('');
+              track('checkout_started', { plan });
               try {
                 await accountService().startCheckout(plan);
               } catch (e) {

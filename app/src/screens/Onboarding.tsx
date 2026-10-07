@@ -1,4 +1,4 @@
-import { forwardRef, useEffect, useMemo, useRef, useState } from 'react';
+import { forwardRef, startTransition, useEffect, useMemo, useRef, useState } from 'react';
 import { BirthFields } from '../components/BirthFields';
 import { computeNatal } from '../astro/natal';
 import { factsFor } from '../astro/facts';
@@ -11,6 +11,9 @@ import { skyNotes } from '../content/fullReading';
 import { SIGN_ELEMENT } from '../content/templates';
 import { ChipGroup, PerspectiveCard, PromptChips, SafetyPanel } from '../components/ui';
 import { Orbit } from '../components/Illustrations';
+import { SharingToggles } from '../components/Sharing';
+import { track } from '../services/telemetry';
+import { load as loadInterview, markStep, update as updateInterview, visibleLenses } from '../interview/session';
 import { SAMPLE_BIRTH, useStore, type Birth } from '../state';
 
 const STEPS = 8;
@@ -58,6 +61,10 @@ export default function Onboarding() {
 
   // Move focus to each new step's heading so screen-reader users hear where they are.
   useEffect(() => heading.current?.focus(), [step]);
+  useEffect(() => {
+    track('onboarding_step', { step });
+    markStep(step);
+  }, [step]);
 
   const next = () => {
     if (step === 2) {
@@ -66,7 +73,9 @@ export default function Onboarding() {
     }
     setStep(step + 1);
   };
-  const finish = () => {
+  // One transition for the state change and the navigation (the router's updates are transitions),
+  // so the signed-in routes never render at the old address and redirect away from the check.
+  const finish = () => startTransition(() => {
     dispatch({
       type: 'onboarding/finish',
       birth,
@@ -86,8 +95,13 @@ export default function Onboarding() {
       });
     }
     if (remind) dispatch({ type: 'notifications/set', on: true });
-    nav('/today');
-  };
+    track('onboarding_finished', { self_only: !(mode === 'other' && nickname.trim()), time_precision: birth.timePrecision, reminder: !!remind });
+    if (choice) track('step_chosen', { pillar: 'onboarding', choice: choice === 'pause' || choice === 'none' ? choice : 'step' });
+    if (loadInterview()) {
+      updateInterview((s) => ({ ...s, finishedAt: Date.now(), choice: choice === 'pause' || choice === 'none' ? choice : choice ? 'step' : null }));
+      nav('/interview/check');
+    } else nav('/today');
+  });
 
 
   return (
@@ -114,10 +128,10 @@ export default function Onboarding() {
           <p className="sub">About you, the sky right now, the people around you, or a relationship. Choose any that fit.</p>
           <ChipGroup label="Topics" multi options={FOCUS_OPTIONS} value={focus} onChange={setFocus} />
           <label htmlFor="focus-text">
-            What’s happening? <span className="hint">Tap one below or write your own. You can edit it.</span>
+            What’s happening? <span className="hint">Tap any that fit, or write your own. You can edit it.</span>
           </label>
           {SITUATION_GROUPS.map((g) => (
-            <PromptChips key={g.label} label={g.label} options={Object.keys(g.items)} value={focusText} onChange={setFocusText} mode="replace" limit={4} />
+            <PromptChips key={g.label} label={g.label} options={Object.keys(g.items)} value={focusText} onChange={setFocusText} limit={4} />
           ))}
           <textarea id="focus-text" value={focusText} onChange={(e) => setFocusText(e.target.value)} placeholder="In your own words" />
           <div className="btn-row">
@@ -151,6 +165,10 @@ export default function Onboarding() {
             <p>You choose your purpose and your next step, including choosing to pause. Your entries are private.</p>
             <p className="small muted">Within isn’t therapy, medical, or legal advice, and isn’t an emergency service.</p>
           </div>
+          <details className="card soft">
+            <summary>Help improve Within (optional, off unless you turn it on)</summary>
+            <SharingToggles />
+          </details>
           <div className="btn-row">
             <button className="btn" type="button" onClick={next}>
               I understand
@@ -209,9 +227,9 @@ export default function Onboarding() {
           <Heading ref={heading}>Your first reflection</Heading>
           <p className="sub muted">{r.subheading}</p>
           <p className="small muted" style={{ textAlign: 'center' }}>
-            Placements are calculated from your details. The interpretation text is still a draft.
+            Placements are calculated from your details.
           </p>
-          {state.lensOrder.map((t) => (
+          {visibleLenses(state.lensOrder).map((t) => (
             <PerspectiveCard key={t} p={r.perspectives[t]} reflectionId="onboarding" facts={chart ? factsFor('self', t, chart, null) : null} composed={composed?.[t]} />
           ))}
           <div className="btn-row">

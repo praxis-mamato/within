@@ -4,6 +4,8 @@ import { METHOD } from '../data/fixtures';
 import { Back, ConfirmButton, SafetyPanel } from '../components/ui';
 import { BirthFields } from '../components/BirthFields';
 import { useStore, type Birth } from '../state';
+import { SharingLog, SharingToggles } from '../components/Sharing';
+import { forgetInstall } from '../services/telemetry';
 
 export default function Settings() {
   const { state, dispatch } = useStore();
@@ -13,7 +15,7 @@ export default function Settings() {
 
   const [exportOpen, setExportOpen] = useState(false);
   const [copied, setCopied] = useState('');
-  const exportJson = JSON.stringify({ exportedAt: new Date().toISOString(), note: 'Prototype sample data', data: state }, null, 2);
+  const exportJson = JSON.stringify({ exportedAt: new Date().toISOString(), note: 'Within data export', data: state }, null, 2);
   const copyExport = async () => {
     try {
       await navigator.clipboard.writeText(exportJson);
@@ -125,11 +127,19 @@ export default function Settings() {
             question="Erase your birth details, journal, milestones, and reflections from this device? Your account and subscription aren’t affected. This can’t be undone."
             confirmLabel="Erase this device"
             onConfirm={() => {
+              forgetInstall();
               dispatch({ type: 'reset' });
               nav('/');
             }}
           />
         </div>
+      </section>
+
+      <section aria-labelledby="sh-h">
+        <h2 id="sh-h">Help improve Within</h2>
+        <p className="small">Optional, and off unless you turn it on.</p>
+        <SharingToggles />
+        <SharingLog />
       </section>
 
       <section aria-labelledby="sr-h">
@@ -139,7 +149,7 @@ export default function Settings() {
       </section>
 
       <hr />
-      <p className="small muted">Prototype 0.3 · charts calculated on this device · entries saved encrypted on this device only.</p>
+      <p className="small muted">Version 0.3 · charts calculated on this device · entries saved encrypted on this device only.</p>
       <p className="small muted">
         Place data © GeoNames (CC BY 4.0). Planet positions: Astronomy Engine (MIT).
       </p>

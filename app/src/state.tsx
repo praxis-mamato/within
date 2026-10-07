@@ -5,6 +5,7 @@ import { createContext, useContext, useEffect, useMemo, useReducer, useRef, useS
 import { deviceVault } from './storage/vault';
 import { SAMPLE_MILESTONES, type Milestone, type Tradition } from './data/fixtures';
 import { screen, type ScreenResult } from './lib/screener';
+import { setConsent, type Consent } from './services/telemetry';
 
 export type TimePrecision = 'exact' | 'approximate' | 'unknown';
 export type Choice = 'step' | 'pause' | 'none';
@@ -83,6 +84,10 @@ export interface State {
   /** Set when birth details change after reflections exist (PRD §8). */
   stale: boolean;
   notifications: boolean;
+  /** Opt-in usage counts and crash reports. Both off until the person turns them on. */
+  sharing: Consent;
+  /** Where safety resources are shown for: a country code, 'other', or null to guess from the device. */
+  country: string | null;
   todayDone: boolean;
   /** Opt-in for AI deep readings (sends calculated placements only). */
   aiConsent: boolean;
@@ -121,6 +126,8 @@ export function initialState(): State {
     lensOrder: Math.random() < 0.5 ? ['western', 'vedic'] : ['vedic', 'western'],
     stale: false,
     notifications: false,
+    sharing: { usage: false, crashes: false },
+    country: null,
     todayDone: false,
     aiConsent: false,
     aiReadings: {},
@@ -147,6 +154,8 @@ export type Event =
   | { type: 'feedback/add'; feedback: Omit<Feedback, 'id'> }
   | { type: 'text/screen'; text: string }
   | { type: 'notifications/set'; on: boolean }
+  | { type: 'sharing/set'; sharing: Consent }
+  | { type: 'country/set'; country: string | null }
   | { type: 'today/finish' }
   | { type: 'ai/consent'; on: boolean }
   | { type: 'ai/save'; key: string; reading: State['aiReadings'][string] }
@@ -212,6 +221,10 @@ export function reducer(s: State, e: Event): State {
       return withScreen(s, e.text);
     case 'notifications/set':
       return { ...s, notifications: e.on };
+    case 'sharing/set':
+      return { ...s, sharing: e.sharing };
+    case 'country/set':
+      return { ...s, country: e.country };
     case 'today/finish':
       return { ...s, todayDone: true };
     case 'ai/consent':
@@ -259,6 +272,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }, 300);
     return () => clearTimeout(t);
   }, [state, ready]);
+
+  // Set during render (idempotent) so children's effects already see the current choice.
+  setConsent(state.sharing);
 
   const value = useMemo(() => ({ state, dispatch }), [state]);
   return ready ? <Ctx.Provider value={value}>{children}</Ctx.Provider> : null;

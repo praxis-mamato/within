@@ -1,7 +1,8 @@
-import { useEffect, useRef } from 'react';
-import { HashRouter, Link, MemoryRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom';
+import { lazy, Suspense, useEffect, useRef } from 'react';
+import { HashRouter, Link, MemoryRouter, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { StoreProvider, useStore } from './state';
 import { TabBar } from './components/ui';
+import { LogoMark } from './components/Illustrations';
 import Onboarding from './screens/Onboarding';
 import Today from './screens/Today';
 import Reflection from './screens/Reflection';
@@ -10,6 +11,29 @@ import Growth, { FollowUp } from './screens/Growth';
 import Settings from './screens/Settings';
 import AccountScreen from './screens/Account';
 import { AccountProvider } from './services/AccountContext';
+import { ErrorBoundary } from './components/ErrorBoundary';
+import { track } from './services/telemetry';
+import Interview, { ComprehensionCheck, InterviewBar } from './screens/Interview';
+import { interviewRequested, load as loadInterview } from './interview/session';
+
+// The template review console is for the approver only: not linked anywhere, loaded on demand.
+const ReviewConsole = lazy(() => import('./screens/Review'));
+
+function Routed() {
+  return (
+    <Routes>
+      <Route
+        path="/review/*"
+        element={
+          <Suspense fallback={<p className="review">Loading…</p>}>
+            <ReviewConsole />
+          </Suspense>
+        }
+      />
+      <Route path="*" element={<Shell />} />
+    </Routes>
+  );
+}
 
 function Shell() {
   const { state } = useStore();
@@ -22,14 +46,30 @@ function Shell() {
     main.current?.focus();
   }, [loc.pathname]);
 
+  // ?interview in the address opens the facilitator setup (Stage 1 interviews).
+  const nav = useNavigate();
+  useEffect(() => {
+    if (interviewRequested() && !loadInterview()) nav('/interview');
+  }, [nav]);
+
+  // Counted once per launch, only with the person's consent (lets the pilot measure returns).
+  const opened = useRef(false);
+  useEffect(() => {
+    if (opened.current || !state.sharing.usage) return;
+    opened.current = true;
+    track('app_opened');
+  }, [state.sharing.usage]);
+
   return (
     <div className="app">
       <a className="skip" href="#main" onClick={(e) => (e.preventDefault(), main.current?.focus())}>
         Skip to content
       </a>
-      <div className="proto-banner">Prototype · draft interpretations · your entries stay on this device</div>
+      <div className="proto-banner">Your entries stay on this device</div>
+      <InterviewBar />
       <header className="topbar">
         <Link className="wordmark" to={state.onboarded ? '/today' : '/'}>
+          <LogoMark />
           WITHIN
         </Link>
         {state.onboarded && (
@@ -42,10 +82,13 @@ function Shell() {
         )}
       </header>
       <main id="main" ref={main} tabIndex={-1}>
+        <ErrorBoundary resetKey={loc.pathname}>
         <Routes>
           {!state.onboarded ? (
             <>
               <Route path="/" element={<Onboarding />} />
+              <Route path="/interview" element={<Interview />} />
+              <Route path="/interview/check" element={<ComprehensionCheck />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </>
           ) : (
@@ -64,10 +107,13 @@ function Shell() {
               <Route path="/follow-up/:id" element={<FollowUp />} />
               <Route path="/settings" element={<Settings />} />
               <Route path="/account" element={<AccountScreen />} />
+              <Route path="/interview" element={<Interview />} />
+              <Route path="/interview/check" element={<ComprehensionCheck />} />
               <Route path="*" element={<Navigate to="/today" replace />} />
             </>
           )}
         </Routes>
+        </ErrorBoundary>
       </main>
       {state.onboarded && <TabBar />}
     </div>
@@ -82,11 +128,11 @@ export default function App() {
           for the single-file artifact build, whose host frame doesn't pass hash state through. */}
       {import.meta.env.MODE === 'artifact' ? (
         <MemoryRouter>
-          <Shell />
+          <Routed />
         </MemoryRouter>
       ) : (
         <HashRouter>
-          <Shell />
+          <Routed />
         </HashRouter>
       )}
       </AccountProvider>

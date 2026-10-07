@@ -43,6 +43,7 @@ export interface AccountService {
 // ─── Device trust (the email link as a second factor on each new device) ──────────────────
 const TRUST = 'within.trusted.';
 const PENDING = 'within.pendingStepUp';
+const APPLE = 'within.appleToken.';
 const ls = {
   get: (k: string) => {
     try {
@@ -80,7 +81,7 @@ export function authMethods(accessToken: string): string[] {
 // ─── Live ──────────────────────────────────────────────────────────────────────────────────
 function live(): AccountService {
   const sb = supabase()!;
-  const toAccount = (session: { access_token: string; user: { id: string; email?: string; app_metadata: { provider?: string } } } | null): Account | null => {
+  const toAccount = (session: { access_token: string; provider_token?: string | null; provider_refresh_token?: string | null; user: { id: string; email?: string; app_metadata: { provider?: string } } } | null): Account | null => {
     if (!session) return null;
     const { user } = session;
     const methods = authMethods(session.access_token);
@@ -88,6 +89,11 @@ function live(): AccountService {
     if (ls.get(PENDING) === user.id && methods.some((m) => m === 'otp' || m === 'magiclink')) {
       ls.set(TRUST + user.id, new Date().toISOString());
       ls.del(PENDING);
+    }
+    // Apple's tokens arrive only once, right after sign-in. Keep one on this device so deleting
+    // the account can revoke it (App Store 5.1.1(v)); it's never sent anywhere else.
+    if (user.app_metadata.provider === 'apple' && (session.provider_refresh_token || session.provider_token)) {
+      ls.set(APPLE + user.id, JSON.stringify(session.provider_refresh_token ? { t: session.provider_refresh_token, k: 'refresh_token' } : { t: session.provider_token, k: 'access_token' }));
     }
     const p = user.app_metadata.provider;
     return { id: user.id, email: user.email ?? '', provider: p === 'google' || p === 'apple' ? p : 'email', deviceVerified: Boolean(ls.get(TRUST + user.id)) };
@@ -110,8 +116,12 @@ function live(): AccountService {
     },
     signOut: async () => void (await sb.auth.signOut()),
     deleteAccount: async () => {
-      const { error } = await sb.functions.invoke('delete-account', { method: 'POST' });
+      const { data } = await sb.auth.getUser();
+      const key = data.user ? APPLE + data.user.id : '';
+      const apple = key ? (JSON.parse(ls.get(key) ?? 'null') as { t: string; k: string } | null) : null;
+      const { error } = await sb.functions.invoke('delete-account', { method: 'POST', body: apple ? { appleToken: apple.t, appleTokenType: apple.k } : {} });
       if (error) throw error;
+      if (key) ls.del(key);
       await sb.auth.signOut();
     },
     entitlement: async () => {

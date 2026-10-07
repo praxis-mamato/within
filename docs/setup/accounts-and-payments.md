@@ -93,7 +93,8 @@ Requires an Apple Developer Program membership. At https://developer.apple.com/a
    - Return URLs: `https://<ref>.supabase.co/auth/v1/callback`
 3. **Keys → +:** enable Sign in with Apple, linked to the App ID. Download the `.p8` file (only once). Note the **Key ID** and your **Team ID**.
 4. Supabase → Apple provider: Client IDs `com.within.web`. For the secret key, use Supabase's Apple secret generator (linked from the provider panel) with the Team ID, Key ID, Services ID, and `.p8`. **This secret expires every 6 months**; set a reminder.
-5. So the email-link check reaches people who hid their email with Apple: **Services → Sign in with Apple for Email Communication**, register the address Supabase sends from.
+5. **Account deletion revokes Apple's token** (App Store 5.1.1(v)). In Supabase → Edge Functions → Secrets, add `APPLE_TEAM_ID`, `APPLE_KEY_ID`, `APPLE_CLIENT_ID` (`com.within.web` for the website; the iOS app's bundle ID once it exists), and `APPLE_PRIVATE_KEY` (the whole `.p8` file). Without them, deletion still works but the token isn't revoked.
+6. So the email-link check reaches people who hid their email with Apple: **Services → Sign in with Apple for Email Communication**, register the address Supabase sends from.
 
 ## 5. Switch the public site to live test mode
 
@@ -119,9 +120,10 @@ Use Stripe test cards with any future expiry date, any CVC, and any postcode.
 | 10 | Sign in on a second browser | Must pass the email link before subscribing or deleting |
 | 11 | Write something that raises a safety flag in the journal, then open a locked reflection | A calm "part of a subscription" note, **no** subscribe button |
 | 12 | Account → Delete my account | Subscription canceled in Stripe, user gone from Supabase, device erased |
+| 13 | Repeat 12 with an Apple account, then check appleid.apple.com → Sign in with Apple | Within no longer listed; the function returned `appleRevoked: true` |
 
 ## Still to do before real customers
 
 - In-app purchase for the iOS and Android apps (Apple and Google require it for subscriptions sold in-app; RevenueCat plan in `docs/next-features.md` B2).
-- Revoke the Apple token on account deletion (`delete-account` has a TODO; needs the Apple key).
+- Add the Apple secrets in step 4.5 so account deletion revokes Apple's token.
 - Your own SMTP sender, privacy policy, Stripe live mode, and template approval.
