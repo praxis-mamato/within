@@ -84,6 +84,10 @@ export interface State {
   stale: boolean;
   notifications: boolean;
   todayDone: boolean;
+  /** Opt-in for AI deep readings (sends calculated placements only). */
+  aiConsent: boolean;
+  /** AI readings kept on this device, keyed by reading type and chart. */
+  aiReadings: Record<string, { at: string; sections: { title: string; body: string; tradition: string }[]; reflection_question: string }>;
 }
 
 const now = () => new Date().toISOString();
@@ -118,6 +122,8 @@ export function initialState(): State {
     stale: false,
     notifications: false,
     todayDone: false,
+    aiConsent: false,
+    aiReadings: {},
   };
 }
 
@@ -142,6 +148,8 @@ export type Event =
   | { type: 'text/screen'; text: string }
   | { type: 'notifications/set'; on: boolean }
   | { type: 'today/finish' }
+  | { type: 'ai/consent'; on: boolean }
+  | { type: 'ai/save'; key: string; reading: State['aiReadings'][string] }
   | { type: 'reset' }
   | { type: 'hydrate'; state: State };
 
@@ -206,6 +214,10 @@ export function reducer(s: State, e: Event): State {
       return { ...s, notifications: e.on };
     case 'today/finish':
       return { ...s, todayDone: true };
+    case 'ai/consent':
+      return { ...s, aiConsent: e.on, aiReadings: e.on ? s.aiReadings : {} };
+    case 'ai/save':
+      return { ...s, aiReadings: { ...s.aiReadings, [e.key]: e.reading } };
     case 'reset':
       return initialState();
     case 'hydrate':

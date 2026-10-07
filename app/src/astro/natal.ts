@@ -73,6 +73,8 @@ export interface NatalChart {
   };
   vedic: {
     ayanamsa: number;
+    /** Sidereal ascendant longitude at the stated time, when the lagna is certain. */
+    lagnaLongitude: number | null;
     planets: VedicPlacement[];
     lagna: Uncertain<string>;
     moonRashi: Uncertain<string>;
@@ -182,6 +184,7 @@ export function computeNatal(b: BirthInput, now = new Date()): NatalChart {
     },
     vedic: {
       ayanamsa,
+      lagnaLongitude: angles && lagnaRashis.certain ? norm(angles.asc - ayanamsa) : null,
       planets: vedicPlanets,
       lagna: lagnaRashis,
       moonRashi,

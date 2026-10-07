@@ -302,3 +302,6 @@ details > summary { cursor: pointer; margin: 8px 0; }
 .plan.on { border-color: var(--accent); background: var(--accent-soft); }
 .plan input { width: 20px; height: 20px; accent-color: var(--accent); margin-top: 2px; flex: none; }
 .paywall a, .card a:not(.btn):not(.list-link) { color: var(--ink-display); text-underline-offset: 3px; }
+.ai-card { border-top: 4px solid #7a6aa8; }
+.ai-card .lens-label .dot { background: #7a6aa8; border-radius: 50%; }
+.ai-card h3 { font-size: 1.125rem; margin: 8px 0 6px; }

@@ -82,6 +82,17 @@ export default function Settings() {
         <p className="small muted">Reminders say only “You have a reflection waiting.” No names or relationship details.</p>
       </section>
 
+      <section aria-labelledby="ai-set-h">
+        <h2 id="ai-set-h">AI readings</h2>
+        <label className="toggle">
+          Write deeper readings with AI (subscribers)
+          <input type="checkbox" checked={state.aiConsent} onChange={(e) => dispatch({ type: 'ai/consent', on: e.target.checked })} />
+        </label>
+        <p className="small muted">
+          When on, Within sends your calculated placements (never your name, birth details, journal, or notes) to Claude to write connected readings. Turning it off also deletes saved AI readings from this device.
+        </p>
+      </section>
+
       <section aria-labelledby="p-h">
         <h2 id="p-h">Privacy</h2>
         <ul className="small">
