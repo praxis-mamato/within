@@ -22,6 +22,8 @@ describe('prompts and topics', () => {
     expect(topicFor('My ex keeps texting me', [])).toBe('breakup');
     expect(topicFor('', ['Boundaries'])).toBe('boundaries');
     expect(topicFor('hmm', [])).toBe('general');
+    expect(topicFor('I feel stuck. We keep having the same argument.', [])).toBe('stuck');
+    expect(topicFor('We keep having the same argument. I feel stuck.', [])).toBe('conflict');
   });
 });
 
