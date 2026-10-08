@@ -537,3 +537,9 @@ details > summary { cursor: pointer; margin: 8px 0; }
 .upcoming li.for-you { border-color: var(--accent); }
 .upcoming-date { font-size: 0.8125rem; color: var(--ink-muted); }
 .upcoming-what strong { color: var(--ink-display); margin-right: 6px; }
+
+/* The fuller answer to a sky or feeling question */
+.answer-card .reading-items { margin-top: 12px; }
+.answer-points { margin: 6px 0 0; padding-left: 1.1em; display: grid; gap: 6px; }
+.answer-points li { line-height: 1.5; }
+.answer-care { margin-top: 14px; }

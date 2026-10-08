@@ -4,6 +4,9 @@ import { visibleLenses } from '../interview/session';
 import { composeReflection } from '../content/compose';
 import { OUTCOME_STEPS, planFor, SITUATIONS } from '../content/topics';
 import { skyNotes } from '../content/fullReading';
+import { answerFor } from '../content/answer';
+import { AnswerCard } from '../components/AnswerCard';
+import { screen } from '../lib/screener';
 import { SIGN_ELEMENT } from '../content/templates';
 import { PILLAR_ANSWERS } from '../data/prompts';
 import { Link, useParams } from 'react-router-dom';
@@ -44,6 +47,11 @@ export default function Reflection() {
     () => planFor(situation, state.focus, state.outcome, moonSign ? SIGN_ELEMENT[moonSign] : null, me ? skyNotes(me) : []),
     [situation, state.focus, state.outcome, moonSign, me],
   );
+  // A question about the sky or a feeling gets a fuller answer from the chart (never after a safety match).
+  const qAnswer = useMemo(
+    () => (pillar === 'self' && me && !screen(situation).flagged ? answerFor([situation, ...state.focus].join(' '), plan.topic, me, state.birth, new Date(), state.profile) : null),
+    [pillar, me, situation, state.focus, plan.topic, state.birth, state.profile],
+  );
   const question = pillar === 'self' ? plan.question : (composed?.question ?? personalize(r.question, nickname));
   const answerIdeas = pillar === 'self' ? plan.answers : PILLAR_ANSWERS[r.pillar];
   const allSteps =
@@ -75,6 +83,7 @@ export default function Reflection() {
   const lenses = visibleLenses(state.lensOrder);
   const reflectionBody = (
     <>
+      {qAnswer && <AnswerCard answer={qAnswer} />}
       <section aria-labelledby="persp-h">
         <h2 id="persp-h">{lenses.length > 1 ? 'Two perspectives' : 'A perspective'}</h2>
         <p className="small muted">
