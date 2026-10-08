@@ -80,6 +80,12 @@ export function authMethods(accessToken: string): string[] {
   }
 }
 
+/** The function's own message (not set up, already subscribed, …) is in the response body. */
+async function serverMessage(error: unknown, fallback: string): Promise<string> {
+  const body = await (error as { context?: Response }).context?.json?.().catch(() => null);
+  return typeof body?.error === 'string' ? body.error : fallback;
+}
+
 // ─── Live ──────────────────────────────────────────────────────────────────────────────────
 function live(): AccountService {
   const sb = supabase()!;
@@ -141,20 +147,19 @@ function live(): AccountService {
     },
     startCheckout: async (plan) => {
       const { data, error } = await sb.functions.invoke('create-checkout', { body: { plan, returnUrl: siteUrl() } });
-      if (error || !data?.url) throw error ?? new Error('Checkout could not start.');
+      if (error) throw new Error(await serverMessage(error, 'Checkout couldn’t start. Try again.'));
+      if (!data?.url) throw new Error('Checkout couldn’t start. Try again.');
       location.assign(data.url);
     },
     manageSubscription: async () => {
       const { data, error } = await sb.functions.invoke('billing-portal', { body: { returnUrl: siteUrl() } });
-      if (error || !data?.url) throw error ?? new Error('Could not open subscription settings.');
+      if (error) throw new Error(await serverMessage(error, 'Couldn’t open subscription settings.'));
+      if (!data?.url) throw new Error('Couldn’t open subscription settings.');
       location.assign(data.url);
     },
     redeemCode: async (code) => {
       const { data, error } = await sb.functions.invoke('redeem-code', { body: { code } });
-      if (error) {
-        const body = await (error as { context?: Response }).context?.json?.().catch(() => null);
-        throw new Error(body?.error ?? 'The code couldn’t be checked right now. Try again.');
-      }
+      if (error) throw new Error(await serverMessage(error, 'The code couldn’t be checked right now. Try again.'));
       return (data?.message as string) ?? 'Tester access is on.';
     },
   };
