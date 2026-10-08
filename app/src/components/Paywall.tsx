@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useState, type FormEvent, type ReactNode } from 'react';
 import { track } from '../services/telemetry';
 import { Link } from 'react-router-dom';
 import { accountService, type Plan, type Provider } from '../services/account';
@@ -158,6 +158,7 @@ export function Paywall({ children, what, where }: { children: ReactNode; what: 
           {error && <p role="alert" className="small">{error}</p>}
         </div>
       )}
+      {account && <RedeemCode />}
       <p className="small muted" style={{ marginTop: 12 }}>
         Safety resources, privacy controls, export, and delete are always free. <Link to="/account">Account</Link>
       </p>
@@ -172,5 +173,42 @@ export function ModeBanner() {
     <p className="demo-note" role="note">
       Demo mode: sign-in and payment are simulated on this device. No real account or charge.
     </p>
+  );
+}
+
+/** Tester access: a code gives full access without payment. */
+export function RedeemCode() {
+  const { refresh } = useAccount();
+  const [code, setCode] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
+  const submit = async (e: FormEvent) => {
+    e.preventDefault();
+    setBusy(true);
+    setMsg(null);
+    try {
+      setMsg({ ok: true, text: await accountService().redeemCode(code) });
+      await refresh();
+    } catch (err) {
+      setMsg({ ok: false, text: err instanceof Error ? err.message : 'That code isn’t valid.' });
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <form className="redeem" onSubmit={submit}>
+      <label htmlFor="tester-code">
+        Have a tester code? <span className="hint">Full access without payment</span>
+      </label>
+      <input id="tester-code" value={code} onChange={(e) => setCode(e.target.value)} autoComplete="off" autoCapitalize="characters" spellCheck={false} placeholder="WITHIN-XXXX-XXXX-XXXX" />
+      <button type="submit" className="btn quiet" disabled={busy || code.trim().length < 8}>
+        {busy ? 'Checking…' : 'Use code'}
+      </button>
+      {msg && (
+        <p role={msg.ok ? 'status' : 'alert'} className="small">
+          {msg.text}
+        </p>
+      )}
+    </form>
   );
 }

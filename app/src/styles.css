@@ -537,3 +537,7 @@ details > summary { cursor: pointer; margin: 8px 0; }
 .upcoming li.for-you { border-color: var(--accent); }
 .upcoming-date { font-size: 0.8125rem; color: var(--ink-muted); }
 .upcoming-what strong { color: var(--ink-display); margin-right: 6px; }
+
+/* Tester code inside the paywall */
+.redeem { border-top: 1px solid var(--line); margin-top: 14px; padding-top: 10px; }
+.redeem label { font-weight: 600; }

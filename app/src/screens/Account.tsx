@@ -77,10 +77,7 @@ export default function AccountScreen() {
             )}
           </div>
         ) : (
-          <>
-            <Paywall where="account" what="Everything beyond your first reflection">{null}</Paywall>
-            {account && <RedeemCode onDone={refresh} />}
-          </>
+          <Paywall where="account" what="Everything beyond your first reflection">{null}</Paywall>
         )}
       </section>
 
@@ -115,40 +112,5 @@ export default function AccountScreen() {
       )}
       <p className="small muted">We store only your sign-in and subscription status. Your entries stay on your device.</p>
     </>
-  );
-}
-
-function RedeemCode({ onDone }: { onDone: () => Promise<void> }) {
-  const [code, setCode] = useState('');
-  const [busy, setBusy] = useState(false);
-  const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
-  const submit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setBusy(true);
-    setMsg(null);
-    try {
-      setMsg({ ok: true, text: await accountService().redeemCode(code) });
-      await onDone();
-    } catch (err) {
-      setMsg({ ok: false, text: err instanceof Error ? err.message : 'That code isn’t valid.' });
-    } finally {
-      setBusy(false);
-    }
-  };
-  return (
-    <form className="card soft" onSubmit={submit}>
-      <label htmlFor="tester-code">
-        Have a tester code? <span className="hint">Full access without payment</span>
-      </label>
-      <input id="tester-code" value={code} onChange={(e) => setCode(e.target.value)} autoComplete="off" autoCapitalize="characters" spellCheck={false} placeholder="WITHIN-XXXX-XXXX-XXXX" />
-      <button type="submit" className="btn quiet" disabled={busy || code.trim().length < 8}>
-        {busy ? 'Checking…' : 'Use code'}
-      </button>
-      {msg && (
-        <p role={msg.ok ? 'status' : 'alert'} className="small">
-          {msg.text}
-        </p>
-      )}
-    </form>
   );
 }
