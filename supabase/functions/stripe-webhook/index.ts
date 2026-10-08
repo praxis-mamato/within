@@ -1,7 +1,7 @@
 // Receives Stripe events and keeps public.entitlements in step with each subscription.
 import Stripe from 'npm:stripe@17';
 import { admin } from '../_shared/clients.ts';
-import { stripe, stripeConfigured } from '../_shared/stripe.ts';
+import { priceYearly, stripe, stripeConfigured, webhookSecret } from '../_shared/stripe.ts';
 import { toEntitlement, type StripeSubscriptionLike } from '../_shared/entitlement.ts';
 
 const crypto = Stripe.createSubtleCryptoProvider();
@@ -14,7 +14,7 @@ async function record(sub: Stripe.Subscription) {
     userId = data?.user_id;
   }
   if (!userId) throw new Error(`No user for customer ${customer}`);
-  const row = toEntitlement(sub as unknown as StripeSubscriptionLike, userId, Deno.env.get('STRIPE_PRICE_YEARLY'));
+  const row = toEntitlement(sub as unknown as StripeSubscriptionLike, userId, priceYearly);
   const { error } = await admin.from('entitlements').upsert(row);
   if (error) throw error;
 }
@@ -25,7 +25,7 @@ Deno.serve(async (req) => {
   const body = await req.text();
   let event: Stripe.Event;
   try {
-    event = await stripe.webhooks.constructEventAsync(body, signature ?? '', Deno.env.get('STRIPE_WEBHOOK_SECRET') ?? '', undefined, crypto);
+    event = await stripe.webhooks.constructEventAsync(body, signature ?? '', webhookSecret ?? '', undefined, crypto);
   } catch {
     return new Response('Invalid signature', { status: 400 });
   }

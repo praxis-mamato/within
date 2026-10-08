@@ -1,6 +1,6 @@
 // Starts a Stripe Checkout session for the signed-in user ($9.99/month or $100/year).
 import { admin, callingUser, cors, json, SITE_URLS } from '../_shared/clients.ts';
-import { stripe, stripeConfigured } from '../_shared/stripe.ts';
+import { priceMonthly, priceYearly, stripe, stripeConfigured } from '../_shared/stripe.ts';
 import { safeReturnUrl } from '../_shared/entitlement.ts';
 
 Deno.serve(async (req) => {
@@ -10,7 +10,7 @@ Deno.serve(async (req) => {
   if (!stripeConfigured) return json({ error: 'Payments aren’t set up yet.' }, 503);
 
   const { plan, returnUrl } = await req.json().catch(() => ({}));
-  const price = plan === 'yearly' ? Deno.env.get('STRIPE_PRICE_YEARLY') : Deno.env.get('STRIPE_PRICE_MONTHLY');
+  const price = plan === 'yearly' ? priceYearly : priceMonthly;
   if (!price) return json({ error: 'This plan isn’t set up yet.' }, 500);
   const back = safeReturnUrl(returnUrl, SITE_URLS);
 
