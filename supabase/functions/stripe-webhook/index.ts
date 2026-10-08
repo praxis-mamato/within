@@ -6,17 +6,23 @@ import { toEntitlement, type StripeSubscriptionLike } from '../_shared/entitleme
 
 const crypto = Stripe.createSubtleCryptoProvider();
 
+/** Event order isn't guaranteed and events can be resent, so read the customer's current state from Stripe. */
 async function record(sub: Stripe.Subscription) {
-  let userId = sub.metadata?.user_id;
   const customer = typeof sub.customer === 'string' ? sub.customer : sub.customer.id;
+  let userId = sub.metadata?.user_id;
   if (!userId) {
     const { data } = await admin.from('entitlements').select('user_id').eq('stripe_customer_id', customer).maybeSingle();
     userId = data?.user_id;
   }
   if (!userId) throw new Error(`No user for customer ${customer}`);
-  const row = toEntitlement(sub as unknown as StripeSubscriptionLike, userId, priceYearly);
+  // Prefer a subscription that grants access; otherwise the most recent one.
+  const all = (await stripe.subscriptions.list({ customer, status: 'all', limit: 20 })).data;
+  const rank = (s: Stripe.Subscription) => (['active', 'trialing'].includes(s.status) ? 2 : ['past_due', 'unpaid'].includes(s.status) ? 1 : 0);
+  const best = [...all].sort((a, b) => rank(b) - rank(a) || b.created - a.created)[0] ?? sub;
+  const row = toEntitlement(best as unknown as StripeSubscriptionLike, userId, priceYearly);
   const { error } = await admin.from('entitlements').upsert(row);
   if (error) throw error;
+  console.log('entitlement', JSON.stringify({ subscription: best.id, status: best.status, considered: all.length }));
 }
 
 Deno.serve(async (req) => {
