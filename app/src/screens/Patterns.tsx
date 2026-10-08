@@ -312,7 +312,7 @@ export function CycleCard({ x, today, compact = false }: { x: Cycle; today: stri
     <article className={`card cycle ${x.tradition === 'Vedic' ? 'vedic' : 'western'}`} aria-labelledby={`cy-${x.id}`}>
       <div className="cycle-top">
         <span className={`status-tag phase-${x.phase.replace(/\s/g, '-').toLowerCase()}`}>{x.phase}</span>
-        <span className="cycle-intensity" aria-label={`Intensity ${x.intensity} of 3`} title={`Intensity ${x.intensity} of 3`}>
+        <span className="cycle-intensity" role="img" aria-label={`Intensity ${x.intensity} of 3`} title={`Intensity ${x.intensity} of 3`}>
           {[1, 2, 3].map((i) => (
             <span key={i} className={i <= x.intensity ? 'on' : ''} aria-hidden="true" />
           ))}
