@@ -8,6 +8,9 @@ import { FOCUS_OPTIONS, REFLECTIONS } from '../data/fixtures';
 import { OUTCOMES, PURPOSES } from '../data/prompts';
 import { planFor, SITUATION_GROUPS } from '../content/topics';
 import { skyNotes } from '../content/fullReading';
+import { answerFor } from '../content/answer';
+import { AnswerCard } from '../components/AnswerCard';
+import { screen } from '../lib/screener';
 import { SIGN_ELEMENT } from '../content/templates';
 import { ChipGroup, PerspectiveCard, PromptChips, SafetyPanel } from '../components/ui';
 import { Orbit } from '../components/Illustrations';
@@ -60,6 +63,11 @@ export default function Onboarding() {
     () => planFor(focusText, focus, outcome[0] ?? '', moonSign ? SIGN_ELEMENT[moonSign] : null, chart ? skyNotes(chart) : []),
     [focusText, focus, outcome, moonSign, chart],
   );
+  // A question about the sky or a feeling gets a fuller answer from the chart (never after a safety match).
+  const qAnswer = useMemo(() => {
+    const text = [focusText, ...focus].join(' ');
+    return chart && !screen(text).flagged ? answerFor(text, plan.topic, chart, birth, new Date(), state.profile) : null;
+  }, [chart, focusText, focus, plan.topic, birth, state.profile]);
   const stepOptions = plan.steps.filter((x) => !(state.safety.suppressContactActions && x.involvesOther));
 
   // Move focus to each new step's heading so screen-reader users hear where they are.
@@ -237,6 +245,7 @@ export default function Onboarding() {
           {visibleLenses(state.lensOrder).map((t) => (
             <PerspectiveCard key={t} p={r.perspectives[t]} reflectionId="onboarding" facts={chart ? factsFor('self', t, chart, null) : null} composed={composed?.[t]} />
           ))}
+          {qAnswer && <AnswerCard answer={qAnswer} />}
           <div className="btn-row">
             <button className="btn" type="button" onClick={next}>
               Continue

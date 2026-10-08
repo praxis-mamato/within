@@ -14,6 +14,7 @@ import * as PR from './progressions';
 import * as PAT from './patterns';
 import * as CY from './cycles';
 import * as MI from './mirror';
+import * as AN from './answer';
 import committed from './approvals.json';
 import { lint } from './lint';
 
@@ -104,6 +105,16 @@ const SOURCES: [section: string, module: string, Record<string, unknown>, [name:
     ['PATTERN_AREAS', 'Patterns by life area'],
     ['MOVER_TARGET', 'Slow planets by natal point'],
     ['MOVER_AREA', 'Slow planets by life area'],
+  ]],
+  ['Answers to sky and feeling questions', 'answer', AN as Record<string, unknown>, [
+    ['MOON_TODAY_HOUSE', 'Today’s Moon by natal house'],
+    ['MOON_TO_MOON', 'Today’s Moon and the birth Moon'],
+    ['MOON_SIGN_WORRY', 'How each Moon sign carries worry'],
+    ['NATAL_MOON_ASPECT', 'Birth Moon contacts'],
+    ['FAST_CONTACT', 'Fast planets this week'],
+    ['SATURN_FROM_MOON', 'Vedic Saturn from the Moon'],
+    ['ELEMENT_CALM', 'What helps, by Moon element'],
+    ['ANSWER_TEXT', 'Answer framing and care note'],
   ]],
   ['Questions and steps', 'topics', P as Record<string, unknown>, [
     ['TOPICS', 'Topics: questions, answers, steps'],
