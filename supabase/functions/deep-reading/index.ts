@@ -39,7 +39,9 @@ Deno.serve(async (req) => {
   } catch (e) {
     if (e instanceof Anthropic.RateLimitError) return json({ error: 'Too many requests right now. Try again in a minute.' }, 429);
     if (e instanceof Anthropic.APIError) {
-      console.error('anthropic error', e.status);
+      console.error('anthropic error', e.status, e.message);
+      // The account needs API credits before the first reading can be written.
+      if (e.status === 400 && /credit balance/i.test(e.message)) return json({ error: 'AI readings aren’t switched on yet. Please try again later.' }, 503);
       return json({ error: 'The reading couldn’t be written right now. Try again later.' }, 502);
     }
     throw e;
