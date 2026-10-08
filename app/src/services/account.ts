@@ -105,7 +105,8 @@ function live(): AccountService {
     current: async () => toAccount((await sb.auth.getSession()).data.session),
     onChange: (cb) => sb.auth.onAuthStateChange((_e, s) => cb(toAccount(s))).data.subscription.unsubscribe,
     signIn: async (provider) => {
-      const { error } = await sb.auth.signInWithOAuth({ provider, options: { redirectTo: siteUrl() } });
+      // Always show Google's account chooser, so people with several accounts can pick the right one.
+      const { error } = await sb.auth.signInWithOAuth({ provider, options: { redirectTo: siteUrl(), queryParams: provider === 'google' ? { prompt: 'select_account' } : undefined } });
       if (error) throw error;
     },
     sendEmailLink: async () => {
