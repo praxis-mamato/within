@@ -9,7 +9,8 @@ import { findPatterns } from './patternRules';
 import { cycles } from './cycles';
 import { PATTERN_AREAS } from './mirror';
 import { timingReading, togetherReading, vedicDeep, westernDeep } from './deepReading';
-import { OUTCOME_STEPS, planFor, SITUATIONS } from './topics';
+import { OUTCOME_STEPS, planFor, SITUATIONS, topicFor } from './topics';
+import { answerFor, answerText } from './answer';
 import type { Element } from './templates';
 import type { Fragment } from './registry';
 
@@ -88,6 +89,10 @@ export function buildCorpus(now = new Date('2026-10-06T12:00:00Z')): Passage[] {
     const cy = cycles(c, births[i].lat, births[i].lon, now);
     for (const x of cy.now) out.push({ source: `${who} · Cycles · ${x.title}`, text: `${x.title}. Touching ${x.touches}. ${x.feel} ${x.contacts.map((ct) => ct.line).join(' ')} What helps: ${x.helps}` });
     for (const x of cy.next) out.push({ source: `${who} · Cycles · coming up`, text: x.line });
+    for (const q of ['What’s happening in the sky right now, and how might it affect me?', 'Why do I feel anxious right now?', 'I feel stressed and low.']) {
+      const a = answerFor(q, topicFor(q, []), c, place, now);
+      if (a) out.push({ source: `${who} · Your question · “${q}”`, text: answerText(a) });
+    }
     out.push(...sectionPassages(`${who} · Together`, togetherReading(c, place, charts[j], { lat: births[j].lat, lon: births[j].lon }, 'Alex')));
   });
   const elements: Element[] = ['fire', 'earth', 'air', 'water'];

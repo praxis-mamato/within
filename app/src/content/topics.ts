@@ -20,6 +20,7 @@ export type Topic =
   | 'self'
   | 'stuck'
   | 'restless'
+  | 'feelings'
   | 'sky'
   | 'others'
   | 'work'
@@ -119,6 +120,12 @@ export const TOPICS: Record<Topic, TopicContent> = {
     step: 'Write down when it started, then read “The sky now, for you” and notice whether any theme resonates.',
     stepInvolvesOther: false,
   },
+  feelings: {
+    question: 'When did you first notice this feeling, and what was going on around then?',
+    answers: ['It started with something specific.', 'It builds up toward evening.', 'It comes in waves.', 'It’s been there for a while.', 'I don’t know yet.'],
+    step: 'Write down when the feeling is strongest this week, then compare it with the dates in “Why you may be feeling this”.',
+    stepInvolvesOther: false,
+  },
   sky: {
     question: 'Which part of what’s happening in the sky feels most alive for you right now?',
     answers: ['Something about my current period or dasha.', 'The planets crossing my chart.', 'Retrograde planets.', 'The Moon’s mood today.', 'None of it fits right now.'],
@@ -159,6 +166,7 @@ export const SITUATION_GROUPS: { label: string; items: Record<string, Topic> }[]
       'I want to understand myself better.': 'self',
       'I feel stuck.': 'stuck',
       'I feel unsettled and don’t know why.': 'restless',
+      'I feel anxious and want to understand why.': 'feelings',
       'I have a big decision to make.': 'decision',
       'Work feels out of step with who I am.': 'work',
       'I’m going through a big change.': 'transition',
@@ -171,6 +179,7 @@ export const SITUATION_GROUPS: { label: string; items: Record<string, Topic> }[]
     items: {
       'What’s happening in the sky right now, and how might it affect me?': 'sky',
       'Is this a challenging period for me astrologically?': 'sky',
+      'Why do I feel anxious right now?': 'feelings',
       'What does my current dasha or transit mean for me?': 'sky',
       'How might the current sky be affecting the people around me?': 'others',
     },
@@ -216,6 +225,7 @@ const FOCUS_TOPIC: Record<string, Topic> = {
 
 /** Keywords for free text that doesn't match a ready-made situation. First match wins. */
 const KEYWORDS: [RegExp, Topic][] = [
+  [/\banxi|\bnervous|\bon edge\b|\bpanic|\bworr(y|ied|ying)\b|\bstress|\boverwhelm|\bsad\b|\bfeel(ing)? (low|down|heavy)\b|\bdepress|\bexhausted\b|\bdrained\b/i, 'feelings'],
   [/\b(sky|planets?|retrograde|transits?|dasha|eclipse|full moon|new moon|stars|astrolog|saturn|mercury|jupiter)\b/i, 'sky'],
   [/\b(family|friends?|mother|mom|father|dad|parents?|kids|children|son|daughter|cowork|colleague|boss|sister|brother)\b/i, 'others'],
   [/\bstuck\b|\bin a rut\b/i, 'stuck'],
