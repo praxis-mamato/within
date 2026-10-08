@@ -1,6 +1,7 @@
 // Deletes the signed-in person's account: cancels any Stripe subscription immediately,
 // then deletes the user (their entitlements row goes with it). Required in-app by App Store 5.1.1(v).
-import { admin, callingUser, cors, json, stripe } from '../_shared/clients.ts';
+import { admin, callingUser, cors, json } from '../_shared/clients.ts';
+import { stripe, stripeConfigured } from '../_shared/stripe.ts';
 import { revokeAppleToken } from '../_shared/apple.ts';
 
 Deno.serve(async (req) => {
@@ -9,7 +10,7 @@ Deno.serve(async (req) => {
   if (!user) return json({ error: 'Sign in first.' }, 401);
 
   const { data } = await admin.from('entitlements').select('stripe_customer_id').eq('user_id', user.id).maybeSingle();
-  if (data?.stripe_customer_id) {
+  if (data?.stripe_customer_id && stripeConfigured) {
     const subs = await stripe.subscriptions.list({ customer: data.stripe_customer_id, status: 'all' });
     for (const s of subs.data) if (!['canceled', 'incomplete_expired'].includes(s.status)) await stripe.subscriptions.cancel(s.id);
     await stripe.customers.del(data.stripe_customer_id);

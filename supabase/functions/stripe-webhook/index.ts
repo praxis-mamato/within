@@ -1,6 +1,7 @@
 // Receives Stripe events and keeps public.entitlements in step with each subscription.
 import Stripe from 'npm:stripe@17';
-import { admin, stripe } from '../_shared/clients.ts';
+import { admin } from '../_shared/clients.ts';
+import { stripe, stripeConfigured } from '../_shared/stripe.ts';
 import { toEntitlement, type StripeSubscriptionLike } from '../_shared/entitlement.ts';
 
 const crypto = Stripe.createSubtleCryptoProvider();
@@ -19,6 +20,7 @@ async function record(sub: Stripe.Subscription) {
 }
 
 Deno.serve(async (req) => {
+  if (!stripeConfigured) return new Response('Payments aren’t set up yet.', { status: 503 });
   const signature = req.headers.get('Stripe-Signature');
   const body = await req.text();
   let event: Stripe.Event;

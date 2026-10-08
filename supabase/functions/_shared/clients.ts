@@ -1,7 +1,4 @@
-import Stripe from 'npm:stripe@17';
 import { createClient, type SupabaseClient } from 'npm:@supabase/supabase-js@2';
-
-export const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') ?? '', { httpClient: Stripe.createFetchHttpClient() });
 
 /** Server-side client with full access. Never sent to the browser. */
 export const admin: SupabaseClient = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!, {
