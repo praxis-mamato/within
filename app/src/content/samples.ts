@@ -7,6 +7,7 @@ import { composeReflection } from './compose';
 import { vedicReading, westernReading, type ReadingSection } from './fullReading';
 import { findPatterns } from './patternRules';
 import { cycles } from './cycles';
+import { PATTERN_AREAS } from './mirror';
 import { timingReading, togetherReading, vedicDeep, westernDeep } from './deepReading';
 import { OUTCOME_STEPS, planFor, SITUATIONS } from './topics';
 import type { Element } from './templates';
@@ -79,9 +80,14 @@ export function buildCorpus(now = new Date('2026-10-06T12:00:00Z')): Passage[] {
     out.push(...sectionPassages(`${who} · Vedic deep reading`, vedicDeep(c)));
     out.push(...sectionPassages(`${who} · Timing`, timingReading(c, place, now)));
     for (const pt of findPatterns(c, births[i].lat, births[i].lon))
-      out.push({ source: `${who} · Patterns · ${pt.title}`, text: [pt.title, pt.summary, pt.shows, pt.gift, pt.edge, pt.helps, ...pt.notice, pt.question].join(' ') });
+      out.push({ source: `${who} · Patterns · ${pt.title}`, text: [pt.title, pt.summary, pt.shows, pt.gift, pt.edge, pt.helps, ...pt.notice, pt.question, ...Object.values(PATTERN_AREAS[pt.id] ?? {})].join(' ') });
+    for (const area of ['love', 'work', 'family', 'health', 'money', 'creativity', 'friends', 'purpose'] as const) {
+      const cyp = cycles(c, births[i].lat, births[i].lon, now, { season: 'Building', onMind: [area], recharge: '' });
+      for (const x of cyp.now) if (x.forYou.length) out.push({ source: `${who} · Cycles · ${x.title} · ${area}`, text: x.forYou.join(' ') });
+    }
     const cy = cycles(c, births[i].lat, births[i].lon, now);
-    for (const x of [...cy.now, ...cy.next]) out.push({ source: `${who} · Cycles · ${x.title}`, text: `${x.title}. Touching ${x.touches}. ${x.feel} What helps: ${x.helps}` });
+    for (const x of cy.now) out.push({ source: `${who} · Cycles · ${x.title}`, text: `${x.title}. Touching ${x.touches}. ${x.feel} ${x.contacts.map((ct) => ct.line).join(' ')} What helps: ${x.helps}` });
+    for (const x of cy.next) out.push({ source: `${who} · Cycles · coming up`, text: x.line });
     out.push(...sectionPassages(`${who} · Together`, togetherReading(c, place, charts[j], { lat: births[j].lat, lon: births[j].lon }, 'Alex')));
   });
   const elements: Element[] = ['fire', 'earth', 'air', 'water'];

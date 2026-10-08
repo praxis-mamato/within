@@ -5,10 +5,13 @@
 import { signals, type AspectKind, type Signals } from '../astro/signals';
 import type { NatalChart } from '../astro/natal';
 import { PATTERNS, type PatternText } from './patterns';
+import * as W from './western';
 
 export interface Evidence {
   weight: number;
   text: string;
+  /** What this placement means, in plain words. */
+  why: string;
 }
 export interface FoundPattern extends PatternText {
   id: string;
@@ -23,25 +26,56 @@ const ord = (n: number) => `${n}${['th', 'st', 'nd', 'rd'][n % 10 > 3 || Math.fl
 
 type Rule = (s: Signals) => (Evidence | null)[];
 
+const FN: Record<string, string> = { ...W.PLANET_FUNCTION, Ascendant: 'how you meet the world', Midheaven: 'your direction and public life' };
+const KIND: Record<AspectKind, string> = {
+  conjunction: 'are fused, so one rarely acts without the other',
+  opposition: 'pull in opposite directions and ask to be balanced',
+  square: 'are in friction, which pushes you to work things out',
+  trine: 'flow together easily',
+  sextile: 'cooperate when you give them an opening',
+  quincunx: 'need constant small adjustments to get along',
+};
+const ELEMENT_WHY: Record<string, string> = {
+  fire: 'Fire is energy, enthusiasm, and action.',
+  earth: 'Earth is practicality, the body, and building.',
+  air: 'Air is ideas, words, and connection.',
+  water: 'Water is feeling, memory, and empathy.',
+};
+const FIGURE_WHY: Record<string, string> = {
+  'T-square': 'Three planets locked in tension, a classic source of drive.',
+  'Grand cross': 'Four planets in mutual tension, pulling in every direction at once.',
+  'Grand trine': 'Three planets in easy harmony, a classic sign of natural gifts.',
+  Yod: 'An unusual figure that points toward a specific, demanding focus.',
+  Stellium: 'Several planets gathered in one sign.',
+};
+
 // Building blocks. Each returns evidence or null.
 const asp = (a: string, b: string, kinds: AspectKind[], w: number) => (s: Signals): Evidence | null => {
   const x = s.aspect(a, b);
   if (!x || !kinds.includes(x.kind)) return null;
   // Tighter aspects count more: full weight at exact, about half at 8°.
-  return { weight: w * Math.max(0.45, 1 - x.orb / 14), text: `${a} ${x.kind} ${b} (orb ${x.orb.toFixed(1)}°)` };
+  return {
+    weight: w * Math.max(0.45, 1 - x.orb / 14),
+    text: `${a} ${x.kind} ${b} (orb ${x.orb.toFixed(1)}°)`,
+    why: `${FN[a].charAt(0).toUpperCase()}${FN[a].slice(1)} and ${FN[b]} ${KIND[x.kind]}.`,
+  };
 };
 const inSign = (body: string, signs: string[], w: number) => (s: Signals): Evidence | null =>
-  signs.includes(s.sign[body]) ? { weight: w, text: `${body} in ${s.sign[body]}` } : null;
-const rising = (signs: string[], w: number) => (s: Signals): Evidence | null => (s.rising && signs.includes(s.rising) ? { weight: w, text: `${s.rising} rising` } : null);
+  signs.includes(s.sign[body]) ? { weight: w, text: `${body} in ${s.sign[body]}`, why: W.PLANET_IN_SIGN[body]?.[s.sign[body]] ?? `${body} colored by ${W.SIGN_KEYWORD[s.sign[body]]}.` } : null;
+const rising = (signs: string[], w: number) => (s: Signals): Evidence | null => (s.rising && signs.includes(s.rising) ? { weight: w, text: `${s.rising} rising`, why: W.RISING[s.rising] } : null);
 const inHouse = (body: string, houses: number[], w: number) => (s: Signals): Evidence | null =>
-  s.house[body] && houses.includes(s.house[body]!) ? { weight: w, text: `${body} in the ${ord(s.house[body]!)} house` } : null;
+  s.house[body] && houses.includes(s.house[body]!)
+    ? { weight: w, text: `${body} in the ${ord(s.house[body]!)} house`, why: `${FN[body].charAt(0).toUpperCase()}${FN[body].slice(1)} plays out around ${W.HOUSE[s.house[body]!].area}.` }
+    : null;
 const emphasis = (house: number, w: number) => (s: Signals): Evidence | null =>
-  (s.inHouse[house]?.length ?? 0) >= 3 ? { weight: w, text: `${s.inHouse[house].length} planets in the ${ord(house)} house (${s.inHouse[house].join(', ')})` } : null;
+  (s.inHouse[house]?.length ?? 0) >= 3
+    ? { weight: w, text: `${s.inHouse[house].length} planets in the ${ord(house)} house (${s.inHouse[house].join(', ')})`, why: `A lot of your energy gathers around ${W.HOUSE[house].area}.` }
+    : null;
 const element = (el: 'fire' | 'earth' | 'air' | 'water', min: number, w: number) => (s: Signals): Evidence | null =>
-  s.elements[el] >= min ? { weight: w, text: `Strong ${el} emphasis (${s.elements[el]} of the personal planets and rising)` } : null;
-const figure = (name: string, w: number) => (s: Signals): Evidence | null => (s.figures.includes(name) ? { weight: w, text: `${name} in the chart` } : null);
-const yoga = (name: string, w: number) => (s: Signals): Evidence | null => (s.yogas.includes(name) ? { weight: w, text: `${name} yoga (Vedic)` } : null);
-const retro = (body: string, w: number) => (s: Signals): Evidence | null => (s.retro[body] ? { weight: w, text: `${body} retrograde at birth` } : null);
+  s.elements[el] >= min ? { weight: w, text: `Strong ${el} emphasis (${s.elements[el]} of the personal planets and rising)`, why: ELEMENT_WHY[el] } : null;
+const figure = (name: string, w: number) => (s: Signals): Evidence | null => (s.figures.includes(name) ? { weight: w, text: `${name} in the chart`, why: FIGURE_WHY[name] ?? '' } : null);
+const yoga = (name: string, w: number) => (s: Signals): Evidence | null => (s.yogas.includes(name) ? { weight: w, text: `${name} yoga (Vedic)`, why: 'A classical Vedic combination.' } : null);
+const retro = (body: string, w: number) => (s: Signals): Evidence | null => (s.retro[body] ? { weight: w, text: `${body} retrograde at birth`, why: `${FN[body].charAt(0).toUpperCase()}${FN[body].slice(1)} tends to turn inward before it turns outward.` } : null);
 const all = (...fs: ((s: Signals) => Evidence | null)[]): Rule => (s) => fs.map((f) => f(s));
 
 const RULES: Record<keyof typeof PATTERNS, Rule> = {
@@ -62,9 +96,9 @@ const RULES: Record<keyof typeof PATTERNS, Rule> = {
   mirror_of_others: all(emphasis(7, 2.5), inSign('Sun', ['Libra'], 1.5), rising(['Libra'], 1.3), inHouse('Sun', [7], 2), inHouse('Moon', [7], 1.6), asp('Sun', 'Moon', ['opposition'], 1)),
   own_person: all(asp('Sun', 'Uranus', HARD, 2.5), asp('Moon', 'Uranus', ['conjunction'], 1.5), inSign('Sun', ['Aquarius', 'Aries'], 1.2), inHouse('Uranus', [1, 10], 2), emphasis(1, 2), rising(['Aquarius'], 1.4), asp('Uranus', 'Ascendant', ['conjunction'], 2)),
   sponge: all(asp('Sun', 'Neptune', HARD, 2.2), asp('Moon', 'Neptune', HARD, 2.2), inSign('Moon', ['Pisces'], 1.6), inSign('Sun', ['Pisces'], 1.3), rising(['Pisces'], 1.4), element('water', 4, 1.3), asp('Neptune', 'Ascendant', ['conjunction'], 2)),
-  creative_tension: all(figure('T-square', 2.2), figure('Grand cross', 3), (s) => (s.hardCount >= 6 ? { weight: 2, text: `${s.hardCount} hard aspects to personal planets` } : null), figure('Yod', 1.5)),
-  natural_flow: all(figure('Grand trine', 2.8), (s) => (s.softCount >= 7 ? { weight: 1.8, text: `${s.softCount} easy aspects to personal planets` } : null)),
-  head_heart: all(asp('Sun', 'Moon', ['square', 'opposition'], 3), asp('Moon', 'Mercury', ['square', 'opposition'], 1.8), (s) => (s.sign.Sun && s.sign.Moon && elementOf(s.sign.Sun) !== elementOf(s.sign.Moon) && ['fire', 'air'].includes(elementOf(s.sign.Sun)) !== ['fire', 'air'].includes(elementOf(s.sign.Moon)) ? { weight: 1, text: `Sun in ${s.sign.Sun}, Moon in ${s.sign.Moon}: different temperaments` } : null)),
+  creative_tension: all(figure('T-square', 2.2), figure('Grand cross', 3), (s) => (s.hardCount >= 6 ? { weight: 2, text: `${s.hardCount} hard aspects to personal planets`, why: 'Many tense angles between the planets that describe your daily self.' } : null), figure('Yod', 1.5)),
+  natural_flow: all(figure('Grand trine', 2.8), (s) => (s.softCount >= 7 ? { weight: 1.8, text: `${s.softCount} easy aspects to personal planets`, why: 'Many easy angles between the planets that describe your daily self.' } : null)),
+  head_heart: all(asp('Sun', 'Moon', ['square', 'opposition'], 3), asp('Moon', 'Mercury', ['square', 'opposition'], 1.8), (s) => (s.sign.Sun && s.sign.Moon && elementOf(s.sign.Sun) !== elementOf(s.sign.Moon) && ['fire', 'air'].includes(elementOf(s.sign.Sun)) !== ['fire', 'air'].includes(elementOf(s.sign.Moon)) ? { weight: 1, text: `Sun in ${s.sign.Sun}, Moon in ${s.sign.Moon}: different temperaments`, why: 'What drives you and what comforts you speak different languages.' } : null)),
   generous_spirit: all(asp('Venus', 'Jupiter', ANY, 1.8), asp('Moon', 'Jupiter', ANY, 1.6), inHouse('Jupiter', [1, 2, 5], 1.3), inSign('Venus', ['Sagittarius', 'Pisces', 'Leo'], 1), inSign('Jupiter', ['Sagittarius', 'Pisces', 'Cancer'], 1)),
   investigator: all(asp('Mercury', 'Pluto', HARD, 2.8), inSign('Mercury', ['Scorpio'], 1.8), inHouse('Mercury', [8], 2), inSign('Mercury', ['Virgo'], 1)),
   calling: all(emphasis(10, 2.5), inHouse('Sun', [10], 1.8), inHouse('Saturn', [10], 1.3), inHouse('Mars', [10], 1.2), asp('Saturn', 'Midheaven', ['conjunction'], 1.5), inSign('Sun', ['Capricorn'], 1)),

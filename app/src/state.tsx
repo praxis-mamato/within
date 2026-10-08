@@ -2,6 +2,7 @@
  * App state. Saved encrypted on this device only (storage/vault.ts); never sent anywhere.
  */
 import { createContext, useContext, useEffect, useMemo, useReducer, useRef, useState, type ReactNode } from 'react';
+import type { PatternCheck, Profile } from './content/mirror';
 import { deviceVault } from './storage/vault';
 import { SAMPLE_MILESTONES, type Milestone, type Tradition } from './data/fixtures';
 import { screen, type ScreenResult } from './lib/screener';
@@ -93,6 +94,10 @@ export interface State {
   aiConsent: boolean;
   /** AI readings kept on this device, keyed by reading type and chart. */
   aiReadings: Record<string, { at: string; sections: { title: string; body: string; tradition: string }[]; reflection_question: string }>;
+  /** What the person tells Within about themselves, so readings can mirror them. Stays on this device. */
+  profile: Profile | null;
+  /** How each pattern fits, in the person's own judgment. */
+  patternChecks: Record<string, PatternCheck>;
 }
 
 const now = () => new Date().toISOString();
@@ -131,6 +136,8 @@ export function initialState(): State {
     todayDone: false,
     aiConsent: false,
     aiReadings: {},
+    profile: null,
+    patternChecks: {},
   };
 }
 
@@ -160,6 +167,8 @@ export type Event =
   | { type: 'ai/consent'; on: boolean }
   | { type: 'ai/save'; key: string; reading: State['aiReadings'][string] }
   | { type: 'reset' }
+  | { type: 'profile/set'; profile: Profile }
+  | { type: 'pattern/check'; id: string; check: PatternCheck | null }
   | { type: 'hydrate'; state: State };
 
 function addIntention(s: State, value: string, behavior: string): State {
@@ -231,6 +240,14 @@ export function reducer(s: State, e: Event): State {
       return { ...s, aiConsent: e.on, aiReadings: e.on ? s.aiReadings : {} };
     case 'ai/save':
       return { ...s, aiReadings: { ...s.aiReadings, [e.key]: e.reading } };
+    case 'profile/set':
+      return { ...s, profile: e.profile };
+    case 'pattern/check': {
+      const patternChecks = { ...s.patternChecks };
+      if (e.check) patternChecks[e.id] = e.check;
+      else delete patternChecks[e.id];
+      return { ...s, patternChecks };
+    }
     case 'reset':
       return initialState();
     case 'hydrate':

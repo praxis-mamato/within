@@ -22,7 +22,7 @@ export interface PatternText {
 export const PATTERNS: Record<string, PatternText> = {
   guarded_heart: {
     title: 'You guard your feelings until it feels safe',
-    summary: 'You may feel deeply but show it slowly, testing whether people and places can hold what you feel before you let it out.',
+    summary: 'Deep feeling, slow to show. People get your steadiness long before they get your softness, and trust is something they earn by staying.',
     shows: 'You might be the calm one in a crisis and only feel the full weight of it later, alone. People can read you as composed or self-sufficient when inside you are working hard to stay steady. Asking for comfort may feel harder than giving it, and you may wait until you have already handled something before telling anyone it happened.',
     gift: 'You are dependable under pressure. Your feelings tend to be considered rather than reactive, and once you trust someone your loyalty runs deep and lasts.',
     edge: 'Holding everything in can turn into loneliness, or into a sense that you are only acceptable when you are coping. Others may not know you need them, because you rarely let them see it.',
@@ -32,7 +32,7 @@ export const PATTERNS: Record<string, PatternText> = {
   },
   deep_waters: {
     title: 'You feel things intensely, all the way down',
-    summary: 'Your emotional life may run deep and strong. Half-feelings rarely interest you; you want what is real, even when it is uncomfortable.',
+    summary: 'Nothing about your emotional life is lukewarm. Small moments land with real force, and surface-level connection leaves you hungry.',
     shows: 'You might sense undercurrents in a room before anyone names them, and small slights can register with real force. Closeness may feel all-or-nothing: you want to know people fully, and you can feel exposed when you are known. When something ends, you may need a long time to let it go.',
     gift: 'Emotional courage. You can remain with hard feelings that other people avoid, and that makes you a powerful presence when someone is in pain or in change.',
     edge: 'Intensity can tip into rumination, jealousy, or bracing for betrayal. You may test people without meaning to, or keep a part of yourself hidden as protection.',
@@ -42,7 +42,7 @@ export const PATTERNS: Record<string, PatternText> = {
   },
   room_to_breathe: {
     title: 'You need room to be yourself, even in closeness',
-    summary: 'You may love deeply and still need space, freedom, and surprise. Too much sameness can make you restless, even in a good relationship.',
+    summary: 'Closeness matters to you, and so does air. The moment love starts to feel like a cage, part of you starts looking for the door.',
     shows: 'You might be drawn to people who are unusual, independent, or a little out of reach. When things become too predictable or too tight, you can pull back suddenly, and then wonder why. Friendship may matter as much to you as romance, and you may prefer relationships that keep room for each person’s own life.',
     gift: 'You keep relationships alive. You bring curiosity, honesty, and room for growth, and you can love people without needing to own them.',
     edge: 'Mixed signals, when closeness and freedom both feel urgent. Partners may struggle to know whether you are in or out, and you may struggle to know it too.',
@@ -52,7 +52,7 @@ export const PATTERNS: Record<string, PatternText> = {
   },
   idealist_in_love: {
     title: 'You see the best in the people you love',
-    summary: 'You may love with imagination and devotion, seeing who someone could be. That can be beautiful, and it can make the real person hard to see.',
+    summary: 'You fall for who someone could be. That generosity is beautiful, and it can blur the person actually standing in front of you.',
     shows: 'You might fall for potential, or feel a near-spiritual pull toward certain people. Romance, music, and beauty can move you strongly. You may give a great deal and expect little, or overlook signs you would notice in a friend’s relationship.',
     gift: 'Compassion and devotion. You can see the soul in people and help them feel seen. Your love has a generous, forgiving quality.',
     edge: 'Disappointment when someone turns out to be only human, or staying loyal to a picture rather than the person in front of you.',
@@ -62,7 +62,7 @@ export const PATTERNS: Record<string, PatternText> = {
   },
   high_bar: {
     title: 'You hold yourself to a very high standard',
-    summary: 'You may carry a strong inner voice that expects a lot of you. It drives real achievement and can make rest feel unearned.',
+    summary: 'There is an inner voice that keeps a tally, and it is rarely satisfied. It built a lot of what you are proud of. It also makes rest feel like something to earn.',
     shows: 'You might find it easier to see what is missing than what is done. Praise may slide off while criticism stays. You may take on responsibility early and feel you have to prove yourself, at work or at home, before you can relax.',
     gift: 'Integrity, persistence, and quality. You finish what you start, and the things you build tend to last. Many people with this pattern grow into their strength later in life.',
     edge: 'Harshness toward yourself, fear of failing, and putting off joy until everything is in order. You may judge yourself more severely than you would ever judge a friend.',
@@ -72,7 +72,7 @@ export const PATTERNS: Record<string, PatternText> = {
   },
   caretaker: {
     title: 'You take care of everyone, sometimes before yourself',
-    summary: 'You may notice what others need almost by reflex and move to meet it. It is one of your gifts, and it can put your own needs last in line.',
+    summary: 'Before anyone asks, you have already noticed what they need. Your own needs tend to wait at the back of the line.',
     shows: 'You might be the one people call, the one who remembers, the one who smooths things over. You may feel uneasy when someone near you is upset, and calm only once they are. Your own needs can feel less urgent, or harder to name.',
     gift: 'Warmth, attentiveness, and a talent for making people feel at home. You create safety for others.',
     edge: 'Resentment that builds quietly, exhaustion, or relationships where you give far more than you receive.',
@@ -82,7 +82,7 @@ export const PATTERNS: Record<string, PatternText> = {
   },
   restless_mind: {
     title: 'Your mind moves fast and wants new input',
-    summary: 'You may think quickly, connect ideas others miss, and get bored by repetition. Your curiosity is a strength that can scatter your focus.',
+    summary: 'Your mind runs ahead, connects dots, and gets bored by repetition. Variety is fuel; finishing is the harder part.',
     shows: 'You might have several projects, tabs, or conversations going at once. Ideas may arrive in flashes. You can talk your way into understanding something, and you may need variety to stay engaged.',
     gift: 'Inventiveness, wit, and quick learning. You can see links between fields and explain things in fresh ways.',
     edge: 'Nervous energy, difficulty finishing, or overthinking at night. Your mind may race ahead of your body’s need for rest.',
@@ -92,7 +92,7 @@ export const PATTERNS: Record<string, PatternText> = {
   },
   go_getter: {
     title: 'You go after what you want, directly',
-    summary: 'You may have strong drive and a preference for action over waiting. Energy, competition, and challenge can bring out your best.',
+    summary: 'Waiting is not your natural state. Challenge wakes you up, and you would rather move and adjust than plan forever.',
     shows: 'You might act first and plan later, or feel frustrated by slow processes and indirect people. Physical activity may matter to your mood. You can be the one who gets things moving.',
     gift: 'Courage, initiative, and honesty. You can start what others only talk about, and you tend to stand up for people.',
     edge: 'Impatience, flashes of anger, or burning out by pushing too hard. Others may experience your directness as pressure.',
@@ -102,7 +102,7 @@ export const PATTERNS: Record<string, PatternText> = {
   },
   quiet_anger: {
     title: 'Anger is hard for you to show',
-    summary: 'You may feel frustration strongly but find it difficult to express directly. It can come out sideways, or turn inward as tiredness or self-doubt.',
+    summary: 'Frustration builds quietly in you. It rarely arrives as a clean “no”; more often as tiredness, distance, or a resentment you notice later.',
     shows: 'You might keep the peace and only realize later that you were angry. Saying no may feel risky. Your drive can be strong in some areas and stalled in others, as if you need permission to go after what you want.',
     gift: 'Restraint, fairness, and staying power. When you do act, it tends to be considered, and you can work steadily toward long goals.',
     edge: 'Frustration that builds without release, passive resistance, or feeling stuck. Your body may carry tension your words do not.',
@@ -112,7 +112,7 @@ export const PATTERNS: Record<string, PatternText> = {
   },
   meaning_seeker: {
     title: 'You need life to mean something',
-    summary: 'You may be driven by a search for truth, growth, and a bigger picture. Routine without purpose can feel like a cage.',
+    summary: 'A life without a bigger why feels too small for you. Truth, growth, and horizons pull harder than comfort does.',
     shows: 'You might be drawn to travel, study, philosophy, or faith. You can be the optimist in the room, and you may change direction when something stops feeling meaningful.',
     gift: 'Vision, generosity, and faith in what is possible. You can inspire others and help them see further.',
     edge: 'Overpromising, restlessness, or skipping over the practical details that make a dream real.',
@@ -122,7 +122,7 @@ export const PATTERNS: Record<string, PatternText> = {
   },
   to_be_seen: {
     title: 'You need to be seen for who you really are',
-    summary: 'You may have a strong creative core and a wish to express it. Recognition matters to you, not out of vanity, but because being seen helps you feel real.',
+    summary: 'There is a bright, creative core in you that wants an audience. Being overlooked stings in a way you rarely admit.',
     shows: 'You might come alive with an audience, a creative project, or a role where you can lead. Being overlooked can hurt more than you show. You may be very generous with your warmth.',
     gift: 'Warmth, creativity, and the ability to lift a room. You can encourage others to shine too.',
     edge: 'Taking a lack of appreciation personally, or tying your worth to how others respond.',
@@ -132,7 +132,7 @@ export const PATTERNS: Record<string, PatternText> = {
   },
   transformer: {
     title: 'You are drawn to depth and reinvention',
-    summary: 'You may go through several lives in one. Endings and beginnings shape you, and you are not satisfied with surface answers.',
+    summary: 'You have lived several lives in one. Endings tend to remake you, and polite surface answers do not satisfy you.',
     shows: 'You might be fascinated by psychology, mystery, or what people hide. Big turning points may have marked your life. You can sense power dynamics quickly and may resist anyone trying to control you.',
     gift: 'Resilience and the ability to rebuild. You can face what others avoid, and you often help people through their own crises.',
     edge: 'Control, secrecy, or all-or-nothing choices. You may find it hard to trust, or hold on too tightly when you do.',
@@ -142,7 +142,7 @@ export const PATTERNS: Record<string, PatternText> = {
   },
   security_first: {
     title: 'Security and steadiness come first for you',
-    summary: 'You may need a stable base, physically, financially, and emotionally, before you can relax and grow. You build things slowly and well.',
+    summary: 'Ground first, then growth. A stable base (money, home, body) is what lets the rest of you relax and open.',
     shows: 'You might prefer what is proven to what is new. Comfort, good food, nature, and beautiful objects may soothe you. Big changes can unsettle you even when they are good.',
     gift: 'Reliability, patience, and practical sense. You make things that last and you stay when others drift.',
     edge: 'Stubbornness, staying in what is comfortable after it has stopped fitting, or worrying about money even when there is enough.',
@@ -152,7 +152,7 @@ export const PATTERNS: Record<string, PatternText> = {
   },
   slow_trust_love: {
     title: 'Love feels serious to you, and trust takes time',
-    summary: 'You may take relationships seriously and commit carefully. You want love that is real and lasting, and you may protect yourself until you are sure.',
+    summary: 'Love is serious business for you. Commitment comes carefully, and you protect yourself until you are sure it is real.',
     shows: 'You might hold back early in relationships, or feel that love has to be earned. You may be drawn to older or more established partners, or to relationships with clear commitments. Showing affection may come through actions more than words.',
     gift: 'Loyalty, steadiness, and commitment. When you love, you build something that lasts and you show up.',
     edge: 'Fear of rejection, loneliness inside a relationship, or a sense that you are not lovable as you are.',
@@ -162,7 +162,7 @@ export const PATTERNS: Record<string, PatternText> = {
   },
   mirror_of_others: {
     title: 'You discover yourself through other people',
-    summary: 'Relationships may be where you grow most. Partners, close friends, and collaborators can act as mirrors that show you who you are.',
+    summary: 'Other people are your mirror. Partnership is where you learn the most about who you are, sometimes at the cost of what you want.',
     shows: 'You might think best in conversation and feel most alive in partnership. Decisions can be easier with someone to bounce them off. You may adapt to the people around you, sometimes so well that you lose track of your own preferences.',
     gift: 'Diplomacy, fairness, and a talent for partnership. You can see several sides of a situation and help people meet in the middle.',
     edge: 'Losing yourself in others, avoiding conflict, or waiting for someone else to decide.',
@@ -172,7 +172,7 @@ export const PATTERNS: Record<string, PatternText> = {
   },
   own_person: {
     title: 'You march to your own beat',
-    summary: 'You may need to do things your way. Independence and originality are central to you, and you can feel stifled by rules that do not make sense.',
+    summary: 'Rules that make no sense to you do not hold you for long. Independence is less a preference than a need.',
     shows: 'You might question tradition, prefer to learn by experiment, or feel like an outsider in groups. You may change direction suddenly when something stops feeling true.',
     gift: 'Originality and courage. You see options others miss and you give people permission to be different.',
     edge: 'Feeling disconnected, rebelling for its own sake, or pushing people away to protect your freedom.',
@@ -182,7 +182,7 @@ export const PATTERNS: Record<string, PatternText> = {
   },
   sponge: {
     title: 'You absorb the moods around you',
-    summary: 'You may be highly sensitive to atmosphere, people, and places. You feel what others feel, often before they say it.',
+    summary: 'Rooms, moods, and people soak into you. You often feel what others feel before they have said a word.',
     shows: 'You might come home from a crowded day drained without knowing why. Art, music, and nature may move you deeply. Boundaries between your feelings and other people’s can blur.',
     gift: 'Empathy, intuition, and imagination. You can sense what is needed and offer compassion that others feel deeply.',
     edge: 'Overwhelm, escapism, or taking on problems that are not yours to carry.',
@@ -192,7 +192,7 @@ export const PATTERNS: Record<string, PatternText> = {
   },
   creative_tension: {
     title: 'Inner tension pushes you to grow',
-    summary: 'Your chart has strong internal friction, parts of you that pull in different directions. It can feel uncomfortable, and it is also a powerful engine.',
+    summary: 'Parts of your chart pull against each other. It is uncomfortable, and it is also the engine behind much of what you build.',
     shows: 'You might feel that nothing comes easily, or that there is constantly a next problem to solve. You can be driven, restless, and resourceful. Pressure may bring out your best work.',
     gift: 'Resilience and achievement. People with this pattern often build remarkable things because they cannot sit still with what is not working.',
     edge: 'Stress, inner conflict, or difficulty resting even when things are fine.',
@@ -202,7 +202,7 @@ export const PATTERNS: Record<string, PatternText> = {
   },
   natural_flow: {
     title: 'Some things come easily to you',
-    summary: 'Your chart has strong areas of ease and natural talent. Gifts that come easily can be overlooked, by you most of all.',
+    summary: 'Some things come to you with real ease. Gifts that cost you little are the ones you are most likely to underrate.',
     shows: 'You might do things well without much effort, or find that certain doors open readily. You may take your talents for granted and assume everyone can do what you do.',
     gift: 'Natural ability, grace, and a calm that steadies other people.',
     edge: 'Coasting, or avoiding the challenges that would help your gifts grow further.',
@@ -212,7 +212,7 @@ export const PATTERNS: Record<string, PatternText> = {
   },
   head_heart: {
     title: 'What you think and what you feel can pull apart',
-    summary: 'Your conscious goals and your emotional needs may point in different directions. Learning to hear both is a lifelong thread.',
+    summary: 'What you want and what you need often disagree. Much of your growth comes from letting both have a say.',
     shows: 'You might want one thing and need another: freedom and security, ambition and rest. You may decide with your head and then feel uneasy, or follow your feelings and later doubt yourself.',
     gift: 'Complexity and range. You can understand people on both sides of a divide because you hold both sides yourself.',
     edge: 'Indecision or inner conflict, or feeling that no single choice can satisfy all of you.',
@@ -222,7 +222,7 @@ export const PATTERNS: Record<string, PatternText> = {
   },
   generous_spirit: {
     title: 'You are generous, sometimes to a fault',
-    summary: 'You may give warmth, time, and encouragement freely. Your optimism draws people in, and your generosity can stretch thin.',
+    summary: 'Warmth, time, encouragement: you give them freely. Optimism draws people to you, and generosity can stretch you thin.',
     shows: 'You might say yes easily, treat people well, and assume the best. Pleasure, abundance, and good company may matter to you.',
     gift: 'Kindness and faith in people. You make others feel welcome and capable.',
     edge: 'Overcommitting, overspending, or difficulty with limits.',
@@ -232,7 +232,7 @@ export const PATTERNS: Record<string, PatternText> = {
   },
   investigator: {
     title: 'You need to get to the bottom of things',
-    summary: 'You may have a probing, penetrating mind that wants the real answer, not the convenient one.',
+    summary: 'Convenient answers do not satisfy you. Your mind digs until it hits what is actually true.',
     shows: 'You might research deeply, ask the question no one else asks, or notice inconsistencies right away. Secrets and mysteries may interest you. You can be persuasive and hard to fool.',
     gift: 'Insight and focus. You can solve problems others give up on and see through spin.',
     edge: 'Suspicion, obsessive thinking, or using words as weapons when you feel threatened.',
@@ -242,7 +242,7 @@ export const PATTERNS: Record<string, PatternText> = {
   },
   calling: {
     title: 'Your work and purpose are central to who you are',
-    summary: 'Your chart puts strong weight on career, direction, and contribution. You may feel most yourself when you are building something that matters.',
+    summary: 'Work is not only a job for you. Your sense of self is bound up with building something that matters.',
     shows: 'You might measure a good year by what you achieved, or feel lost when work feels meaningless. Reputation and responsibility can matter to you.',
     gift: 'Ambition, leadership, and a sense of mission. You can make real contributions in your field.',
     edge: 'Overwork, or a sense of self that rises and falls with professional success.',
@@ -252,7 +252,7 @@ export const PATTERNS: Record<string, PatternText> = {
   },
   roots: {
     title: 'Home and family shape you deeply',
-    summary: 'Your chart puts strong weight on roots, home, and your private inner world. Where you come from may be a lifelong subject.',
+    summary: 'Home, family, and where you come from run deep in you, and they shape more of your present than they appear to.',
     shows: 'You might need a home that feels like a sanctuary, or carry strong feelings about family, positive, painful, or both. Your inner life may be rich and private.',
     gift: 'Emotional depth, loyalty, and a gift for creating belonging.',
     edge: 'Old family patterns repeating, or withdrawing when the outside world feels harsh.',
@@ -262,7 +262,7 @@ export const PATTERNS: Record<string, PatternText> = {
   },
   inner_world: {
     title: 'You have a rich, private inner world',
-    summary: 'Much of your life may happen inside: dreams, intuition, reflection. You need solitude to recharge, and parts of you are not easy to show.',
+    summary: 'A great deal of your life happens on the inside. Solitude is how you recharge, and some of you is hard to put into words.',
     shows: 'You might feel things you cannot fully explain, have vivid dreams, or need time alone more than others. You can work well behind the scenes.',
     gift: 'Intuition, compassion, and spiritual depth. You understand what people cannot say.',
     edge: 'Hiding, self-doubt, or carrying burdens in silence.',
@@ -272,7 +272,7 @@ export const PATTERNS: Record<string, PatternText> = {
   },
   wise_steady: {
     title: 'You have a steady inner compass',
-    summary: 'The Vedic chart shows Jupiter supporting your Moon (Gaja Kesari yoga), a classic sign of good judgment and resilience.',
+    summary: 'In the Vedic chart, Jupiter supports your Moon (Gaja Kesari yoga): a classic sign of good judgment and the ability to recover your footing.',
     shows: 'You might find your footing again after setbacks, or be the person others come to for perspective. Learning, teaching, and principles may matter to you.',
     gift: 'Wisdom, optimism, and reputation built on good character.',
     edge: 'Being the counselor for everyone and forgetting to ask for counsel yourself.',
@@ -282,7 +282,7 @@ export const PATTERNS: Record<string, PatternText> = {
   },
   self_reliant: {
     title: 'You learned to rely on yourself',
-    summary: 'The Vedic chart shows your Moon without planets beside it (Kemadruma yoga). Tradition reads this as self-reliance, sometimes learned through feeling alone.',
+    summary: 'In the Vedic chart, your Moon stands alone (Kemadruma yoga). Tradition reads this as self-reliance, often learned by having to manage alone.',
     shows: 'You might be very capable on your own and slow to ask for help. You may have had to find your own way early on.',
     gift: 'Independence, inner strength, and the ability to carry yourself through hard times.',
     edge: 'Isolation, or a belief that you have to do everything alone.',

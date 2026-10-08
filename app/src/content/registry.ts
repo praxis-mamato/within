@@ -13,6 +13,7 @@ import * as D from './deep';
 import * as PR from './progressions';
 import * as PAT from './patterns';
 import * as CY from './cycles';
+import * as MI from './mirror';
 import committed from './approvals.json';
 import { lint } from './lint';
 
@@ -98,6 +99,11 @@ const SOURCES: [section: string, module: string, Record<string, unknown>, [name:
     ['CYCLE_HELP', 'What helps in a cycle'],
     ['TOUCHES', 'What a cycle touches'],
     ['RETURNS', 'Jupiter and Saturn returns'],
+  ]],
+  ['The mirror', 'mirror', MI as Record<string, unknown>, [
+    ['PATTERN_AREAS', 'Patterns by life area'],
+    ['MOVER_TARGET', 'Slow planets by natal point'],
+    ['MOVER_AREA', 'Slow planets by life area'],
   ]],
   ['Questions and steps', 'topics', P as Record<string, unknown>, [
     ['TOPICS', 'Topics: questions, answers, steps'],

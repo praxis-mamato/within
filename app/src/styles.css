@@ -514,3 +514,26 @@ details > summary { cursor: pointer; margin: 8px 0; }
 .features svg { width: 24px; height: 24px; flex: none; margin-top: 2px; fill: none; stroke: var(--accent); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
 .features strong { display: block; color: var(--ink-display); }
 @media (min-width: 640px) { .features { grid-template-columns: 1fr 1fr; } }
+
+/* The mirror */
+.mirror-card .q, .pattern .q { font-weight: 600; color: var(--ink-display); margin: 14px 0 6px; }
+.mirror-line { margin: 4px 0 12px; }
+.area-tag { display: inline-block; font-size: 0.6875rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent-pressed); background: var(--accent-soft); border-radius: 999px; padding: 2px 8px; margin-right: 8px; vertical-align: 1px; }
+.pattern-areas p { margin: 8px 0; }
+.pattern-check { border-top: 1px solid var(--line); margin-top: 12px; padding-top: 4px; }
+.pattern-mirror { border-left: 3px solid var(--sage); background: var(--ok-soft); color: var(--ok-ink); padding: 10px 14px; border-radius: 0 10px 10px 0; margin: 12px 0; }
+.pattern-mirror p { margin: 0 0 4px; }
+.pattern.fit-yes { border-top-color: var(--sage); }
+.light-shadow { display: grid; gap: 12px; }
+@media (min-width: 560px) { .light-shadow { grid-template-columns: 1fr 1fr; } }
+.evidence li { margin: 6px 0; }
+.evidence strong { color: var(--ink-display); }
+.for-you-box { background: var(--accent-soft); border-radius: 12px; padding: 4px 14px; margin: 10px 0; }
+.for-you-box .q { margin: 8px 0 4px; font-weight: 600; color: var(--accent-pressed); font-size: 0.8125rem; text-transform: uppercase; letter-spacing: 0.06em; }
+.contacts { padding-left: 18px; }
+.contacts li { margin: 8px 0; }
+.upcoming { list-style: none; padding: 0; margin: 8px 0 16px; display: grid; gap: 8px; }
+.upcoming li { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 10px 14px; display: grid; gap: 2px; }
+.upcoming li.for-you { border-color: var(--accent); }
+.upcoming-date { font-size: 0.8125rem; color: var(--ink-muted); }
+.upcoming-what strong { color: var(--ink-display); margin-right: 6px; }

@@ -5,6 +5,7 @@
 import { yearAhead, progressions, type AspectName } from '../astro/progressions';
 import type { NatalChart } from '../astro/natal';
 import { PROGRESSED_MOON_SIGN } from './progressions';
+import { AREAS, MOVER_AREA, MOVER_TARGET, SEASONS, TARGET_AREAS, type Area, type Profile } from './mirror';
 import * as V from './vedic';
 
 type Cls = 'conj' | 'hard' | 'soft';
@@ -79,6 +80,21 @@ export const RETURNS: Record<string, { title: string; feel: string; helps: strin
   },
 };
 
+/** One natal point a slow planet is touching, with its own line. */
+export interface Contact {
+  transiting: string;
+  aspect: AspectName;
+  natal: string;
+  touches: string;
+  start: string;
+  end: string;
+  peaks: string[];
+  line: string;
+  /** True when it touches an area the person said is on their mind. */
+  forYou: boolean;
+}
+
+/** A season: everything one slow planet (or the progressed Moon, or the dasha) is doing for you now. */
 export interface Cycle {
   id: string;
   kind: 'transit' | 'progressed' | 'dasha';
@@ -94,11 +110,15 @@ export interface Cycle {
   feel: string;
   helps: string;
   basis: string;
+  contacts: Contact[];
+  /** Lines written for the areas the person said are on their mind. */
+  forYou: string[];
 }
 
 const DAY = 86400000;
 const iso = (d: Date) => d.toISOString().slice(0, 10);
 const MOVER_WEIGHT: Record<string, number> = { Pluto: 3, Neptune: 2.8, Uranus: 2.8, Saturn: 2.5, Jupiter: 1.5 };
+const weightOf = (mover: string, natal: string, k: Cls) => MOVER_WEIGHT[mover] * (['Sun', 'Moon', 'Ascendant', 'Midheaven'].includes(natal) ? 1.2 : 1) * (k === 'soft' ? 0.75 : 1.15);
 
 function phaseOf(start: string, peaks: string[], today: string): Cycle['phase'] {
   if (today < start) return 'Coming up';
@@ -112,32 +132,57 @@ function phaseOf(start: string, peaks: string[], today: string): Cycle['phase'] 
   return 'In progress';
 }
 
-/** The cycles active now, then those starting in the next 12 months, strongest first within each group. */
-export function cycles(c: NatalChart, lat: number, lon: number, now = new Date()): { now: Cycle[]; next: Cycle[] } {
+/**
+ * The seasons you are in now (one per slow planet, plus the progressed Moon and the dasha), and the
+ * individual contacts starting in the next 12 months. Areas the person named come first.
+ */
+export function cycles(c: NatalChart, lat: number, lon: number, now = new Date(), profile: Profile | null = null): { now: Cycle[]; next: Contact[] } {
   const today = iso(now);
+  const onMind = new Set<Area>(profile?.onMind ?? []);
+  // Look back 10 months so a contact already under way shows its real start.
+  const windows = yearAhead(c, lat, lon, new Date(now.getTime() - 300 * DAY), 300 + 366).filter((w) => w.end >= today && TOUCHES[w.natal]);
+  const contact = (w: (typeof windows)[number]): Contact => ({
+    transiting: w.transiting,
+    aspect: w.aspect,
+    natal: w.natal,
+    touches: TOUCHES[w.natal].label,
+    start: w.start,
+    end: w.end,
+    peaks: w.exact,
+    line: w.aspect === 'conjunct' && w.transiting === w.natal ? RETURNS[w.transiting]?.feel ?? MOVER_TARGET[w.transiting][w.natal] : MOVER_TARGET[w.transiting][w.natal],
+    forYou: (TARGET_AREAS[w.natal] ?? []).some((a) => onMind.has(a)),
+  });
+
   const out: Cycle[] = [];
-  // Look back 10 months so a cycle already under way shows its real start.
-  const windows = yearAhead(c, lat, lon, new Date(now.getTime() - 300 * DAY), 300 + 366).filter((w) => w.end >= today);
-  for (const w of windows) {
-    const k = cls(w.aspect);
-    const t = TOUCHES[w.natal];
-    if (!t) continue;
-    const ret = w.aspect === 'conjunct' && w.transiting === w.natal ? RETURNS[w.transiting] : undefined;
-    const weight = MOVER_WEIGHT[w.transiting] * (['Sun', 'Moon', 'Ascendant', 'Midheaven'].includes(w.natal) ? 1.2 : 1) * (k === 'soft' ? 0.75 : 1.15) * (ret ? 1.3 : 1);
+  const active = windows.filter((w) => w.start <= today);
+  for (const mover of ['Pluto', 'Neptune', 'Uranus', 'Saturn', 'Jupiter']) {
+    const ws = active.filter((w) => w.transiting === mover);
+    if (!ws.length) continue;
+    const contacts = ws.map(contact).sort((a, b) => Number(b.forYou) - Number(a.forYou) || a.start.localeCompare(b.start));
+    // The strongest contact sets the season's tone.
+    const lead = [...ws].sort((a, b) => weightOf(mover, b.natal, cls(b.aspect)) - weightOf(mover, a.natal, cls(a.aspect)))[0];
+    const k = cls(lead.aspect);
+    const ret = lead.aspect === 'conjunct' && lead.transiting === lead.natal ? RETURNS[mover] : undefined;
+    const peaks = [...new Set(ws.flatMap((w) => w.exact))].sort();
+    const start = ws.map((w) => w.start).sort()[0];
+    const areas = [...new Set(ws.flatMap((w) => TARGET_AREAS[w.natal] ?? []))].filter((a) => onMind.has(a));
+    const weight = weightOf(mover, lead.natal, k) * (ret ? 1.3 : 1);
     out.push({
-      id: `${w.transiting}-${w.aspect}-${w.natal}-${w.start}`,
+      id: `season-${mover}`,
       kind: 'transit',
       tradition: 'Western',
-      title: ret?.title ?? CYCLE_TITLE[w.transiting][k],
-      touches: ret ? 'a life-stage turning point' : t.label,
-      start: w.start,
-      end: w.end,
-      peaks: w.exact,
-      phase: phaseOf(w.start, w.exact, today),
+      title: ret?.title ?? `${mover} · ${CYCLE_TITLE[mover][k]}`,
+      touches: contacts.map((x) => x.touches).filter((v, i, a) => a.indexOf(v) === i).join(', '),
+      start,
+      end: ws.map((w) => w.end).sort().reverse()[0],
+      peaks,
+      phase: phaseOf(start, peaks, today),
       intensity: weight >= 3.2 ? 3 : weight >= 2 ? 2 : 1,
-      feel: ret?.feel ?? `${CYCLE_FEEL[w.transiting][k]} ${t.area}`,
-      helps: ret?.helps ?? CYCLE_HELP[w.transiting][k],
-      basis: `Transiting ${w.transiting} ${w.aspect} your natal ${w.natal}`,
+      feel: ret ? ret.feel : CYCLE_FEEL[mover][k],
+      helps: ret ? ret.helps : CYCLE_HELP[mover][k],
+      basis: ws.map((w) => `${w.transiting} ${w.aspect} natal ${w.natal}`).join('; '),
+      contacts,
+      forYou: areas.map((a) => MOVER_AREA[mover][a]).filter((x): x is string => Boolean(x)).slice(0, 2),
     });
   }
 
@@ -156,8 +201,10 @@ export function cycles(c: NatalChart, lat: number, lon: number, now = new Date()
       phase: 'In progress',
       intensity: 2,
       feel: PROGRESSED_MOON_SIGN[pr.moon.sign],
-      helps: 'Notice what you need more of in this chapter, and give it to yourself on purpose.',
+      helps: profile?.season ? `You described this as a time of ${SEASONS[profile.season] ?? profile.season.toLowerCase()}. Ask what this chapter needs from you within that.` : 'Notice what you need more of in this chapter, and give it to yourself on purpose.',
       basis: `Progressed Moon in ${pr.moon.sign} (secondary progression, about two and a half years per sign)`,
+      contacts: [],
+      forYou: [],
     });
 
   // The Vedic dasha sub-period now.
@@ -167,7 +214,7 @@ export function cycles(c: NatalChart, lat: number, lon: number, now = new Date()
       id: `dasha-${cur.maha.lord}-${cur.antar.lord}`,
       kind: 'dasha',
       tradition: 'Vedic',
-      title: `${cur.antar.lord} within ${cur.maha.lord}`,
+      title: `Vedic period · ${cur.antar.lord} within ${cur.maha.lord}`,
       touches: 'the tone of this period',
       start: iso(cur.antar.start),
       end: iso(cur.antar.end),
@@ -177,11 +224,20 @@ export function cycles(c: NatalChart, lat: number, lon: number, now = new Date()
       feel: `In Vedic timing you are in a ${cur.maha.lord} mahadasha, now colored by its ${cur.antar.lord} sub-period. ${cap(V.DASHA_DETAIL[cur.antar.lord])}.`,
       helps: `Work with ${cur.antar.lord}’s themes rather than against them.`,
       basis: `Vimshottari dasha: ${cur.maha.lord} mahadasha, ${cur.antar.lord} antardasha`,
+      contacts: [],
+      forYou: [],
     });
 
-  const active = out.filter((x) => x.start <= today).sort((a, b) => b.intensity - a.intensity || a.end.localeCompare(b.end));
-  const next = out.filter((x) => x.start > today).sort((a, b) => a.start.localeCompare(b.start));
-  return { now: active, next };
+  const ranked = out.sort((a, b) => Number(b.forYou.length > 0) - Number(a.forYou.length > 0) || b.intensity - a.intensity);
+  // Coming up: one line per new contact, the same planet and point only once.
+  const seen = new Set<string>();
+  const next = windows
+    .filter((w) => w.start > today)
+    .sort((a, b) => a.start.localeCompare(b.start))
+    .filter((w) => (seen.has(w.transiting + w.natal) ? false : (seen.add(w.transiting + w.natal), true)))
+    .map(contact);
+  return { now: ranked, next };
 }
 
+export const AREA_LABEL = AREAS;
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);

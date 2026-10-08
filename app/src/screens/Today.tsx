@@ -14,7 +14,7 @@ export default function Today() {
   const { state, dispatch } = useStore();
   const { me } = useCharts();
   const today = new Date().toISOString().slice(0, 10);
-  const nowCycle = useMemo(() => (me ? cycles(me, state.birth.lat, state.birth.lon).now[0] : undefined), [me, state.birth.lat, state.birth.lon]);
+  const nowCycle = useMemo(() => (me ? cycles(me, state.birth.lat, state.birth.lon, new Date(), state.profile).now[0] : undefined), [me, state.birth.lat, state.birth.lon, state.profile]);
   const r = REFLECTIONS.self;
   const action = [...state.actions].reverse().find((a) => a.reflectionId === r.id);
   // Check-ins are for earlier steps; today's own step isn't due yet. (Prototype: no real clock.)
