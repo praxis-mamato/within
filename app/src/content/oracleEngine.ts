@@ -57,7 +57,7 @@ export interface OracleContext {
 export const ORACLE_SAYS = {
   welcome: 'Welcome to the Oracle…',
   invite:
-    'Ask the stars anything: what your chart says about you, what the sky is doing tonight, the best day to begin something, what you are moving through this year, or the question on your heart. The Oracle reads the sky at this moment against your chart, the way astrologers have for centuries.',
+    'Your personal guide to insight and reflection: the energy within you, and how it shows up in the world. Ask about your chart, today’s sky, the right time for something, what you are moving through, or what is on your heart. The Oracle reads the sky against your chart, the way astrologers have for centuries, to help you navigate life.',
   open: 'The Oracle hears a question it cannot place on one star, so it reads the sky at this moment against your chart.',
   quietWhen: 'The next two months hold no standout window for this, so the Oracle points to the waxing Moon, the traditional time to begin.',
   waxing: 'The Moon is waxing, the traditional time to begin and build.',

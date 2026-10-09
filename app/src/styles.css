@@ -565,7 +565,7 @@ details > summary { cursor: pointer; margin: 8px 0; }
   color: var(--o-ink);
   background:
     radial-gradient(120% 60% at 50% 105%, rgb(233 164 106 / 0.55), transparent 60%),
-    linear-gradient(180deg, #140b1c 0%, #22122d 45%, #3a1f3b 75%, #6b3a3e 100%);
+    linear-gradient(180deg, #0a0f26 0%, #141b40 45%, #2b2547 75%, #5d3a45 100%);
   border-radius: 0 0 24px 24px;
   min-height: 100%;
 }
@@ -577,25 +577,29 @@ details > summary { cursor: pointer; margin: 8px 0; }
 .oracle-board { position: relative; width: min(100%, 420px); margin: 12px auto 18px; filter: drop-shadow(0 12px 30px rgb(0 0 0 / 0.45)); }
 .oracle-board > svg:first-child { display: block; width: 100%; height: auto; }
 .ob-planchette {
-  position: absolute; width: 17%; height: auto; transform: translate(-50%, -38%) rotate(-8deg);
+  position: absolute; width: 15%; height: auto; transform: translate(-50%, -50%);
   transition: left 0.46s cubic-bezier(0.45, 0, 0.3, 1), top 0.46s cubic-bezier(0.45, 0, 0.3, 1);
   filter: drop-shadow(0 6px 8px rgb(0 0 0 / 0.5)); pointer-events: none;
 }
 .oracle-board.seeking .ob-planchette { animation: ob-wobble 0.48s ease-in-out infinite; }
 .oracle-board.seeking .ob-orb { animation: ob-shake 0.5s ease-in-out 3; transform-origin: 50% 50%; transform-box: fill-box; }
-.oracle-board.seeking .ob-mist, .oracle-board.idle .ob-mist { animation: ob-swirl 6s linear infinite; transform-origin: 50% 50%; transform-box: fill-box; }
-.oracle-board.seeking .ob-mist { animation-duration: 1.4s; }
+.ob-rings { animation: ob-swirl 40s linear infinite; transform-origin: 50% 50%; transform-box: fill-box; }
+.oracle-board.seeking .ob-rings { animation-duration: 2.4s; }
+.ob-core { opacity: 0.35; transition: opacity 0.8s ease; }
+.oracle-board.seeking .ob-core { animation: ob-pulse 0.9s ease-in-out infinite; }
+.oracle-board.answered .ob-core { opacity: 1; }
+@keyframes ob-pulse { 0%, 100% { opacity: 0.3; } 50% { opacity: 0.9; } }
 .ob-reveal { animation: ob-fade 0.9s ease-out both; }
 .ob-glow { filter: drop-shadow(0 0 6px #ffd98a); }
 .ob-twinkle { animation: ob-twinkle 3.2s ease-in-out infinite; }
-@keyframes ob-wobble { 0%, 100% { rotate: -4deg; } 50% { rotate: 4deg; } }
+@keyframes ob-wobble { 0%, 100% { rotate: -12deg; } 50% { rotate: 12deg; } }
 @keyframes ob-shake { 0%, 100% { transform: translate(0, 0); } 25% { transform: translate(-3px, 1px); } 75% { transform: translate(3px, -1px); } }
 @keyframes ob-swirl { to { transform: rotate(360deg); } }
 @keyframes ob-fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 @keyframes ob-twinkle { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
 @media (prefers-reduced-motion: reduce) {
   .ob-planchette { transition: none; }
-  .oracle-board .ob-planchette, .oracle-board .ob-orb, .oracle-board .ob-mist, .ob-reveal, .ob-twinkle { animation: none !important; }
+  .oracle-board .ob-planchette, .oracle-board .ob-orb, .ob-rings, .ob-core, .ob-reveal, .ob-twinkle { animation: none !important; }
 }
 .oracle-ask { display: grid; gap: 10px; }
 .oracle-ask label { color: #fff6e6; font-weight: 600; }
@@ -605,7 +609,7 @@ details > summary { cursor: pointer; margin: 8px 0; }
 .oracle-ask .chip { background: rgb(255 255 255 / 0.06); color: var(--o-ink); border: 1px solid rgb(226 194 126 / 0.45); border-radius: 999px; padding: 6px 12px; font: inherit; font-size: 0.875rem; min-height: 36px; }
 .oracle-scene .btn { background: linear-gradient(180deg, #e9b56c, #c98b4a); color: #24122a; border: none; }
 .oracle-note { background: rgb(226 194 126 / 0.15); border-left: 3px solid var(--o-gold); padding: 8px 10px; border-radius: 6px; }
-.oracle-answer { margin: 18px 0; padding: 16px; border: 1px solid rgb(226 194 126 / 0.55); border-radius: 18px; background: rgb(20 11 28 / 0.55); }
+.oracle-answer { margin: 18px 0; padding: 16px; border: 1px solid rgb(226 194 126 / 0.55); border-radius: 18px; background: rgb(10 15 38 / 0.6); }
 .oracle-answer h2 { margin: 2px 0 6px; font-size: 1.6rem; }
 .oracle-because { color: var(--o-gold); }
 .oracle-answer .paywall { color: var(--ink-body); }
@@ -615,7 +619,7 @@ details > summary { cursor: pointer; margin: 8px 0; }
 .oracle-past strong { color: var(--o-gold); font-weight: 600; }
 .oracle-card {
   display: flex; align-items: center; gap: 12px; margin: 16px 0; padding: 14px 16px; border-radius: 18px; text-decoration: none; color: #f6ebdd;
-  background: radial-gradient(90% 80% at 50% 120%, rgb(233 164 106 / 0.6), transparent 70%), linear-gradient(160deg, #1a0e24, #3a1f3b 70%, #6b3a3e);
+  background: radial-gradient(90% 80% at 50% 120%, rgb(233 164 106 / 0.6), transparent 70%), linear-gradient(160deg, #0d1330, #232552 70%, #5d3a45);
   border: 1px solid rgb(226 194 126 / 0.6); box-shadow: 0 8px 22px rgb(58 26 44 / 0.25); min-height: 44px;
 }
 .oracle-card > span:nth-child(2) { display: grid; gap: 2px; flex: 1; }

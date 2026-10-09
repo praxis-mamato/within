@@ -52,7 +52,7 @@ function skyNow(now: Date) {
  */
 export function OracleBoard({ phase, points, tone, orb, boardRef }: { phase: 'idle' | 'seeking' | 'answered'; points?: string; tone?: Tone; orb?: string; boardRef?: Ref<HTMLDivElement> }) {
   const sky = useMemo(() => skyNow(new Date()), []);
-  const [pos, setPos] = useState({ x: C, y: C + 92 });
+  const [pos, setPos] = useState({ x: C, y: C + 112 });
   const timers = useRef<number[]>([]);
 
   useEffect(() => {
@@ -60,13 +60,13 @@ export function OracleBoard({ phase, points, tone, orb, boardRef }: { phase: 'id
     timers.current = [];
     const target = sky.find((p) => p.body === points);
     const sign = SIGN_NAMES.indexOf(points ?? '');
-    const land = target ? at(target.lon, target.r) : sign >= 0 ? at(sign * 30 + 15, 158) : { x: C, y: C + 92 };
+    const land = target ? at(target.lon, target.r) : sign >= 0 ? at(sign * 30 + 15, 158) : { x: C, y: C + 112 };
     if (phase === 'seeking' && !reduced()) {
       const hops = [0, 1, 2, 3].map(() => at(Math.random() * 360, 100 + Math.random() * 40));
       hops.forEach((h, i) => timers.current.push(window.setTimeout(() => setPos(h), i * 480)));
       timers.current.push(window.setTimeout(() => setPos(land), hops.length * 480));
     } else if (phase !== 'idle') setPos(land);
-    else setPos({ x: C, y: C + 92 });
+    else setPos({ x: C, y: C + 112 });
     return () => timers.current.forEach(clearTimeout);
   }, [phase, points, sky]);
 
@@ -78,27 +78,33 @@ export function OracleBoard({ phase, points, tone, orb, boardRef }: { phase: 'id
       <svg viewBox={`0 0 ${SIZE} ${SIZE}`} role="img" aria-label={phase === 'answered' ? `The planchette rests on ${points}. The orb reads: ${text.toLowerCase()}.` : 'A talking board of the zodiac with today’s planets, and a glass orb at the centre.'}>
         <defs>
           <radialGradient id="ob-sky" cx="50%" cy="38%" r="75%">
-            <stop offset="0" stopColor="#3a2049" />
-            <stop offset="0.6" stopColor="#1d1027" />
-            <stop offset="1" stopColor="#120916" />
+            <stop offset="0" stopColor="#1f2a5c" />
+            <stop offset="0.6" stopColor="#10173a" />
+            <stop offset="1" stopColor="#090c20" />
           </radialGradient>
           <linearGradient id="ob-dawn" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0.55" stopColor="#e9a46a" stopOpacity="0" />
             <stop offset="1" stopColor="#e9a46a" stopOpacity="0.45" />
           </linearGradient>
-          <radialGradient id="ob-glass" cx="38%" cy="32%" r="70%">
-            <stop offset="0" stopColor="#f8efe6" stopOpacity="0.9" />
-            <stop offset="0.25" stopColor="#b9a3d6" stopOpacity="0.55" />
-            <stop offset="0.7" stopColor="#3b2458" stopOpacity="0.9" />
-            <stop offset="1" stopColor="#170c22" />
+          <radialGradient id="ob-glass" cx="36%" cy="30%" r="78%">
+            <stop offset="0" stopColor="#4a63b0" />
+            <stop offset="0.45" stopColor="#1b2a62" />
+            <stop offset="0.85" stopColor="#0b1233" />
+            <stop offset="1" stopColor="#060a1e" />
           </radialGradient>
-          <radialGradient id="ob-mist" cx="50%" cy="50%" r="50%">
-            <stop offset="0" stopColor="#f3d9a8" stopOpacity="0.55" />
-            <stop offset="1" stopColor="#f3d9a8" stopOpacity="0" />
+          <radialGradient id="ob-core" cx="50%" cy="50%" r="50%">
+            <stop offset="0" stopColor="#ffdf9a" stopOpacity="0.55" />
+            <stop offset="0.6" stopColor="#e2b765" stopOpacity="0.12" />
+            <stop offset="1" stopColor="#e2b765" stopOpacity="0" />
           </radialGradient>
-          <filter id="ob-blur">
-            <feGaussianBlur stdDeviation="5" />
-          </filter>
+          <linearGradient id="ob-gold" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stopColor="#f3d68e" />
+            <stop offset="0.5" stopColor="#c99a4a" />
+            <stop offset="1" stopColor="#8a6327" />
+          </linearGradient>
+          <clipPath id="ob-clip">
+            <circle cx={C} cy={C} r="60" />
+          </clipPath>
         </defs>
         <rect x="2" y="2" width={SIZE - 4} height={SIZE - 4} rx="26" fill="url(#ob-sky)" stroke="#c9a15a" strokeWidth="2" />
         <rect x="2" y="2" width={SIZE - 4} height={SIZE - 4} rx="26" fill="url(#ob-dawn)" />
@@ -116,7 +122,7 @@ export function OracleBoard({ phase, points, tone, orb, boardRef }: { phase: 'id
             return <line key={i} x1={34 + 12 * Math.cos(a)} y1={34 + 12 * Math.sin(a)} x2={34 + 17 * Math.cos(a)} y2={34 + 17 * Math.sin(a)} />;
           })}
           <circle cx={SIZE - 34} cy="34" r="12" fill="#d9b36a" stroke="none" />
-          <circle cx={SIZE - 28} cy="30" r="11" fill="#22122c" stroke="none" />
+          <circle cx={SIZE - 28} cy="30" r="11" fill="#141c45" stroke="none" />
         </g>
         {/* Rings */}
         <circle cx={C} cy={C} r="170" fill="none" stroke="#c9a15a" strokeOpacity="0.7" />
@@ -153,15 +159,23 @@ export function OracleBoard({ phase, points, tone, orb, boardRef }: { phase: 'id
             </text>
           );
         })}
-        {/* The orb */}
-        <ellipse cx={C} cy={C + 66} rx="40" ry="7" fill="#000" opacity="0.35" />
+        {/* The orb: a midnight crystal sphere with gold armillary rings, on a gold stand */}
+        <path d={`M ${C - 30} ${C + 74} L ${C + 30} ${C + 74} L ${C + 22} ${C + 58} L ${C - 22} ${C + 58} Z`} fill="url(#ob-gold)" />
+        <rect x={C - 38} y={C + 73} width="76" height="6" rx="3" fill="url(#ob-gold)" />
         <g className="ob-orb">
-          <circle cx={C} cy={C} r="62" fill="url(#ob-glass)" stroke="#e8cf98" strokeOpacity="0.6" />
-          <g className="ob-mist" filter="url(#ob-blur)">
-            <ellipse cx={C - 14} cy={C + 6} rx="30" ry="14" fill="url(#ob-mist)" />
-            <ellipse cx={C + 16} cy={C - 10} rx="24" ry="11" fill="url(#ob-mist)" />
+          <circle cx={C} cy={C} r="62" fill="url(#ob-glass)" stroke="url(#ob-gold)" strokeWidth="2.5" />
+          <g clipPath="url(#ob-clip)">
+            {Array.from({ length: 22 }, (_, i) => (
+              <circle key={i} cx={C - 52 + ((i * 37) % 104)} cy={C - 50 + ((i * 53) % 100)} r={i % 5 === 0 ? 1.2 : 0.6} fill="#fdf3d6" opacity={0.4 + (i % 4) * 0.15} />
+            ))}
+            <circle cx={C} cy={C} r="58" fill="url(#ob-core)" className="ob-core" />
+            <g className="ob-rings" fill="none" stroke="#e2c27e" strokeOpacity="0.55">
+              <ellipse cx={C} cy={C} rx="60" ry="17" transform={`rotate(-18 ${C} ${C})`} />
+              <ellipse cx={C} cy={C} rx="18" ry="60" transform={`rotate(-18 ${C} ${C})`} strokeOpacity="0.3" />
+            </g>
           </g>
-          <path d={`M ${C - 40} ${C - 28} q 14 -26 46 -30`} stroke="#fff" strokeOpacity="0.55" strokeWidth="5" fill="none" strokeLinecap="round" />
+          <ellipse cx={C - 24} cy={C - 32} rx="16" ry="8" fill="#fff" opacity="0.32" transform={`rotate(-30 ${C - 24} ${C - 32})`} />
+          <circle cx={C - 33} cy={C - 37} r="3" fill="#fff" opacity="0.75" />
           {words.length > 0 && (
             <text key={text} x={C} y={C + 6 - (words.length - 1) * 9} textAnchor="middle" fill="#fff6e3" fontSize={words.some((w) => w.length > 9) ? 12.5 : 15} letterSpacing="1.5" fontWeight={600} className={phase === 'idle' ? 'ob-breathe' : 'ob-reveal'}>
               {words.map((w, i) => (
@@ -173,11 +187,20 @@ export function OracleBoard({ phase, points, tone, orb, boardRef }: { phase: 'id
           )}
         </g>
       </svg>
-      <svg className="ob-planchette" viewBox="0 0 64 78" aria-hidden="true" style={{ left: `${(pos.x / SIZE) * 100}%`, top: `${(pos.y / SIZE) * 100}%` }}>
-        <path d="M32 2 C 50 18 62 34 62 52 C 62 68 48 76 32 76 C 16 76 2 68 2 52 C 2 34 14 18 32 2 Z" fill="#f4e6cf" fillOpacity="0.82" stroke="#8c6a2f" strokeWidth="2" />
-        <circle cx="32" cy="30" r="11" fill="#fffaf0" fillOpacity="0.25" stroke="#8c6a2f" strokeWidth="2" />
-        <circle cx="28" cy="26" r="3" fill="#fff" fillOpacity="0.8" />
-        <path d="M18 58 q 14 8 28 0" stroke="#8c6a2f" strokeWidth="1.5" fill="none" />
+      {/* The pointer: a gold celestial lens with a four-pointed star, centred on what it reads */}
+      <svg className="ob-planchette" viewBox="0 0 64 64" aria-hidden="true" style={{ left: `${(pos.x / SIZE) * 100}%`, top: `${(pos.y / SIZE) * 100}%` }}>
+        <defs>
+          <linearGradient id="ob-lens-gold" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stopColor="#fbe3a0" />
+            <stop offset="1" stopColor="#b98a3c" />
+          </linearGradient>
+        </defs>
+        <circle cx="32" cy="32" r="15" fill="#fffaf0" fillOpacity="0.12" stroke="url(#ob-lens-gold)" strokeWidth="3" />
+        <circle cx="32" cy="32" r="20" fill="none" stroke="#f3d68e" strokeOpacity="0.45" strokeWidth="1" strokeDasharray="2 4" />
+        {[0, 90, 180, 270].map((a) => (
+          <path key={a} d="M32 2 L35 12 L32 10 L29 12 Z" fill="url(#ob-lens-gold)" transform={`rotate(${a} 32 32)`} />
+        ))}
+        <path d="M24 26 a 9 9 0 0 1 8 -4" stroke="#fff" strokeOpacity="0.7" strokeWidth="2" fill="none" strokeLinecap="round" />
       </svg>
     </div>
   );
@@ -199,19 +222,21 @@ export function MiniOrb() {
   return (
     <svg viewBox="0 0 80 80" width="72" height="72" aria-hidden="true" className="mini-orb">
       <defs>
-        <radialGradient id="mo-glass" cx="38%" cy="32%" r="70%">
-          <stop offset="0" stopColor="#f8efe6" stopOpacity="0.95" />
-          <stop offset="0.3" stopColor="#b9a3d6" stopOpacity="0.6" />
-          <stop offset="0.75" stopColor="#3b2458" />
-          <stop offset="1" stopColor="#170c22" />
+        <radialGradient id="mo-glass" cx="36%" cy="30%" r="78%">
+          <stop offset="0" stopColor="#4a63b0" />
+          <stop offset="0.5" stopColor="#1b2a62" />
+          <stop offset="1" stopColor="#070b20" />
         </radialGradient>
+        <linearGradient id="mo-gold" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#f3d68e" />
+          <stop offset="1" stopColor="#a87b34" />
+        </linearGradient>
       </defs>
-      <ellipse cx="40" cy="73" rx="20" ry="4" fill="#000" opacity="0.3" />
-      <circle cx="40" cy="38" r="31" fill="url(#mo-glass)" stroke="#e8cf98" strokeOpacity="0.7" />
-      <path d="M20 26 q 7 -13 23 -15" stroke="#fff" strokeOpacity="0.6" strokeWidth="3" fill="none" strokeLinecap="round" />
-      <text x="40" y="44" textAnchor="middle" fontSize="16" fill="#ffe7a8">
-        ☽
-      </text>
+      <path d="M27 72 L53 72 L49 64 L31 64 Z" fill="url(#mo-gold)" />
+      <circle cx="40" cy="36" r="29" fill="url(#mo-glass)" stroke="url(#mo-gold)" strokeWidth="2" />
+      <ellipse cx="40" cy="36" rx="28" ry="8" fill="none" stroke="#e2c27e" strokeOpacity="0.55" transform="rotate(-18 40 36)" />
+      <path d="M40 24 L42 33 L51 36 L42 39 L40 48 L38 39 L29 36 L38 33 Z" fill="#ffe7a8" />
+      <circle cx="28" cy="22" r="2.2" fill="#fff" opacity="0.8" />
     </svg>
   );
 }
