@@ -22,6 +22,7 @@ import { chartInBrief, todaySky, type SkyLine } from './today';
 import { topicFor } from './topics';
 import { WEEK_CONTACT, WEEK_MOVER, WEEK_TARGET, weekReading } from './week';
 import * as D from './deep';
+import { consulted, oracleLayers, type Layer } from './oracleLayers';
 import * as V from './vedic';
 import * as W from './western';
 
@@ -44,6 +45,10 @@ export interface OracleReply {
   limit?: Limit;
   /** True when a written, whole-chart consultation would add the most. */
   consult?: boolean;
+  /** The full reading behind the answer, layer by layer (subscribers). */
+  layers?: Layer[];
+  /** What the Oracle read to answer. */
+  consulted?: string[];
 }
 
 export interface OracleContext {
@@ -265,6 +270,17 @@ function natalLines(c: NatalChart, q: string, place: { lat: number; lon: number 
 }
 
 export function consultOracle(question: string, ctx: OracleContext): OracleReply {
+  const reply = answerOnly(question, ctx);
+  if (reply.limit) return reply;
+  // The full reading: the question's life area (or the one on the person's mind), or the planet it names.
+  const q = question.trim();
+  const body = reply.intent === 'chart' || reply.intent === 'planet' || reply.intent === 'retro' ? (/north node|\bnode\b/i.test(q) ? 'Node' : bodyIn(q)) : null;
+  const area = body ? null : (areaOf(q) ?? (['decision', 'when', 'feeling', 'cycle', 'open', 'week', 'sky'].includes(reply.intent) ? (ctx.profile?.onMind[0] ?? null) : null));
+  const layers = oracleLayers(ctx.chart, ctx.place, area, body && body !== 'Moon' ? body : body === 'Moon' ? 'Moon' : null, ctx.now ?? new Date());
+  return layers.length ? { ...reply, layers, consulted: consulted(ctx.chart, layers) } : reply;
+}
+
+function answerOnly(question: string, ctx: OracleContext): OracleReply {
   const { chart: c, place } = ctx;
   const now = ctx.now ?? new Date();
   const q = question.trim();
@@ -280,7 +296,7 @@ export function consultOracle(question: string, ctx: OracleContext): OracleReply
   switch (intent) {
     case 'decision': {
       const a = askOracle(q, c, place, now);
-      return { ...base, intent, label: a.label, orb: '', tone: a.tone, points: a.points, lines: [{ heading: a.label, text: a.line }, ...(a.because ? [{ heading: 'In the sky', text: a.because }] : [])], deeper: a.why.map((w) => ({ heading: '', text: w })), limit: a.limit };
+      return { ...base, intent, label: a.label, orb: '', tone: a.tone, points: a.points, lines: [{ heading: '', text: a.line }, ...(a.because ? [{ heading: 'In the sky', text: a.because }] : [])], deeper: a.why.map((w) => ({ heading: '', text: w })), limit: a.limit };
     }
     case 'when': {
       if (/\b(saturn|jupiter)\b/i.test(q) && /\breturn\b/i.test(q)) break;
@@ -434,3 +450,14 @@ export function consultOracle(question: string, ctx: OracleContext): OracleReply
   };
 }
 
+
+const GLYPHS: Record<string, string> = { Sun: '☉', Moon: '☽', Mercury: '☿', Venus: '♀', Mars: '♂', Jupiter: '♃', Saturn: '♄', Uranus: '♅', Neptune: '♆', Pluto: '♇' };
+
+/** Every planet right now: sign, degree, retrograde, and the person's house it is moving through. */
+export function skyToday(c: NatalChart, place: { lat: number; lon: number }, now = new Date()) {
+  const cusps = cuspsOf(c, place);
+  return (['Sun', 'Moon', 'Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Pluto'] as const).map((b) => {
+    const lon = tropicalLongitude(b, now);
+    return { body: b, glyph: `${GLYPHS[b]}\uFE0E`, sign: signOf(lon), deg: fmtDeg(lon % 30), rx: b !== 'Sun' && b !== 'Moon' && speed(b, now) < 0, house: cusps ? `${ord(houseOf(lon, cusps))} house` : null };
+  });
+}

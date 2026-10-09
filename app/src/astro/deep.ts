@@ -198,7 +198,7 @@ export function aspectPatterns(c: NatalChart): Pattern[] {
   return out.filter((p) => !(p.name === 'T-square' && crosses.some((g) => p.bodies.every((b) => g.bodies.includes(b)))));
 }
 
-const TRAD_RULER: Record<string, string> = {
+export const TRAD_RULER: Record<string, string> = {
   Aries: 'Mars', Taurus: 'Venus', Gemini: 'Mercury', Cancer: 'Moon', Leo: 'Sun', Virgo: 'Mercury',
   Libra: 'Venus', Scorpio: 'Mars', Sagittarius: 'Jupiter', Capricorn: 'Saturn', Aquarius: 'Saturn', Pisces: 'Jupiter',
 };

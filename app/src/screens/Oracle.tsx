@@ -1,7 +1,7 @@
 import { useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useCharts } from '../astro/useCharts';
-import { consultOracle, ORACLE_SAYS, type OracleReply } from '../content/oracleEngine';
+import { consultOracle, ORACLE_SAYS, skyToday, type OracleReply } from '../content/oracleEngine';
 import { ORACLE_TEXT, ORACLE_TONE } from '../content/oracle';
 import type { SkyLine } from '../content/today';
 import { FortuneBall, spellFor, TalkingBoard, useShake } from '../components/OracleBoard';
@@ -37,6 +37,35 @@ const Lines = ({ items }: { items: SkyLine[] }) => (
   </div>
 );
 
+/** Today's planets, each with its sign, degree, and your house; tap one to ask about it. */
+function SkyStrip({ onAsk }: { onAsk: (q: string) => void }) {
+  const { state } = useStore();
+  const { me } = useCharts();
+  const rows = useMemo(() => (me ? skyToday(me, { lat: state.birth.lat, lon: state.birth.lon }) : []), [me, state.birth.lat, state.birth.lon]);
+  if (!rows.length) return null;
+  return (
+    <section className="sky-strip" aria-labelledby="sky-strip-h">
+      <h2 id="sky-strip-h">The sky right now</h2>
+      <ul>
+        {rows.map((r) => (
+          <li key={r.body}>
+            <button type="button" onClick={() => onAsk(r.body === 'Moon' ? 'What’s the sky doing tonight?' : `Where is ${r.body} right now?`)}>
+              <span className="sky-glyph" aria-hidden="true">
+                {r.glyph}
+              </span>
+              <span>
+                <strong>{r.body}</strong> {r.deg} {r.sign}
+                {r.rx && ' ℞'}
+                <span className="small oracle-muted">{r.house ? ` · your ${r.house}` : ''}</span>
+              </span>
+            </button>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
 /** The Oracle: ask the stars anything. Answered from the sky at this moment and your chart. */
 export default function Oracle() {
   const { state, dispatch } = useStore();
@@ -70,16 +99,17 @@ export default function Oracle() {
       return;
     }
     // The same question gets the same answer all day, and does not count again.
-    const same = asked.find((a) => a.question.toLowerCase() === question.toLowerCase() && a.lines);
+    const same = asked.find((a) => a.question.toLowerCase() === question.toLowerCase());
     if (!same && left <= 0) {
       setNote(ORACLE_TEXT.limit);
       return;
     }
     const theirs = state.person?.birth;
-    const a = same ?? consultOracle(question, { chart: me, place, profile: state.profile, other: other && theirs ? { chart: other, place: { lat: theirs.lat, lon: theirs.lon }, name: state.person!.nickname } : null });
+    const a = consultOracle(question, { chart: me, place, profile: state.profile, other: other && theirs ? { chart: other, place: { lat: theirs.lat, lon: theirs.lon }, name: state.person!.nickname } : null });
     if (same) setNote(ORACLE_TEXT.sameDay);
     else {
-      dispatch({ type: 'oracle/ask', answer: a });
+      // History keeps the answer itself; the full reading is recalculated when asked again.
+      dispatch({ type: 'oracle/ask', answer: { ...a, layers: undefined, consulted: undefined } });
       track('oracle_asked', { intent: a.intent });
     }
     setAnswer(a);
@@ -128,13 +158,48 @@ export default function Oracle() {
         }}
       />
       <p className="small oracle-muted oracle-hint">Write your question, then tap or shake the ball. Or slide the planchette across the board yourself.</p>
+      <SkyStrip onAsk={(x) => (setQ(x), ask(x))} />
       {!answer && <p className="small oracle-muted">{ORACLE_SAYS.how}</p>}
       {answer && phase === 'answered' && (
         <section className="oracle-answer" aria-live="polite" aria-labelledby="oa-h">
           <p className="small oracle-muted">“{answer.question}”</p>
           <h2 id="oa-h">{answer.label}</h2>
           <Lines items={answer.lines} />
-          {(answer.deeper.length > 0 || !answer.limit) && (
+          {answer.consulted && (
+            <div className="oracle-consulted">
+              <p className="small">The Oracle read</p>
+              <ul>
+                {answer.consulted.map((x) => (
+                  <li key={x}>{x}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+          {answer.layers && answer.layers.length > 0 && (
+            <div className="oracle-layers">
+              <h3>The full reading</h3>
+              {!entitlement.active && (
+                <ol className="oracle-locked">
+                  {answer.layers.map((l) => (
+                    <li key={l.title}>
+                      {l.title} <span>· {l.lines.length} findings</span>
+                    </li>
+                  ))}
+                </ol>
+              )}
+              <Paywall where="reading" what="The Oracle’s full reading">
+                {answer.layers.map((l) => (
+                  <details key={l.title} className="oracle-layer" open={l === answer.layers![0]}>
+                    <summary>
+                      <span>{l.title}</span> <span className="oracle-trad">{l.tradition}</span>
+                    </summary>
+                    <Lines items={l.lines} />
+                  </details>
+                ))}
+              </Paywall>
+            </div>
+          )}
+          {(answer.deeper.length > 0 || !answer.limit) && (entitlement.active || !answer.layers?.length) && (
             <>
               <h3 style={{ marginTop: 16 }}>{answer.deeper.length ? 'The Oracle goes deeper' : 'Consult your whole chart'}</h3>
               <Paywall where="reading" what="The Oracle’s deeper answers">

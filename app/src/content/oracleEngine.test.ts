@@ -40,13 +40,22 @@ describe('the Oracle engine', () => {
         const a = OE.consultOracle(q, { chart: c, place: b, now });
         expect(a.lines.length, q).toBeGreaterThan(0);
         expect(a.label).toBeTruthy();
-        const text = [a.label, a.orb, ...[...a.lines, ...a.deeper].flatMap((l) => [l.heading, l.text, l.basis ?? ''])];
+        const text = [a.label, a.orb, ...(a.consulted ?? []), ...(a.layers ?? []).map((l) => l.title), ...[...a.lines, ...a.deeper, ...(a.layers ?? []).flatMap((l) => l.lines)].flatMap((l) => [l.heading, l.text, l.basis ?? ''])];
         for (const t of text) {
           expect(t, `${q}: ${t}`).not.toMatch(/undefined|NaN|\bnull\b|\[object/);
           expect(lint(t), `${q}: ${t}`).toEqual([]);
         }
       }
     }
+  });
+  it('gives a full layered reading for life-area and planet questions', () => {
+    const b = sampleBirths()[0];
+    const c = computeNatal(b, new Date('2026-10-09T15:00:00Z'));
+    const job = OE.consultOracle('Should I apply for the new job?', { chart: c, place: b, now: new Date('2026-10-09T15:00:00Z') });
+    expect(job.layers!.map((l) => l.title)).toEqual(expect.arrayContaining(['The year ahead: slow planets', 'The next 30 days', 'Your progressed chart and solar arcs', 'The Vedic view']));
+    expect(job.consulted!.length).toBeGreaterThan(5);
+    const venus = OE.consultOracle('What does my Venus mean?', { chart: c, place: b });
+    expect(venus.layers![0].title).toBe('Your birth chart: your Venus');
   });
   it('still refuses health, others, legal, and gambling questions', () => {
     const b = sampleBirths()[0];

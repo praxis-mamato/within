@@ -681,3 +681,22 @@ details > summary { cursor: pointer; margin: 8px 0; }
 @keyframes fb-rattle { 0%, 100% { transform: translate(0, 0) rotate(0); } 25% { transform: translate(-5px, 2px) rotate(-4deg); } 75% { transform: translate(5px, -2px) rotate(4deg); } }
 @keyframes fb-rise { from { transform: translateY(0); opacity: 0.6; } to { transform: translateY(-60px); opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { .tb-planchette, .fb-die { transition: none; } .fortune-ball.seeking, .fb-bubble { animation: none; } }
+
+.oracle-consulted { margin: 14px 0 4px; padding: 10px 12px; border-radius: 12px; background: rgb(226 194 126 / 0.1); border: 1px solid rgb(226 194 126 / 0.35); }
+.oracle-consulted p { margin: 0 0 6px; color: var(--o-gold); letter-spacing: 0.08em; text-transform: uppercase; font-size: 0.75rem; }
+.oracle-consulted ul { margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 6px; }
+.oracle-consulted li { font-size: 0.8125rem; padding: 3px 9px; border-radius: 999px; border: 1px solid rgb(226 194 126 / 0.45); color: var(--o-ink); }
+.oracle-layers { margin-top: 16px; }
+.oracle-layers > h3 { margin: 0 0 8px; }
+.oracle-locked { margin: 0 0 12px; padding-left: 22px; color: var(--o-ink); }
+.oracle-locked li { margin: 4px 0; }
+.oracle-locked span { color: var(--o-muted); font-size: 0.875rem; }
+.oracle-layer { border-top: 1px solid rgb(226 194 126 / 0.25); padding: 10px 0; }
+.oracle-layer summary { cursor: pointer; font-family: 'Cormorant Garamond', serif; font-size: 1.2rem; color: #fff6e6; min-height: 32px; }
+.oracle-layer .lines { margin-top: 8px; }
+.oracle-trad { font-family: 'Source Sans 3', sans-serif; font-size: 0.75rem; color: var(--o-gold); letter-spacing: 0.08em; text-transform: uppercase; }
+.sky-strip { margin: 6px 0 16px; }
+.sky-strip h2 { font-size: 1.25rem; margin: 0 0 8px; }
+.sky-strip ul { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.sky-strip button { width: 100%; display: flex; gap: 8px; align-items: center; text-align: left; background: rgb(255 255 255 / 0.04); border: 1px solid rgb(226 194 126 / 0.3); border-radius: 10px; color: var(--o-ink); padding: 6px 8px; font: inherit; font-size: 0.875rem; min-height: 44px; cursor: pointer; }
+.sky-glyph { color: var(--o-gold); font-size: 1.2rem; width: 1.2em; text-align: center; }

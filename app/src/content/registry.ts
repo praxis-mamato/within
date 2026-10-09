@@ -19,6 +19,7 @@ import * as WK from './week';
 import * as TD from './today';
 import * as OR from './oracle';
 import * as OE from './oracleEngine';
+import * as OL from './oracleLayers';
 import committed from './approvals.json';
 import { lint } from './lint';
 
@@ -131,6 +132,7 @@ const SOURCES: [section: string, module: string, Record<string, unknown>, [name:
     ['ORACLE_SAYS', 'The Oracle’s voice'],
     ['RETURN_MEANING', 'Planetary returns'],
   ]],
+  ['The Oracle’s full reading', 'oracleLayers', OL as Record<string, unknown>, [['LAYER_TEXT', 'Layer framing']]],
   ['Answers to sky and feeling questions', 'answer', AN as Record<string, unknown>, [
     ['MOON_TODAY_HOUSE', 'Today’s Moon by natal house'],
     ['MOON_TO_MOON', 'Today’s Moon and the birth Moon'],
