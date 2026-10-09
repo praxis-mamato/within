@@ -291,7 +291,7 @@ legend { font-weight: 600; color: var(--ink-display); margin: 14px 0 6px; paddin
   width: 100%; max-width: 480px; height: calc(var(--tab-h) + env(safe-area-inset-bottom));
   padding-bottom: env(safe-area-inset-bottom);
   background: var(--surface); border-top: 1px solid var(--line);
-  display: grid; grid-template-columns: repeat(3, 1fr); z-index: 5;
+  display: grid; grid-template-columns: repeat(4, 1fr); z-index: 5;
 }
 .tabbar a {
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
@@ -623,3 +623,17 @@ details > summary { cursor: pointer; margin: 8px 0; }
 .oracle-card .small { color: #d8c6cf; }
 .oracle-card-kicker { font-size: 0.75rem; letter-spacing: 0.12em; text-transform: uppercase; color: #e2c27e; }
 .oracle-card:hover .mini-orb, .oracle-card:focus-visible .mini-orb { animation: ob-shake 0.5s ease-in-out 2; }
+.ob-breathe { animation: ob-breathe 3.6s ease-in-out infinite; }
+@keyframes ob-breathe { 0%, 100% { opacity: 0.55; } 50% { opacity: 1; } }
+.oracle-welcome { font-family: 'Cormorant Garamond', serif; font-size: clamp(2rem, 8vw, 2.6rem); line-height: 1.1; margin: 4px 0 8px; color: #fff6e6; }
+.oracle-welcome span { display: inline-block; opacity: 0; animation: ob-letter 0.6s ease-out forwards; white-space: pre; }
+@keyframes ob-letter { from { opacity: 0; filter: blur(6px); transform: translateY(4px); } to { opacity: 1; filter: none; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .oracle-welcome span { animation: none; opacity: 1; } .ob-breathe { animation: none; } }
+.oracle-answer .lines { display: grid; gap: 12px; }
+.oracle-answer .lines h3 { margin: 0 0 2px; font-size: 1.1rem; color: #fff6e6; }
+.oracle-answer .lines p { margin: 0; }
+.oracle-answer .basis { font-size: 0.8125rem; color: var(--o-muted); margin-top: 4px; }
+.oracle-consult { margin-top: 14px; padding-top: 12px; border-top: 1px solid rgb(226 194 126 / 0.3); }
+.oracle-consult .section-title { color: var(--o-gold); }
+.tabbar a.oracle-tab svg { color: inherit; }
+.oracle-scene button.link { color: var(--o-ink); text-align: left; background: none; border: 0; padding: 0; font: inherit; min-height: 44px; }

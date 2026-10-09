@@ -18,6 +18,7 @@ import * as AN from './answer';
 import * as WK from './week';
 import * as TD from './today';
 import * as OR from './oracle';
+import * as OE from './oracleEngine';
 import committed from './approvals.json';
 import { lint } from './lint';
 
@@ -125,6 +126,10 @@ const SOURCES: [section: string, module: string, Record<string, unknown>, [name:
     ['ORACLE_TONE', 'Answer tones'],
     ['ORACLE_REFRAME', 'Questions it does not answer'],
     ['ORACLE_TEXT', 'Framing and horary notes'],
+  ]],
+  ['The Oracle engine', 'oracleEngine', OE as Record<string, unknown>, [
+    ['ORACLE_SAYS', 'The Oracle’s voice'],
+    ['RETURN_MEANING', 'Planetary returns'],
   ]],
   ['Answers to sky and feeling questions', 'answer', AN as Record<string, unknown>, [
     ['MOON_TODAY_HOUSE', 'Today’s Moon by natal house'],

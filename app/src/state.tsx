@@ -3,7 +3,7 @@
  */
 import { createContext, useContext, useEffect, useMemo, useReducer, useRef, useState, type ReactNode } from 'react';
 import type { PatternCheck, Profile } from './content/mirror';
-import type { OracleAnswer } from './content/oracle';
+import type { OracleReply } from './content/oracleEngine';
 import { deviceVault } from './storage/vault';
 import { SAMPLE_MILESTONES, type Milestone, type Tradition } from './data/fixtures';
 import { screen, type ScreenResult } from './lib/screener';
@@ -100,7 +100,7 @@ export interface State {
   /** How each pattern fits, in the person's own judgment. */
   patternChecks: Record<string, PatternCheck>;
   /** Questions asked of the Oracle and its answers, newest last. Stays on this device. */
-  oracle: OracleAnswer[];
+  oracle: OracleReply[];
 }
 
 const now = () => new Date().toISOString();
@@ -172,7 +172,7 @@ export type Event =
   | { type: 'ai/save'; key: string; reading: State['aiReadings'][string] }
   | { type: 'reset' }
   | { type: 'profile/set'; profile: Profile }
-  | { type: 'oracle/ask'; answer: OracleAnswer }
+  | { type: 'oracle/ask'; answer: OracleReply }
   | { type: 'pattern/check'; id: string; check: PatternCheck | null }
   | { type: 'hydrate'; state: State };
 

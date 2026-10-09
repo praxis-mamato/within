@@ -115,12 +115,12 @@ const Lines = ({ items }: { items: SkyLine[] }) => (
 /** The way into the Oracle: a night card that warms into dawn. */
 function OracleCard() {
   return (
-    <Link to="/oracle" className="oracle-card" aria-label="Ask the Oracle: one question, answered by the sky right now">
+    <Link to="/oracle" className="oracle-card" aria-label="The Oracle: ask the stars anything">
       <MiniOrb />
       <span>
         <span className="oracle-card-kicker">The Oracle</span>
-        <strong>Ask the sky one question</strong>
-        <span className="small">Answered from this moment’s sky and your chart, the way horary astrologers have for centuries.</span>
+        <strong>Ask the stars anything</strong>
+        <span className="small">Your chart, tonight’s sky, the best day to begin, what you are moving through. Read from the sky and your chart, the way astrologers have for centuries.</span>
       </span>
       <span aria-hidden="true">›</span>
     </Link>

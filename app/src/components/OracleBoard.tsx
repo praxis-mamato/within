@@ -4,6 +4,7 @@ import type { Tone } from '../content/oracle';
 
 const SIZE = 360;
 const C = SIZE / 2;
+const SIGN_NAMES = ['Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo', 'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces'];
 const ZODIAC = ['♈', '♉', '♊', '♋', '♌', '♍', '♎', '♏', '♐', '♑', '♒', '♓'];
 const PLANETS = [
   ['Sun', '☉'],
@@ -49,7 +50,7 @@ function skyNow(now: Date) {
  * into dawn at the bottom, a glass orb at the centre, and a planchette that searches the board and
  * comes to rest on the planet behind the answer.
  */
-export function OracleBoard({ phase, points, tone, boardRef }: { phase: 'idle' | 'seeking' | 'answered'; points?: string; tone?: Tone; boardRef?: Ref<HTMLDivElement> }) {
+export function OracleBoard({ phase, points, tone, orb, boardRef }: { phase: 'idle' | 'seeking' | 'answered'; points?: string; tone?: Tone; orb?: string; boardRef?: Ref<HTMLDivElement> }) {
   const sky = useMemo(() => skyNow(new Date()), []);
   const [pos, setPos] = useState({ x: C, y: C + 92 });
   const timers = useRef<number[]>([]);
@@ -58,7 +59,8 @@ export function OracleBoard({ phase, points, tone, boardRef }: { phase: 'idle' |
     timers.current.forEach(clearTimeout);
     timers.current = [];
     const target = sky.find((p) => p.body === points);
-    const land = target ? at(target.lon, target.r) : { x: C, y: C + 92 };
+    const sign = SIGN_NAMES.indexOf(points ?? '');
+    const land = target ? at(target.lon, target.r) : sign >= 0 ? at(sign * 30 + 15, 158) : { x: C, y: C + 92 };
     if (phase === 'seeking' && !reduced()) {
       const hops = [0, 1, 2, 3].map(() => at(Math.random() * 360, 100 + Math.random() * 40));
       hops.forEach((h, i) => timers.current.push(window.setTimeout(() => setPos(h), i * 480)));
@@ -68,10 +70,12 @@ export function OracleBoard({ phase, points, tone, boardRef }: { phase: 'idle' |
     return () => timers.current.forEach(clearTimeout);
   }, [phase, points, sky]);
 
-  const words = phase === 'answered' && tone ? TONES.find((t) => t.tone === tone)!.word.split(' ') : [];
+  // The orb shows the answer's own words, the tone for a decision, or a welcome before the first question.
+  const text = phase === 'answered' ? orb || (tone ? TONES.find((t) => t.tone === tone)!.word : '') : phase === 'idle' ? 'WELCOME' : '';
+  const words = wrap(text);
   return (
     <div className={`oracle-board ${phase}`} ref={boardRef}>
-      <svg viewBox={`0 0 ${SIZE} ${SIZE}`} role="img" aria-label={phase === 'answered' && tone ? `The planchette rests on ${points}. The orb reads: ${TONES.find((t) => t.tone === tone)!.word.toLowerCase()}.` : 'A talking board of the zodiac with today’s planets, and a glass orb at the centre.'}>
+      <svg viewBox={`0 0 ${SIZE} ${SIZE}`} role="img" aria-label={phase === 'answered' ? `The planchette rests on ${points}. The orb reads: ${text.toLowerCase()}.` : 'A talking board of the zodiac with today’s planets, and a glass orb at the centre.'}>
         <defs>
           <radialGradient id="ob-sky" cx="50%" cy="38%" r="75%">
             <stop offset="0" stopColor="#3a2049" />
@@ -124,8 +128,9 @@ export function OracleBoard({ phase, points, tone, boardRef }: { phase: 'idle' |
         })}
         {ZODIAC.map((g, i) => {
           const p = at(i * 30 + 15, 158);
+          const on = phase === 'answered' && points === SIGN_NAMES[i];
           return (
-            <text key={g} x={p.x} y={p.y} textAnchor="middle" dominantBaseline="central" fontSize="14" fill="#e8cf98">
+            <text key={g} x={p.x} y={p.y} textAnchor="middle" dominantBaseline="central" fontSize={on ? 19 : 14} fill={on ? '#ffe7a8' : '#e8cf98'} className={on ? 'ob-glow' : undefined}>
               {`${g}\uFE0E`}
             </text>
           );
@@ -158,9 +163,9 @@ export function OracleBoard({ phase, points, tone, boardRef }: { phase: 'idle' |
           </g>
           <path d={`M ${C - 40} ${C - 28} q 14 -26 46 -30`} stroke="#fff" strokeOpacity="0.55" strokeWidth="5" fill="none" strokeLinecap="round" />
           {words.length > 0 && (
-            <text x={C} y={C + (words.length > 1 ? -2 : 6)} textAnchor="middle" fill="#fff6e3" fontSize="15" letterSpacing="1.5" fontWeight={600} className="ob-reveal">
+            <text key={text} x={C} y={C + 6 - (words.length - 1) * 9} textAnchor="middle" fill="#fff6e3" fontSize={words.some((w) => w.length > 9) ? 12.5 : 15} letterSpacing="1.5" fontWeight={600} className={phase === 'idle' ? 'ob-breathe' : 'ob-reveal'}>
               {words.map((w, i) => (
-                <tspan key={w} x={C} dy={i ? 18 : 0}>
+                <tspan key={`${w}-${i}`} x={C} dy={i ? 18 : 0}>
                   {w}
                 </tspan>
               ))}
@@ -176,6 +181,17 @@ export function OracleBoard({ phase, points, tone, boardRef }: { phase: 'idle' |
       </svg>
     </div>
   );
+}
+
+/** Up to three short lines that fit inside the orb. */
+function wrap(text: string): string[] {
+  const out: string[] = [];
+  for (const w of text.split(' ').filter(Boolean)) {
+    const last = out[out.length - 1];
+    if (last && (last + ' ' + w).length <= 11) out[out.length - 1] = `${last} ${w}`;
+    else out.push(w);
+  }
+  return out.slice(0, 3);
 }
 
 /** A small orb for the Today card. */

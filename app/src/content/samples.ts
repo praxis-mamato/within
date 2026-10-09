@@ -10,6 +10,7 @@ import { cycles } from './cycles';
 import { weekReading } from './week';
 import { chartInBrief, todaySky } from './today';
 import { askOracle, ORACLE_TEXT } from './oracle';
+import { consultOracle, ORACLE_SAYS } from './oracleEngine';
 import { PATTERN_AREAS } from './mirror';
 import { timingReading, togetherReading, vedicDeep, westernDeep } from './deepReading';
 import { OUTCOME_STEPS, planFor, SITUATIONS, topicFor } from './topics';
@@ -91,7 +92,12 @@ export function buildCorpus(now = new Date('2026-10-06T12:00:00Z')): Passage[] {
       const a = askOracle(q, c, place, new Date(now.getTime() + (i * 7 + k * 13) * 3600000));
       out.push({ source: `${who} · The Oracle · “${q}”`, text: [a.label, a.line, a.because, ...a.why].join(' ') });
     }
-    out.push({ source: 'The Oracle · screen', text: [ORACLE_TEXT.intro, ORACLE_TEXT.limit, ORACLE_TEXT.sameDay].join(' ') });
+    out.push({ source: 'The Oracle · screen', text: [ORACLE_TEXT.intro, ORACLE_TEXT.limit, ORACLE_TEXT.sameDay, ORACLE_SAYS.welcome, ORACLE_SAYS.invite, ORACLE_SAYS.consult].join(' ') });
+    if (i % 3 === 0)
+      for (const q of ['When is a good day to sign the lease?', 'Is Mercury retrograde?', 'When is my Saturn return?', 'When is my Jupiter return?', 'Are we compatible?', 'What dasha am I in?', 'Tell me something', 'When is the next Full Moon?']) {
+        const a = consultOracle(q, { chart: c, place, now });
+        out.push({ source: `${who} · The Oracle · “${q}”`, text: [a.label, ...[...a.lines, ...a.deeper].map((l) => `${l.heading} ${l.text}`)].join(' ') });
+      }
     // More weeks, each with a different area on the person's mind, so the week library is seen in context.
     const areas = ['love', 'work', 'family', 'health', 'money', 'creativity', 'friends', 'purpose'] as const;
     for (const d of [10, 20, 30])

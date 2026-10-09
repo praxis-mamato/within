@@ -71,6 +71,15 @@ export function TabBar() {
         {icon(<path d="M5 19c0-8 6-14 14-14 0 8-6 14-14 14Zm0 0 7-7" />)}
         Today
       </NavLink>
+      <NavLink to="/oracle" className="oracle-tab">
+        {icon(
+          <>
+            <circle cx="12" cy="11" r="7" />
+            <path d="M8.5 9.5c.8-1.6 2.2-2.5 4-2.5M7 21h10M9 18l-1 3m7-3 1 3" />
+          </>,
+        )}
+        Oracle
+      </NavLink>
       <NavLink to="/relationships">
         {icon(
           <>
