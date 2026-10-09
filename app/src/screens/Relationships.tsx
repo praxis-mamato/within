@@ -1,6 +1,6 @@
 import { Cycles, Patterns } from './Patterns';
 import { useState } from 'react';
-import { Link, NavLink, useNavigate, useParams } from 'react-router-dom';
+import { Link, NavLink, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { MILESTONE_INTERPRETATION, MILESTONE_TYPES, REFLECTIONS, type Milestone, type MilestoneType, type Pillar } from '../data/fixtures';
 import { describePrecision, formatFuzzyDate, type DateKind } from '../lib/dates';
 import { Landscape, Leaf, Orbit, Venn } from '../components/Illustrations';
@@ -169,11 +169,13 @@ function YouNav() {
 }
 
 export function YouReading() {
+  const [params] = useSearchParams();
+  const tab = params.get('tab') === 'timing' ? 'timing' : 'western';
   return (
     <>
       <Back to="/relationships" label="Relationships" />
       <YouNav />
-      <Reading />
+      <Reading key={tab} initial={tab} />
     </>
   );
 }

@@ -7,6 +7,7 @@ import { composeReflection } from './compose';
 import { vedicReading, westernReading, type ReadingSection } from './fullReading';
 import { findPatterns } from './patternRules';
 import { cycles } from './cycles';
+import { weekReading } from './week';
 import { PATTERN_AREAS } from './mirror';
 import { timingReading, togetherReading, vedicDeep, westernDeep } from './deepReading';
 import { OUTCOME_STEPS, planFor, SITUATIONS, topicFor } from './topics';
@@ -52,7 +53,7 @@ export function sampleBirths(): BirthInput[] {
 
 const sectionPassages = (label: string, sections: ReadingSection[]): Passage[] =>
   sections.flatMap((s) => [
-    ...(s.intro ? [{ source: `${label} · ${s.title}`, text: s.intro }] : []),
+    { source: `${label} · ${s.title}`, text: `${s.title}.${s.intro ? ` ${s.intro}` : ''}` },
     ...s.items.map((it) => ({ source: `${label} · ${s.title}`, text: `${it.heading}. ${it.text}` })),
   ]);
 
@@ -80,6 +81,10 @@ export function buildCorpus(now = new Date('2026-10-06T12:00:00Z')): Passage[] {
     out.push(...sectionPassages(`${who} · Western deep reading`, westernDeep(c, place)));
     out.push(...sectionPassages(`${who} · Vedic deep reading`, vedicDeep(c)));
     out.push(...sectionPassages(`${who} · Timing`, timingReading(c, place, now)));
+    // More weeks, each with a different area on the person's mind, so the week library is seen in context.
+    const areas = ['love', 'work', 'family', 'health', 'money', 'creativity', 'friends', 'purpose'] as const;
+    for (const d of [10, 20, 30])
+      out.push(...sectionPassages(`${who} · Week of +${d} days`, weekReading(c, place, new Date(now.getTime() + d * 86400000), { season: 'Building', onMind: [areas[(i + d / 10) % 8], areas[(i + 4 + d / 10) % 8]], recharge: '' })));
     for (const pt of findPatterns(c, births[i].lat, births[i].lon))
       out.push({ source: `${who} · Patterns · ${pt.title}`, text: [pt.title, pt.summary, pt.shows, pt.gift, pt.edge, pt.helps, ...pt.notice, pt.question, ...Object.values(PATTERN_AREAS[pt.id] ?? {})].join(' ') });
     for (const area of ['love', 'work', 'family', 'health', 'money', 'creativity', 'friends', 'purpose'] as const) {

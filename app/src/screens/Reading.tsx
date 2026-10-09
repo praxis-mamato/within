@@ -13,7 +13,7 @@ type Tab = 'western' | 'vedic' | 'timing' | 'together';
 const TITLES: Record<Tab, { h1: string; sub: string }> = {
   western: { h1: 'The Western view', sub: 'Every placement in your chart, read through Western (tropical) astrology.' },
   vedic: { h1: 'The Vedic view', sub: 'Every placement in your chart, read through Jyotish, Vedic (sidereal) astrology, including the navamsa and dashamsa.' },
-  timing: { h1: 'Your timing', sub: 'The next 30 days of transits, New and Full Moons, and planets changing direction, plus your dasha calendar.' },
+  timing: { h1: 'Your timing', sub: 'Your week planet by planet, the next 30 days of transits, New and Full Moons, and planets changing direction, plus your dasha calendar.' },
   together: { h1: 'The two of you', sub: 'Your chart read alongside theirs: aspects, where you land in each other’s houses, and the relationship’s own chart.' },
 };
 
@@ -32,11 +32,11 @@ export default function Reading({ initial = 'western' }: { initial?: Tab }) {
     const merge = (base: ReadingSection[], deep: ReadingSection[]) => [...base.slice(0, -1), ...deep, base[base.length - 1]];
     if (tab === 'western') return [westernPlacements(me, place), ...merge(westernReading(me), westernDeep(me, place))];
     if (tab === 'vedic') return [vedicPlacements(me), ...merge(vedicReading(me, state.birth.date), vedicDeep(me))];
-    if (tab === 'timing') return timingReading(me, place);
+    if (tab === 'timing') return timingReading(me, place, new Date(), state.profile);
     if (other && theirBirth) return togetherReading(me, place, other, { lat: theirBirth.lat, lon: theirBirth.lon }, state.person!.nickname);
     return [];
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [me, other, tab, state.birth.date, state.birth.lat, state.birth.lon, theirBirth]);
+  }, [me, other, tab, state.profile, state.birth.date, state.birth.lat, state.birth.lon, theirBirth]);
   useEffect(() => track('reading_opened', { tradition: tab }), [tab]);
 
   if (!me) return <p className="banner">These birth details can’t be calculated. Check the date, place, and time zone in Settings.</p>;

@@ -97,6 +97,7 @@ export default function Today() {
 /** The deeper material, one tap from Today: patterns, cycles, and the full reading with AI deep dives. */
 function DeeperLinks() {
   const links = [
+    { to: '/you/reading?tab=timing', title: 'Your week, planet by planet', text: 'Every transit to your chart, dated, with the New and Full Moons' },
     { to: '/you/patterns', title: 'Your patterns', text: 'What shapes you, read from your whole chart' },
     { to: '/you/cycles', title: 'Your cycles', text: 'What you’re moving through now, with dates' },
     { to: '/you/reading', title: 'Your full reading', text: 'Western, Vedic, timing, and AI deep dives' },

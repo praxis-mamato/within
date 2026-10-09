@@ -83,7 +83,8 @@ export const OUTPUT_SCHEMA = {
 const KIND_TEXT: Record<Kind, string> = {
   western: 'A deep Western natal reading.',
   vedic: 'A deep Vedic natal reading, including the navamsa where listed.',
-  timing: 'A reading of the coming month and the current dasha period: themes and timing, not events.',
+  timing:
+    'A timing reading: themes and timing, not events. Start with the week ahead, planet by planet. Give each active planet its own section titled like "Mars in Leo: desire, and the courage to act"; name the natal house it is moving through, then walk through its contacts in date order with the date, the natal point and its degree, and what the two together may bring up. Mention the North Node and the angles when they are touched. Then a section on this week\'s New or Full Moon with its exact degree, house, and the natal points it touches, naming the tension or support in plain words (for example, career and public life versus emotional needs). Then the rest of the month, progressions, and the current dasha period more briefly. For this reading type, up to 9 sections are fine.',
   together: 'A reading of two charts side by side. The other person is called "them"; say nothing about their inner life.',
   question: 'An answer to the reader’s question, grounded in their chart.',
 };

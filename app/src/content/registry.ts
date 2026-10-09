@@ -15,6 +15,7 @@ import * as PAT from './patterns';
 import * as CY from './cycles';
 import * as MI from './mirror';
 import * as AN from './answer';
+import * as WK from './week';
 import committed from './approvals.json';
 import { lint } from './lint';
 
@@ -105,6 +106,17 @@ const SOURCES: [section: string, module: string, Record<string, unknown>, [name:
     ['PATTERN_AREAS', 'Patterns by life area'],
     ['MOVER_TARGET', 'Slow planets by natal point'],
     ['MOVER_AREA', 'Slow planets by life area'],
+  ]],
+  ['The week ahead', 'week', WK as Record<string, unknown>, [
+    ['WEEK_MOVER', 'Planet headings'],
+    ['WEEK_CONTACT', 'Planet contacts by aspect'],
+    ['WEEK_TARGET', 'Node and angles'],
+    ['WEEK_HOUSE_SHORT', 'Houses, short'],
+    ['WEEK_POINT_SHORT', 'Birth points, short'],
+    ['WEEK_LUNATION_ASPECT', 'New and Full Moon contacts'],
+    ['WEEK_FOCUS', 'Tie-back to what you told us'],
+    ['WEEK_STATION', 'Outer planets turning'],
+    ['WEEK_TEXT', 'Framing'],
   ]],
   ['Answers to sky and feeling questions', 'answer', AN as Record<string, unknown>, [
     ['MOON_TODAY_HOUSE', 'Today’s Moon by natal house'],

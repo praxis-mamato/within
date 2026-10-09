@@ -8,6 +8,8 @@ import { fmtDeg, type NatalChart } from '../astro/natal';
 import type { ReadingItem, ReadingSection } from './fullReading';
 import * as D from './deep';
 import { progressionSections } from './chartReading';
+import { weekReading } from './week';
+import type { Profile } from './mirror';
 import * as V from './vedic';
 import * as W from './western';
 
@@ -153,9 +155,9 @@ const TRANSIT_HOW: Record<string, string> = {
 };
 const NATAL_THEME: Record<string, string> = { ...Object.fromEntries(Object.entries(W.PLANET_FUNCTION)), Ascendant: 'how you meet the world', Midheaven: 'your direction and public life' };
 
-export function timingReading(c: NatalChart, place: Place, now = new Date()): ReadingSection[] {
+export function timingReading(c: NatalChart, place: Place, now = new Date(), profile: Profile | null = null): ReadingSection[] {
   const m = monthAhead(c, now, 30, place.lat, place.lon);
-  const out: ReadingSection[] = [];
+  const out: ReadingSection[] = weekReading(c, place, now, profile);
   out.push({
     id: 't-transits',
     title: 'The month ahead, date by date',

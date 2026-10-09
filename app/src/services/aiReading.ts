@@ -7,8 +7,9 @@ import { fmtDeg, type NatalChart } from '../astro/natal';
 import { allAspects, aspectPatterns, dashaCalendar, lordshipYogas, monthAhead, synastry, vargas } from '../astro/deep';
 import { vedicYogas } from '../content/fullReading';
 import type { ReadingSection } from '../content/fullReading';
-import { placidusCusps } from '../astro/chart';
+import { placidusCusps, SIGNS } from '../astro/chart';
 import { progressions, solarArc, solarReturn, yearAhead } from '../astro/progressions';
+import { weekAhead } from '../astro/week';
 import type { DeepResult, Kind } from '../../../supabase/functions/_shared/deepReading';
 import { LIMITS } from '../../../supabase/functions/_shared/deepReading';
 import { LIVE } from './config';
@@ -32,6 +33,26 @@ function progressionFacts(c: NatalChart, place: Place): string[] {
   for (const w of yearAhead(c, place.lat, place.lon, now).slice(0, 14)) f.push(`${w.start} to ${w.end}: transiting ${w.transiting} ${w.aspect} natal ${w.natal}, closest ${w.exact.join(', ')} (Western)`);
   const sr = solarReturn(c, place.lat, place.lon, now);
   if (sr) f.push(`Solar return this year: ${sr.ascendant} rising${sr.sunHouse ? `, Sun in return house ${sr.sunHouse}` : ''}, return Moon in ${sr.moonSign} (Western)`);
+  return f;
+}
+
+const at = (lon: number) => `${fmtDeg(((lon % 30) + 30) % 30)} ${SIGNS[Math.floor((((lon % 360) + 360) % 360) / 30)]}`;
+
+/** The next ten days planet by planet: where each planet is, the house it crosses, and each dated contact. */
+function weekFacts(c: NatalChart, place: Place): string[] {
+  const now = new Date();
+  const w = weekAhead(c, place.lat, place.lon, now);
+  const f = [`Today is ${now.toISOString().slice(0, 10)}; the week runs ${w.start} to ${w.end}`];
+  for (const m of w.movers) {
+    f.push(`Transiting ${m.mover} in ${m.sign} ${fmtDeg(m.lon % 30)}${m.retrograde ? ', retrograde' : ''}${m.house ? `, moving through natal house ${m.house}` : ''} (Western)`);
+    for (const x of m.contacts) f.push(`${x.date}: transiting ${m.mover} ${x.aspect} natal ${x.natal} (${at(x.natalLon)}), within ${fmtDeg(x.orb)} (Western)`);
+    if (m.station) f.push(`${m.station.date}: ${m.mover} turns ${m.station.turns} (Western)`);
+    if (m.ingress) f.push(`${m.ingress.date}: ${m.mover} enters ${m.ingress.sign} (Western)`);
+  }
+  for (const l of w.lunations) {
+    f.push(`${l.date}: ${l.kind} at ${at(l.lon)}${l.house ? `, natal house ${l.house}` : ''} (Western)`);
+    for (const a of l.aspects.slice(0, 3)) f.push(`${l.date}: the ${l.kind} is ${a.aspect} natal ${a.natal} (${at(a.natalLon)}), within ${fmtDeg(a.orb)} (Western)`);
+  }
   return f;
 }
 
@@ -65,8 +86,9 @@ export function factSheet(kind: Kind, me: NatalChart, place: Place, other?: { ch
   else if (kind === 'timing') {
     const m = monthAhead(me, new Date(), 30, place.lat, place.lon);
     f = [
-      ...me.western.planets.filter((p) => ['Sun', 'Moon', 'Venus', 'Mars'].includes(p.body)).map((p) => `Natal ${p.body} in ${p.sign} (Western)`),
-      ...m.transits.slice(0, 20).map((t) => `${t.date}: transiting ${t.transiting} ${t.aspect} natal ${t.natal}, within ${fmtDeg(t.orb)} (Western)`),
+      ...me.western.planets.map((p) => `Natal ${p.body === 'Node' ? 'North Node' : p.body} in ${p.sign} ${fmtDeg(p.degree)}${p.house ? `, house ${p.house}` : ''} (Western)`),
+      ...weekFacts(me, place),
+      ...m.transits.filter((t) => t.date > new Date(Date.now() + 9 * 864e5).toISOString().slice(0, 10)).slice(0, 14).map((t) => `${t.date}: transiting ${t.transiting} ${t.aspect} natal ${t.natal}, within ${fmtDeg(t.orb)} (Western)`),
       ...m.lunar.map((l) => `${l.date}: ${l.kind} in ${l.sign}${l.house ? `, natal house ${l.house}` : ''}${l.eclipse ? ', eclipse season' : ''} (Western)`),
       ...m.stations.map((s) => `${s.date}: ${s.body} turns ${s.turns} in ${s.sign} (Western)`),
       ...dashaCalendar(me, new Date(), 12).slice(0, 12).map((d) => `${d.start} to ${d.end}: ${d.lord} ${d.level} within ${d.within} (Vedic)`),
