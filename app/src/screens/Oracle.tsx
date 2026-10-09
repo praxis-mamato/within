@@ -1,10 +1,10 @@
 import { useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useCharts } from '../astro/useCharts';
-import { boardInfo, consultOracle, ORACLE_SAYS, type BoardInfo, type OracleReply } from '../content/oracleEngine';
-import { ORACLE_TEXT } from '../content/oracle';
+import { consultOracle, ORACLE_SAYS, type OracleReply } from '../content/oracleEngine';
+import { ORACLE_TEXT, ORACLE_TONE } from '../content/oracle';
 import type { SkyLine } from '../content/today';
-import { OracleBoard, useShake } from '../components/OracleBoard';
+import { FortuneBall, spellFor, TalkingBoard, useShake } from '../components/OracleBoard';
 import { Paywall } from '../components/Paywall';
 import { Back, SafetyPanel } from '../components/ui';
 import { screen } from '../lib/screener';
@@ -50,8 +50,8 @@ export default function Oracle() {
   const [consult, setConsult] = useState<{ q: string; result?: DeepResult; busy?: boolean; error?: string } | null>(null);
   const board = useRef<HTMLDivElement>(null);
   const input = useRef<HTMLTextAreaElement>(null);
-  const [info, setInfo] = useState<BoardInfo | null>(null);
-  const [prompt, setPrompt] = useState<string | undefined>(undefined);
+  const [spell, setSpell] = useState<string[] | null>(null);
+  const fallback = useRef(0);
   const place = { lat: state.birth.lat, lon: state.birth.lon };
   const day = new Date().toISOString().slice(0, 10);
   const asked = state.oracle.filter((a) => a.day === day);
@@ -64,7 +64,6 @@ export default function Oracle() {
     if (!me || !question || phase === 'seeking') return;
     setNote('');
     setConsult(null);
-    setInfo(null);
     if (screen(question).flagged) {
       dispatch({ type: 'text/screen', text: question });
       setFlagged(true);
@@ -85,8 +84,11 @@ export default function Oracle() {
     }
     setAnswer(a);
     setPhase('seeking');
-    board.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    window.setTimeout(() => setPhase('answered'), window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ? 0 : 2600);
+    // The planchette spells the answer; the ball reveals it when the spelling ends.
+    setSpell(spellFor(a));
+    board.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    window.clearTimeout(fallback.current);
+    fallback.current = window.setTimeout(() => setPhase('answered'), 12000);
   };
   const enableShake = useShake(() => ask());
 
@@ -115,36 +117,18 @@ export default function Oracle() {
       </h1>
       <p className="sub">{ORACLE_SAYS.invite}</p>
 
-      <OracleBoard
+      <TalkingBoard spell={spell} boardRef={board} onSpelled={() => (window.clearTimeout(fallback.current), setPhase('answered'))} />
+      <FortuneBall
         phase={phase}
-        points={answer?.points}
-        tone={answer?.tone}
-        orb={answer?.orb}
-        boardRef={board}
-        prompt={prompt}
-        onPick={(p) => setInfo(boardInfo(p.kind, p.name, me, place))}
-        onOrb={() => {
+        text={answer ? (answer.tone ? ORACLE_TONE[answer.tone].label : answer.orb || answer.label) : ''}
+        onAsk={() => {
+          void enableShake();
           if (q.trim()) ask();
-          else {
-            setPrompt('ASK ME');
-            input.current?.focus({ preventScroll: true });
-          }
+          else input.current?.focus();
         }}
       />
-      <p className="small oracle-muted oracle-hint">Touch the crystal ball to ask. Tap or drag the pointer onto any planet, sign, or answer to explore.</p>
+      <p className="small oracle-muted oracle-hint">Write your question, then tap or shake the ball. Or slide the planchette across the board yourself.</p>
       {!answer && <p className="small oracle-muted">{ORACLE_SAYS.how}</p>}
-      {info && (
-        <section className="oracle-info" aria-live="polite">
-          <h3>{info.title}</h3>
-          <p>{info.text}</p>
-          {info.ask && (
-            <button type="button" className="btn secondary" onClick={() => (setQ(info.ask!), ask(info.ask))}>
-              Ask the Oracle about this
-            </button>
-          )}
-        </section>
-      )}
-
       {answer && phase === 'answered' && (
         <section className="oracle-answer" aria-live="polite" aria-labelledby="oa-h">
           <p className="small oracle-muted">“{answer.question}”</p>
@@ -206,7 +190,7 @@ export default function Oracle() {
           }}
         >
           <label htmlFor="oracle-q">Ask the stars</label>
-          <textarea ref={input} id="oracle-q" rows={2} maxLength={300} value={q} placeholder="Ask anything about your chart, the sky, or your timing…" onChange={(e) => (setQ(e.target.value), phase === 'answered' && setPhase('idle'))} />
+          <textarea ref={input} id="oracle-q" rows={2} maxLength={300} value={q} placeholder="Ask anything about your chart, the sky, or your timing…" onChange={(e) => (setQ(e.target.value), phase === 'answered' && (setPhase('idle'), setSpell(null)))} />
           <div className="chips">
             {EXAMPLES.map((x) => (
               <button key={x} type="button" className="chip" onClick={() => (setQ(x), ask(x))}>

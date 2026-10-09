@@ -564,8 +564,8 @@ details > summary { cursor: pointer; margin: 8px 0; }
   padding: 16px 20px 32px;
   color: var(--o-ink);
   background:
-    radial-gradient(120% 60% at 50% 105%, rgb(233 164 106 / 0.55), transparent 60%),
-    linear-gradient(180deg, #0a0f26 0%, #141b40 45%, #2b2547 75%, #5d3a45 100%);
+    radial-gradient(90% 45% at 50% 30%, rgb(255 190 110 / 0.18), transparent 70%),
+    linear-gradient(180deg, #0d0907 0%, #1a110b 45%, #2a1a10 75%, #3d2614 100%);
   border-radius: 0 0 24px 24px;
   min-height: 100%;
 }
@@ -619,7 +619,7 @@ details > summary { cursor: pointer; margin: 8px 0; }
 .oracle-past strong { color: var(--o-gold); font-weight: 600; }
 .oracle-card {
   display: flex; align-items: center; gap: 12px; margin: 16px 0; padding: 14px 16px; border-radius: 18px; text-decoration: none; color: #f6ebdd;
-  background: radial-gradient(90% 80% at 50% 120%, rgb(233 164 106 / 0.6), transparent 70%), linear-gradient(160deg, #0d1330, #232552 70%, #5d3a45);
+  background: radial-gradient(90% 80% at 50% 120%, rgb(233 164 106 / 0.6), transparent 70%), linear-gradient(160deg, #120c08, #2a1a10 70%, #4a2e17);
   border: 1px solid rgb(226 194 126 / 0.6); box-shadow: 0 8px 22px rgb(58 26 44 / 0.25); min-height: 44px;
 }
 .oracle-card > span:nth-child(2) { display: grid; gap: 2px; flex: 1; }
@@ -656,3 +656,28 @@ details > summary { cursor: pointer; margin: 8px 0; }
 .oracle-info h3 { margin: 0 0 4px; color: #fff6e6; }
 .oracle-info p { margin: 0 0 8px; }
 .oracle-hint { text-align: center; margin: -8px 0 14px; }
+
+/* ─── Talking board and fortune ball ─── */
+.talking-board { position: relative; width: min(100%, 480px); margin: 14px auto 6px; filter: drop-shadow(0 14px 24px rgb(0 0 0 / 0.6)); touch-action: pan-y; }
+.talking-board > svg:first-child { display: block; width: 100%; height: auto; }
+.talking-board text { font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 600; transition: fill 0.25s ease; }
+.talking-board .tb-title { font-weight: 600; }
+.tb-lit { filter: drop-shadow(0 0 4px #ffcf6a) drop-shadow(0 0 10px #ff9d2e); }
+.tb-planchette {
+  position: absolute; width: 17%; height: auto; transform: translate(-50%, -36%);
+  transition: left 0.55s cubic-bezier(0.45, 0, 0.3, 1), top 0.55s cubic-bezier(0.45, 0, 0.3, 1);
+  filter: drop-shadow(0 8px 6px rgb(0 0 0 / 0.55)); touch-action: none; cursor: grab;
+}
+.talking-board.dragging .tb-planchette { transition: none; cursor: grabbing; }
+.fortune-ball { display: block; width: min(56%, 230px); margin: 4px auto 10px; padding: 0; border: 0; background: none; cursor: pointer; border-radius: 50%; touch-action: manipulation; }
+.fortune-ball svg { display: block; width: 100%; height: auto; }
+.fortune-ball:focus-visible { outline: 2px solid #e2c27e; outline-offset: 4px; }
+.fortune-ball.seeking { animation: fb-rattle 0.18s ease-in-out 8; }
+.fb-die { transform-origin: 100px 104px; transition: opacity 1.2s ease, transform 1.4s cubic-bezier(0.2, 0.7, 0.2, 1); }
+.fortune-ball.seeking .fb-die { opacity: 0; transform: translateY(16px) scale(0.6) rotate(25deg); transition-duration: 0.3s; }
+.fortune-ball.idle .fb-die { opacity: 0.5; transform: scale(0.9); }
+.fortune-ball.answered .fb-die { opacity: 1; transform: none; }
+.fb-bubble { animation: fb-rise 3s ease-in infinite; }
+@keyframes fb-rattle { 0%, 100% { transform: translate(0, 0) rotate(0); } 25% { transform: translate(-5px, 2px) rotate(-4deg); } 75% { transform: translate(5px, -2px) rotate(4deg); } }
+@keyframes fb-rise { from { transform: translateY(0); opacity: 0.6; } to { transform: translateY(-60px); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .tb-planchette, .fb-die { transition: none; } .fortune-ball.seeking, .fb-bubble { animation: none; } }

@@ -19,6 +19,7 @@ const Q: [string, OE.Intent][] = [
   ['Are we compatible?', 'together'],
   ['What does my week look like?', 'week'],
   ['Should I text him?', 'decision'],
+  ['Should I reach out to them this week?', 'decision'],
   ['Tell me something', 'open'],
 ];
 

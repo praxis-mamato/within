@@ -1,353 +1,281 @@
-import { useEffect, useMemo, useRef, useState, type Ref } from 'react';
-import { tropicalLongitude } from '../astro/chart';
+import { useEffect, useRef, useState, type Ref } from 'react';
 import type { Tone } from '../content/oracle';
-import { CrystalOrb } from './CrystalOrb';
+import type { OracleReply } from '../content/oracleEngine';
 
-const SIZE = 360;
-const C = SIZE / 2;
-const SIGN_NAMES = ['Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo', 'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces'];
-const ZODIAC = ['♈', '♉', '♊', '♋', '♌', '♍', '♎', '♏', '♐', '♑', '♒', '♓'];
-const PLANETS = [
-  ['Sun', '☉'],
-  ['Moon', '☽'],
-  ['Mercury', '☿'],
-  ['Venus', '♀'],
-  ['Mars', '♂'],
-  ['Jupiter', '♃'],
-  ['Saturn', '♄'],
-  ['Uranus', '♅'],
-  ['Neptune', '♆'],
-  ['Pluto', '♇'],
-] as const;
-// Tone words sit on the diagonals, like the corners of a talking board.
-const TONES: { tone: Tone; word: string; deg: number }[] = [
-  { tone: 'go', word: 'GO GENTLY', deg: 135 },
-  { tone: 'wait', word: 'WAIT', deg: 45 },
-  { tone: 'closer', word: 'LOOK CLOSER', deg: 315 },
-  { tone: 'again', word: 'ASK AGAIN', deg: 225 },
-];
+// ─── The talking board ────────────────────────────────────────────────────────
 
-// Chart-wheel orientation: 0° Aries on the left, signs running counter-clockwise.
-const at = (lon: number, r: number) => {
-  const a = ((180 - lon) * Math.PI) / 180;
-  return { x: C + r * Math.cos(a), y: C - r * Math.sin(a) };
+const W = 400;
+const H = 280;
+const UPPER = 'ABCDEFGHIJKLM'.split('');
+const LOWER = 'NOPQRSTUVWXYZ'.split('');
+const DIGITS = '1234567890'.split('');
+
+/** Letters sit on two shallow arcs, as on a classic talking board. */
+function arc(i: number, n: number, cy: number) {
+  const r = 455;
+  const t0 = (110.6 * Math.PI) / 180;
+  const t1 = (69.4 * Math.PI) / 180;
+  const t = t0 + ((t1 - t0) * i) / (n - 1);
+  const x = W / 2 + r * Math.cos(t);
+  const y = cy - r * Math.sin(t);
+  return { x, y, rot: 90 - (t * 180) / Math.PI };
+}
+const SPOTS: Record<string, { x: number; y: number }> = {
+  ...Object.fromEntries(UPPER.map((ch, i) => [ch, arc(i, UPPER.length, 560)])),
+  ...Object.fromEntries(LOWER.map((ch, i) => [ch, arc(i, LOWER.length, 622)])),
+  ...Object.fromEntries(DIGITS.map((d, i) => [d, { x: 82 + i * 26.2, y: 222 }])),
+  YES: { x: 92, y: 54 },
+  NO: { x: 310, y: 54 },
+  'GOOD BYE': { x: 200, y: 256 },
 };
-const polar = (deg: number, r: number) => ({ x: C + r * Math.cos((deg * Math.PI) / 180), y: C - r * Math.sin((deg * Math.PI) / 180) });
-const ORB_R = 68;
-const REST = { x: C, y: C + 118 };
+const REST = { x: 352, y: 238 };
 const reduced = () => typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 
-/** Where each planet is in the sky right now, spread apart when two sit close. */
-function skyNow(now: Date) {
-  const placed: { body: string; glyph: string; lon: number; r: number }[] = [];
-  for (const [body, glyph] of PLANETS) {
-    const lon = tropicalLongitude(body, now);
-    const near = placed.filter((p) => Math.abs(((p.lon - lon + 540) % 360) - 180) < 9).length;
-    placed.push({ body, glyph, lon, r: 128 - near * 15 });
-  }
-  return placed;
+const TONE_WORD: Record<Tone, string> = { go: 'YES', wait: 'WAIT', closer: 'LOOK', again: 'ASK' };
+const MONTHS = /\b(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)\b/;
+
+/** What the planchette spells for an answer: YES for go gently, a short word, or a date. */
+export function spellFor(r: OracleReply): string[] {
+  if (r.tone) return r.tone === 'go' ? ['YES'] : TONE_WORD[r.tone].split('');
+  const date = r.orb.toUpperCase().match(new RegExp(`${MONTHS.source}\\s+(\\d{1,2})`));
+  if (date) return [...date[1], ...date[2]];
+  const word = (r.points || 'MOON').toUpperCase().replace(/[^A-Z]/g, '').slice(0, 8);
+  return word ? word.split('') : ['YES'];
 }
 
-export type BoardPick = { kind: 'planet' | 'sign' | 'tone'; name: string };
-
 /**
- * The Oracle's board: the zodiac and today's real planet positions on a night-sky board that warms
- * into dawn, a living crystal ball on a gold stand, and a pointer that searches the board and comes
- * to rest on what the answer is about. Everything on it can be touched: tap a planet, a sign, or an
- * answer word, or drag the pointer onto one, to learn what it means. Touch and hold the ball to ask.
+ * A classic talking board, in Within's own design: the alphabet on two arcs, YES and NO under the
+ * sun and moon, the numbers, and GOOD BYE. The planchette glides to each letter of the answer.
+ * Drag it yourself and the letter under its window lights up.
  */
-export function OracleBoard({
-  phase,
-  points,
-  tone,
-  orb,
-  boardRef,
-  onPick,
-  onOrb,
-  prompt,
-}: {
-  phase: 'idle' | 'seeking' | 'answered';
-  points?: string;
-  tone?: Tone;
-  orb?: string;
-  boardRef?: Ref<HTMLDivElement>;
-  onPick?: (p: BoardPick) => void;
-  /** Called when the ball is released after a touch or hold. */
-  onOrb?: () => void;
-  /** Words for the ball before the first answer, e.g. "ASK ME". */
-  prompt?: string;
-}) {
-  const sky = useMemo(() => skyNow(new Date()), []);
+export function TalkingBoard({ spell, onSpelled, boardRef }: { spell: string[] | null; onSpelled?: () => void; boardRef?: Ref<HTMLDivElement> }) {
   const [pos, setPos] = useState(REST);
-  const [picked, setPicked] = useState<BoardPick | null>(null);
-  const [holding, setHolding] = useState(false);
+  const [lit, setLit] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
-  const timers = useRef<number[]>([]);
-  const wrapEl = useRef<HTMLDivElement | null>(null);
-
-  const spots = useMemo(
-    () => [
-      ...sky.map((p) => ({ kind: 'planet' as const, name: p.body, ...at(p.lon, p.r) })),
-      ...SIGN_NAMES.map((name, i) => ({ kind: 'sign' as const, name, ...at(i * 30 + 15, 158) })),
-      ...TONES.map((t) => ({ kind: 'tone' as const, name: t.tone, ...polar(t.deg, 98) })),
-    ],
-    [sky],
-  );
+  const wrap = useRef<HTMLDivElement | null>(null);
+  const done = useRef(onSpelled);
+  done.current = onSpelled;
 
   useEffect(() => {
-    timers.current.forEach(clearTimeout);
-    timers.current = [];
-    setPicked(null);
-    const target = spots.find((s) => s.kind !== 'tone' && s.name === points);
-    const land = target ?? REST;
-    if (phase === 'seeking' && !reduced()) {
-      const hops = [0, 1, 2, 3].map(() => at(Math.random() * 360, 100 + Math.random() * 40));
-      hops.forEach((h, i) => timers.current.push(window.setTimeout(() => setPos(h), i * 480)));
-      timers.current.push(window.setTimeout(() => setPos({ x: land.x, y: land.y }), hops.length * 480));
-    } else if (phase !== 'idle') setPos({ x: land.x, y: land.y });
-    else setPos(REST);
-    return () => timers.current.forEach(clearTimeout);
-  }, [phase, points, spots]);
+    if (!spell) {
+      setLit(null);
+      return;
+    }
+    if (reduced()) {
+      const last = SPOTS[spell[spell.length - 1]] ?? REST;
+      setPos(last);
+      setLit(spell[spell.length - 1]);
+      done.current?.();
+      return;
+    }
+    const timers: number[] = [];
+    // A slow circle to gather, then each letter in turn.
+    const warm = [{ x: 200, y: 150 }, { x: 150, y: 130 }, { x: 250, y: 130 }, { x: 200, y: 150 }];
+    warm.forEach((p, i) => timers.push(window.setTimeout(() => setPos(p), i * 330)));
+    spell.forEach((ch, i) =>
+      timers.push(
+        window.setTimeout(() => {
+          setPos(SPOTS[ch] ?? REST);
+          setLit(ch);
+        }, warm.length * 330 + i * 700),
+      ),
+    );
+    timers.push(window.setTimeout(() => done.current?.(), warm.length * 330 + spell.length * 700 + 300));
+    return () => timers.forEach(clearTimeout);
+  }, [spell]);
 
-  const pick = (p: BoardPick) => {
-    const s = spots.find((x) => x.kind === p.kind && x.name === p.name);
-    if (s) setPos({ x: s.x, y: s.y });
-    setPicked(p);
-    onPick?.(p);
-  };
   const toBoard = (e: React.PointerEvent) => {
-    const r = wrapEl.current!.getBoundingClientRect();
-    return { x: ((e.clientX - r.left) / r.width) * SIZE, y: ((e.clientY - r.top) / r.height) * SIZE };
+    const r = wrap.current!.getBoundingClientRect();
+    return { x: ((e.clientX - r.left) / r.width) * W, y: ((e.clientY - r.top) / r.height) * H };
   };
-  const nearest = (x: number, y: number) => {
-    let best: (typeof spots)[number] | null = null;
-    let d = 22 * 22;
-    for (const s of spots) {
-      const dd = (s.x - x) ** 2 + (s.y - y) ** 2;
-      if (dd < d) (d = dd), (best = s);
+  const under = (p: { x: number; y: number }) => {
+    let best: string | null = null;
+    let d = 16 * 16;
+    for (const [k, s] of Object.entries(SPOTS)) {
+      const dd = (s.x - p.x) ** 2 + (s.y - p.y) ** 2;
+      if (dd < d) (d = dd), (best = k);
     }
     return best;
   };
-
-  // The ball shows the answer's own words, the tone for a decision, or an invitation before the first question.
-  const text = phase === 'answered' ? orb || (tone ? TONES.find((t) => t.tone === tone)!.word : '') : phase === 'idle' ? (holding ? 'ASK' : (prompt ?? 'WELCOME')) : '';
-  const words = wrap(text);
-  const lit = (kind: BoardPick['kind'], name: string) => (picked ? picked.kind === kind && picked.name === name : phase === 'answered' && (kind === 'tone' ? tone === name : points === name));
-  const key = (p: BoardPick) => (e: React.KeyboardEvent) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), pick(p));
+  const glyph = (k: string, size: number, rot = 0) => {
+    const s = SPOTS[k];
+    const on = lit === k;
+    return (
+      <text key={k} x={s.x} y={s.y} textAnchor="middle" dominantBaseline="central" fontSize={size} transform={rot ? `rotate(${rot} ${s.x} ${s.y})` : undefined} className={on ? 'tb-lit' : undefined} fill={on ? '#fff3c4' : '#2a170a'}>
+        {k}
+      </text>
+    );
+  };
 
   return (
     <div
-      className={`oracle-board ${phase}${holding ? ' holding' : ''}${dragging ? ' dragging' : ''}`}
+      className={`talking-board${dragging ? ' dragging' : ''}`}
       ref={(el) => {
-        wrapEl.current = el;
+        wrap.current = el;
         if (typeof boardRef === 'function') boardRef(el);
         else if (boardRef) (boardRef as { current: HTMLDivElement | null }).current = el;
       }}
-      onPointerMove={(e) => dragging && setPos(toBoard(e))}
-      onPointerUp={(e) => {
+      onPointerMove={(e) => {
         if (!dragging) return;
-        setDragging(false);
-        const s = nearest(toBoard(e).x, toBoard(e).y);
-        if (s) pick({ kind: s.kind, name: s.name });
+        const p = toBoard(e);
+        setPos(p);
+        setLit(under(p));
       }}
+      onPointerUp={() => setDragging(false)}
     >
-      <svg viewBox={`0 0 ${SIZE} ${SIZE}`} role="group" aria-label="The Oracle’s board: the zodiac, today’s planets, and a crystal ball. Tap any planet, sign, or answer to learn what it means.">
+      <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={lit ? `A talking board. The planchette rests on ${lit}.` : 'A talking board with the alphabet, yes and no, the numbers, and good bye.'}>
         <defs>
-          <radialGradient id="ob-sky" cx="50%" cy="38%" r="75%">
-            <stop offset="0" stopColor="#1f2a5c" />
-            <stop offset="0.6" stopColor="#10173a" />
-            <stop offset="1" stopColor="#090c20" />
+          <radialGradient id="tb-wood" cx="50%" cy="45%" r="75%">
+            <stop offset="0" stopColor="#e7cf9f" />
+            <stop offset="0.6" stopColor="#cfa76a" />
+            <stop offset="1" stopColor="#8f6131" />
           </radialGradient>
-          <linearGradient id="ob-dawn" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0.55" stopColor="#e9a46a" stopOpacity="0" />
-            <stop offset="1" stopColor="#e9a46a" stopOpacity="0.45" />
-          </linearGradient>
-          <linearGradient id="ob-gold" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stopColor="#f6dc98" />
-            <stop offset="0.45" stopColor="#d1a352" />
-            <stop offset="1" stopColor="#7d5820" />
-          </linearGradient>
-          <radialGradient id="ob-halo" cx="50%" cy="50%" r="50%">
-            <stop offset="0.6" stopColor="#ffd98a" stopOpacity="0.28" />
-            <stop offset="1" stopColor="#ffd98a" stopOpacity="0" />
-          </radialGradient>
+          <pattern id="tb-grain" width="400" height="14" patternUnits="userSpaceOnUse">
+            <path d="M0 7 C 80 3, 160 11, 240 6 S 360 9, 400 6" stroke="#7a4f22" strokeOpacity="0.12" fill="none" />
+          </pattern>
         </defs>
-        <rect x="2" y="2" width={SIZE - 4} height={SIZE - 4} rx="26" fill="url(#ob-sky)" stroke="#c9a15a" strokeWidth="2" />
-        <rect x="2" y="2" width={SIZE - 4} height={SIZE - 4} rx="26" fill="url(#ob-dawn)" />
-        {Array.from({ length: 46 }, (_, i) => (
-          <circle key={i} cx={(i * 97) % SIZE} cy={(i * 61 + 23) % SIZE} r={i % 7 === 0 ? 1.4 : 0.7} fill="#f7e9c8" opacity={0.35 + (i % 5) * 0.1} className={i % 6 === 0 ? 'ob-twinkle' : undefined} />
-        ))}
-        {/* Sun and Moon in the top corners, as on old talking boards */}
-        <g stroke="#d9b36a" fill="none" strokeWidth="1.4">
-          <circle cx="34" cy="34" r="9" />
-          {Array.from({ length: 8 }, (_, i) => {
-            const a = (i * Math.PI) / 4;
-            return <line key={i} x1={34 + 12 * Math.cos(a)} y1={34 + 12 * Math.sin(a)} x2={34 + 17 * Math.cos(a)} y2={34 + 17 * Math.sin(a)} />;
+        <rect x="2" y="2" width={W - 4} height={H - 4} rx="20" fill="url(#tb-wood)" stroke="#3b2412" strokeWidth="3" />
+        <rect x="2" y="2" width={W - 4} height={H - 4} rx="20" fill="url(#tb-grain)" />
+        <rect x="11" y="11" width={W - 22} height={H - 22} rx="14" fill="none" stroke="#3b2412" strokeWidth="1.2" />
+        <rect x="15" y="15" width={W - 30} height={H - 30} rx="12" fill="none" stroke="#3b2412" strokeWidth="0.6" strokeDasharray="1 3" />
+        {/* Sun over YES, moon over NO */}
+        <g stroke="#2a170a" strokeWidth="1.4" fill="none">
+          <circle cx="48" cy="50" r="12" fill="#e9c879" />
+          {Array.from({ length: 12 }, (_, i) => {
+            const a = (i * Math.PI) / 6;
+            return <line key={i} x1={48 + 15 * Math.cos(a)} y1={50 + 15 * Math.sin(a)} x2={48 + 21 * Math.cos(a)} y2={50 + 21 * Math.sin(a)} />;
           })}
-          <circle cx={SIZE - 34} cy="34" r="12" fill="#d9b36a" stroke="none" />
-          <circle cx={SIZE - 28} cy="30" r="11" fill="#141c45" stroke="none" />
+          <path d="M 352 36 a 15 15 0 1 0 0 28 a 11 11 0 1 1 0 -28 Z" fill="#e9c879" />
         </g>
-        <circle cx={C} cy={C} r="170" fill="none" stroke="#c9a15a" strokeOpacity="0.7" />
-        <circle cx={C} cy={C} r="146" fill="none" stroke="#c9a15a" strokeOpacity="0.45" />
-        {ZODIAC.map((_, i) => {
-          const a = at(i * 30, 146);
-          const b = at(i * 30, 170);
-          return <line key={i} x1={a.x} y1={a.y} x2={b.x} y2={b.y} stroke="#c9a15a" strokeOpacity="0.4" />;
-        })}
-        {ZODIAC.map((g, i) => {
-          const p = at(i * 30 + 15, 158);
-          const on = lit('sign', SIGN_NAMES[i]);
-          const pk = { kind: 'sign' as const, name: SIGN_NAMES[i] };
-          return (
-            <g key={g} role="button" tabIndex={0} aria-label={SIGN_NAMES[i]} className="ob-spot" onClick={() => pick(pk)} onKeyDown={key(pk)}>
-              <circle cx={p.x} cy={p.y} r="13" fill="transparent" />
-              <text x={p.x} y={p.y} textAnchor="middle" dominantBaseline="central" fontSize={on ? 19 : 14} fill={on ? '#ffe7a8' : '#e8cf98'} className={on ? 'ob-glow' : undefined}>
-                {`${g}︎`}
-              </text>
-            </g>
-          );
-        })}
-        {sky.map((p) => {
-          const q = at(p.lon, p.r);
-          const on = lit('planet', p.body);
-          const pk = { kind: 'planet' as const, name: p.body };
-          return (
-            <g key={p.body} role="button" tabIndex={0} aria-label={`${p.body} today`} className="ob-spot" onClick={() => pick(pk)} onKeyDown={key(pk)}>
-              <circle cx={q.x} cy={q.y} r="13" fill="transparent" />
-              <text x={q.x} y={q.y} textAnchor="middle" dominantBaseline="central" fontSize={on ? 21 : 16} fill={on ? '#ffe7a8' : '#f2e3cf'} className={on ? 'ob-glow' : undefined}>
-                {`${p.glyph}︎`}
-              </text>
-            </g>
-          );
-        })}
-        {TONES.map((t) => {
-          const p = polar(t.deg, 98);
-          const on = lit('tone', t.tone);
-          const pk = { kind: 'tone' as const, name: t.tone };
-          return (
-            <g key={t.tone} role="button" tabIndex={0} aria-label={`What “${t.word.toLowerCase()}” means`} className="ob-spot" onClick={() => pick(pk)} onKeyDown={key(pk)}>
-              <rect x={p.x - 36} y={p.y - 10} width="72" height="20" fill="transparent" />
-              <text x={p.x} y={p.y} textAnchor="middle" dominantBaseline="central" fontSize="9.5" letterSpacing="1.6" fill={on ? '#ffe7a8' : '#c9b2a0'} fontWeight={on ? 700 : 400} className={on ? 'ob-glow' : undefined}>
-                {t.word}
-              </text>
-            </g>
-          );
-        })}
-        {/* A halo of light behind the ball, and its stand */}
-        <circle cx={C} cy={C} r={ORB_R + 16} fill="url(#ob-halo)" className="ob-halo" />
-        <ellipse cx={C} cy={C + ORB_R + 20} rx="46" ry="7" fill="#000" opacity="0.35" />
-        <path d={`M ${C - 40} ${C + ORB_R + 18} C ${C - 36} ${C + ORB_R + 6}, ${C - 22} ${C + ORB_R + 2}, ${C - 18} ${C + ORB_R - 6} L ${C + 18} ${C + ORB_R - 6} C ${C + 22} ${C + ORB_R + 2}, ${C + 36} ${C + ORB_R + 6}, ${C + 40} ${C + ORB_R + 18} Z`} fill="url(#ob-gold)" />
-        <rect x={C - 46} y={C + ORB_R + 16} width="92" height="7" rx="3.5" fill="url(#ob-gold)" />
+        <text x="200" y="44" textAnchor="middle" fontSize="15" letterSpacing="6" fill="#2a170a" className="tb-title">
+          ✦ WITHIN ✦
+        </text>
+        {glyph('YES', 22)}
+        {glyph('NO', 22)}
+        {UPPER.map((ch) => glyph(ch, 27, SPOTS_ROT[ch]))}
+        {LOWER.map((ch) => glyph(ch, 27, SPOTS_ROT[ch]))}
+        {DIGITS.map((d) => glyph(d, 20))}
+        {glyph('GOOD BYE', 17)}
       </svg>
-
-      <div className="crystal-wrap" style={{ left: `${((C - ORB_R) / SIZE) * 100}%`, top: `${((C - ORB_R) / SIZE) * 100}%`, width: `${((2 * ORB_R) / SIZE) * 100}%` }}>
-        <CrystalOrb
-          phase={phase}
-          quiet={words.length > 0}
-          onHoldChange={(h) => {
-            setHolding(h);
-            if (!h) onOrb?.();
-          }}
-        />
-      </div>
-
-      {/* Glass highlights, the claws that hold the ball, and the words that rise in it */}
-      <svg className="ob-overlay" viewBox={`0 0 ${SIZE} ${SIZE}`} aria-hidden="true">
-        <defs>
-          <radialGradient id="ob-spec" cx="50%" cy="50%" r="50%">
-            <stop offset="0" stopColor="#fff" stopOpacity="0.85" />
-            <stop offset="1" stopColor="#fff" stopOpacity="0" />
-          </radialGradient>
-          <linearGradient id="ob-gold2" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stopColor="#f6dc98" />
-            <stop offset="1" stopColor="#8a6327" />
-          </linearGradient>
-        </defs>
-        <ellipse cx={C - 26} cy={C - 36} rx="24" ry="12" fill="url(#ob-spec)" opacity="0.55" transform={`rotate(-32 ${C - 26} ${C - 36})`} />
-        <circle cx={C - 36} cy={C - 41} r="3.2" fill="#fff" opacity="0.9" />
-        <path d={`M ${C + 38} ${C + 44} a ${ORB_R - 6} ${ORB_R - 6} 0 0 0 ${18} ${-30}`} stroke="#fff" strokeOpacity="0.25" strokeWidth="2.5" fill="none" strokeLinecap="round" />
-        <circle cx={C} cy={C} r={ORB_R} fill="none" stroke="url(#ob-gold2)" strokeWidth="1.5" strokeOpacity="0.8" />
-        {[-1, 1].map((k) => (
-          <path key={k} d={`M ${C + k * 30} ${C + ORB_R + 2} C ${C + k * 34} ${C + ORB_R - 8}, ${C + k * 40} ${C + ORB_R - 16}, ${C + k * 44} ${C + ORB_R - 24}`} stroke="url(#ob-gold2)" strokeWidth="4" fill="none" strokeLinecap="round" />
-        ))}
-        {words.length > 0 && (
-          <text key={text} x={C} y={C + 6 - (words.length - 1) * 9} textAnchor="middle" fill="#fff8e6" fontSize={words.some((w) => w.length > 9) ? 12.5 : 15} letterSpacing="1.5" fontWeight={600} className={`ob-words ${phase === 'idle' ? 'ob-breathe' : 'ob-reveal'}`}>
-            {words.map((w, i) => (
-              <tspan key={`${w}-${i}`} x={C} dy={i ? 18 : 0}>
-                {w}
-              </tspan>
-            ))}
-          </text>
-        )}
-      </svg>
-
-      {/* The pointer: drag it onto anything on the board */}
+      {/* The planchette: a wooden heart with a brass-rimmed glass window */}
       <svg
-        className="ob-planchette"
-        viewBox="0 0 64 64"
-        role="img"
-        aria-label="The pointer. Drag it onto a planet, sign, or answer."
-        style={{ left: `${(pos.x / SIZE) * 100}%`, top: `${(pos.y / SIZE) * 100}%` }}
+        className="tb-planchette"
+        viewBox="0 0 80 96"
+        aria-hidden="true"
+        style={{ left: `${(pos.x / W) * 100}%`, top: `${(pos.y / H) * 100}%` }}
         onPointerDown={(e) => {
-          if (phase === 'seeking') return;
-          wrapEl.current?.setPointerCapture?.(e.pointerId);
+          wrap.current?.setPointerCapture?.(e.pointerId);
           setDragging(true);
         }}
       >
         <defs>
-          <linearGradient id="ob-lens-gold" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" stopColor="#fbe3a0" />
-            <stop offset="1" stopColor="#b98a3c" />
+          <linearGradient id="tb-pl" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stopColor="#f6ead2" />
+            <stop offset="1" stopColor="#c9a36a" />
           </linearGradient>
         </defs>
-        <circle cx="32" cy="32" r="22" fill="transparent" />
-        <circle cx="32" cy="32" r="15" fill="#fffaf0" fillOpacity="0.12" stroke="url(#ob-lens-gold)" strokeWidth="3" />
-        <circle cx="32" cy="32" r="20" fill="none" stroke="#f3d68e" strokeOpacity="0.45" strokeWidth="1" strokeDasharray="2 4" />
-        {[0, 90, 180, 270].map((a) => (
-          <path key={a} d="M32 2 L35 12 L32 10 L29 12 Z" fill="url(#ob-lens-gold)" transform={`rotate(${a} 32 32)`} />
-        ))}
-        <path d="M24 26 a 9 9 0 0 1 8 -4" stroke="#fff" strokeOpacity="0.7" strokeWidth="2" fill="none" strokeLinecap="round" />
+        <path d="M40 4 C 52 20 78 40 76 62 C 74 80 58 90 40 82 C 22 90 6 80 4 62 C 2 40 28 20 40 4 Z" fill="url(#tb-pl)" stroke="#3b2412" strokeWidth="2.5" />
+        <circle cx="40" cy="34" r="13" fill="#fffaf0" fillOpacity="0.18" stroke="#9a7330" strokeWidth="3.5" />
+        <circle cx="40" cy="34" r="13" fill="none" stroke="#3b2412" strokeWidth="0.8" />
+        <path d="M33 29 a 8 8 0 0 1 7 -4" stroke="#fff" strokeOpacity="0.8" strokeWidth="2" fill="none" strokeLinecap="round" />
+        <circle cx="16" cy="66" r="2.2" fill="#3b2412" />
+        <circle cx="64" cy="66" r="2.2" fill="#3b2412" />
+        <circle cx="40" cy="78" r="2.2" fill="#3b2412" />
       </svg>
     </div>
   );
 }
+const SPOTS_ROT: Record<string, number> = Object.fromEntries([
+  ...UPPER.map((ch, i) => [ch, arc(i, UPPER.length, 560).rot]),
+  ...LOWER.map((ch, i) => [ch, arc(i, LOWER.length, 622).rot]),
+]);
 
-/** Up to three short lines that fit inside the orb. */
-function wrap(text: string): string[] {
+// ─── The fortune ball ─────────────────────────────────────────────────────────
+
+/** Up to four short lines that fit inside the triangle. */
+function lines(text: string): string[] {
   const out: string[] = [];
-  for (const w of text.split(' ').filter(Boolean)) {
+  for (const w of text.toUpperCase().split(' ').filter(Boolean)) {
     const last = out[out.length - 1];
-    if (last && (last + ' ' + w).length <= 11) out[out.length - 1] = `${last} ${w}`;
+    if (last && (last + ' ' + w).length <= 9) out[out.length - 1] = `${last} ${w}`;
     else out.push(w);
   }
-  return out.slice(0, 3);
+  return out.slice(0, 4);
 }
 
-/** A small orb for the Today card. */
+/**
+ * A black fortune ball. Tap or shake it: it rattles, the window goes dark, and the blue die floats
+ * up through the ink with the answer on its face.
+ */
+export function FortuneBall({ phase, text, onAsk }: { phase: 'idle' | 'seeking' | 'answered'; text: string; onAsk?: () => void }) {
+  const ls = lines(phase === 'answered' ? text : phase === 'idle' ? 'ASK' : '');
+  const size = ls.some((l) => l.length > 7) ? 11 : 13;
+  return (
+    <button type="button" className={`fortune-ball ${phase}`} onClick={onAsk} aria-label={phase === 'answered' ? `The ball reads: ${text}` : 'Shake or tap the ball to ask'}>
+      <svg viewBox="0 0 200 200" aria-hidden="true">
+        <defs>
+          <radialGradient id="fb-body" cx="38%" cy="30%" r="75%">
+            <stop offset="0" stopColor="#5a5a62" />
+            <stop offset="0.25" stopColor="#1d1d22" />
+            <stop offset="1" stopColor="#020203" />
+          </radialGradient>
+          <radialGradient id="fb-ink" cx="50%" cy="45%" r="60%">
+            <stop offset="0" stopColor="#13235f" />
+            <stop offset="1" stopColor="#040817" />
+          </radialGradient>
+          <linearGradient id="fb-die" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stopColor="#3956d6" />
+            <stop offset="1" stopColor="#1b2d93" />
+          </linearGradient>
+          <clipPath id="fb-win">
+            <circle cx="100" cy="100" r="50" />
+          </clipPath>
+        </defs>
+        <ellipse cx="100" cy="190" rx="62" ry="7" fill="#000" opacity="0.45" />
+        <circle cx="100" cy="98" r="90" fill="url(#fb-body)" />
+        <circle cx="100" cy="100" r="56" fill="#0a0a0d" />
+        <circle cx="100" cy="100" r="52" fill="url(#fb-ink)" stroke="#2c2c33" strokeWidth="2" />
+        <g clipPath="url(#fb-win)">
+          <g className="fb-die">
+            <path d="M 52 72 L 148 72 L 100 150 Z" fill="url(#fb-die)" stroke="#6f86ff" strokeOpacity="0.5" strokeWidth="1.2" strokeLinejoin="round" />
+            <text x="100" y={95 - (ls.length - 1) * 7} textAnchor="middle" fill="#eef2ff" fontSize={size} fontWeight={700} letterSpacing="0.6" fontFamily="'Source Sans 3', sans-serif">
+              {ls.map((l, i) => (
+                <tspan key={`${l}-${i}`} x="100" dy={i ? 14 : 0}>
+                  {l}
+                </tspan>
+              ))}
+            </text>
+          </g>
+          {[0, 1, 2, 3, 4].map((i) => (
+            <circle key={i} className="fb-bubble" cx={78 + i * 11} cy={136 - (i % 3) * 6} r={1 + (i % 2)} fill="#9fb2ff" opacity="0.5" style={{ animationDelay: `${i * 0.5}s` }} />
+          ))}
+        </g>
+        <ellipse cx="66" cy="44" rx="30" ry="15" fill="#fff" opacity="0.22" transform="rotate(-30 66 44)" />
+        <circle cx="56" cy="40" r="5" fill="#fff" opacity="0.6" />
+      </svg>
+    </button>
+  );
+}
+
+/** A small fortune ball for the Today card. */
 export function MiniOrb() {
   return (
     <svg viewBox="0 0 80 80" width="72" height="72" aria-hidden="true" className="mini-orb">
       <defs>
-        <radialGradient id="mo-glass" cx="36%" cy="30%" r="78%">
-          <stop offset="0" stopColor="#4a63b0" />
-          <stop offset="0.5" stopColor="#1b2a62" />
-          <stop offset="1" stopColor="#070b20" />
+        <radialGradient id="mb-body" cx="38%" cy="30%" r="75%">
+          <stop offset="0" stopColor="#5a5a62" />
+          <stop offset="0.3" stopColor="#1d1d22" />
+          <stop offset="1" stopColor="#020203" />
         </radialGradient>
-        <linearGradient id="mo-gold" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#f3d68e" />
-          <stop offset="1" stopColor="#a87b34" />
-        </linearGradient>
       </defs>
-      <path d="M27 72 L53 72 L49 64 L31 64 Z" fill="url(#mo-gold)" />
-      <circle cx="40" cy="36" r="29" fill="url(#mo-glass)" stroke="url(#mo-gold)" strokeWidth="2" />
-      <ellipse cx="40" cy="36" rx="28" ry="8" fill="none" stroke="#e2c27e" strokeOpacity="0.55" transform="rotate(-18 40 36)" />
-      <path d="M40 24 L42 33 L51 36 L42 39 L40 48 L38 39 L29 36 L38 33 Z" fill="#ffe7a8" />
-      <circle cx="28" cy="22" r="2.2" fill="#fff" opacity="0.8" />
+      <circle cx="40" cy="40" r="34" fill="url(#mb-body)" />
+      <circle cx="40" cy="41" r="16" fill="#0b1236" stroke="#2c2c33" />
+      <path d="M 31 35 L 49 35 L 40 50 Z" fill="#3048c4" />
+      <ellipse cx="27" cy="20" rx="11" ry="5" fill="#fff" opacity="0.25" transform="rotate(-30 27 20)" />
     </svg>
   );
 }
 
-/** Calls `onShake` when the phone is shaken. iOS asks permission on the first tap that calls `enable`. */
 export function useShake(onShake: () => void) {
   const cb = useRef(onShake);
   cb.current = onShake;
