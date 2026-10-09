@@ -50,9 +50,9 @@ export default function OracleIntro() {
       {step === 'birth' && (
         <>
           <h1 ref={heading} tabIndex={-1} className="oracle-welcome">
-            When and where were you born?
+            Where your story begins
           </h1>
-          <p className="intro-line">Your chart begins here.</p>
+          <p className="intro-line">Your birth date, time, and place.</p>
           <div className="intro-form">
             <BirthFields value={birth} onChange={setBirth} idPrefix="ob" />
           </div>

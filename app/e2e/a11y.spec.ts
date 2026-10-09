@@ -19,7 +19,7 @@ async function onboard(page: Page, found: string[]) {
   await expect(page.getByRole('heading', { name: 'Welcome to the Oracle…' })).toBeVisible();
   found.push(...(await audit(page, 'intro: welcome')));
   await page.getByRole('button', { name: 'Begin' }).click();
-  await expect(page.getByRole('heading', { name: 'When and where were you born?' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Where your story begins' })).toBeVisible();
   found.push(...(await audit(page, 'intro: birth')));
   await page.getByRole('button', { name: 'Continue' }).click();
   await expect(page.getByRole('heading', { name: 'What do you seek?' })).toBeVisible();
