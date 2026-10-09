@@ -461,3 +461,48 @@ export function skyToday(c: NatalChart, place: { lat: number; lon: number }, now
     return { body: b, glyph: `${GLYPHS[b]}\uFE0E`, sign: signOf(lon), deg: fmtDeg(lon % 30), rx: b !== 'Sun' && b !== 'Moon' && speed(b, now) < 0, house: cusps ? `${ord(houseOf(lon, cusps))} house` : null };
   });
 }
+// ─── The board, explored by touch ───────────────────────────────────────────
+
+/** What each answer on the board means. */
+export const TONE_MEANING: Record<Tone, string> = {
+  go: 'The sky supports this. Take the next small step, at a pace that feels like yours.',
+  wait: 'The timing looks better soon. The Oracle often names the day to come back.',
+  closer: 'Something here is not yet clear. Check the details, and your own motives, before you act.',
+  again: 'The question cannot be read as it stands, or it rests on someone else’s choices. Ask about what you can choose.',
+};
+export const MOON_MEANING = 'mood, needs, and what feels safe today';
+
+export interface BoardInfo {
+  title: string;
+  text: string;
+  /** A question to ask the Oracle about it. */
+  ask?: string;
+}
+
+/** What the pointer is resting on: a planet in today's sky, a sign, or one of the four answers. */
+export function boardInfo(kind: 'planet' | 'sign' | 'tone', name: string, c: NatalChart, place: { lat: number; lon: number }, now = new Date()): BoardInfo {
+  if (kind === 'tone') {
+    const t = (Object.keys(ORACLE_TONE) as Tone[]).find((k) => k === name) ?? 'again';
+    return { title: ORACLE_TONE[t].label, text: TONE_MEANING[t] };
+  }
+  const cusps = cuspsOf(c, place);
+  if (kind === 'planet') {
+    const b = name as (typeof MOVERS)[number] | 'Moon';
+    const lon = tropicalLongitude(b, now);
+    const h = cusps ? houseOf(lon, cusps) : null;
+    const rx = b !== 'Sun' && b !== 'Moon' && speed(b, now) < 0;
+    return {
+      title: `${b} in ${signOf(lon)}${rx ? ', retrograde' : ''}`,
+      text: `${cap(b === 'Moon' ? MOON_MEANING : WEEK_MOVER[b])}.${h ? ` For you, it is moving through your ${ord(h)} house: ${W.HOUSE[h].area}.` : ''}`,
+      ask: b === 'Moon' ? 'What’s the sky doing tonight?' : `Where is ${b} right now?`,
+    };
+  }
+  const mine = c.western.planets.filter((p) => p.sign === name).map((p) => (p.body === 'Node' ? 'North Node' : p.body));
+  const rising = c.western.ascendant.certain && c.western.ascendant.value === name;
+  const first = mine.find((m) => m !== 'North Node');
+  return {
+    title: name,
+    text: `${cap(W.SIGN_KEYWORD[name])}.${mine.length ? ` In your chart: your ${mine.join(', ')}.` : ' None of your birth planets are here.'}${rising ? ' It is also your rising sign.' : ''}`,
+    ask: rising ? 'What’s my rising sign?' : first ? `What does my ${first} mean?` : undefined,
+  };
+}

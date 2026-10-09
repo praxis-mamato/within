@@ -1,10 +1,10 @@
 import { useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useCharts } from '../astro/useCharts';
-import { consultOracle, ORACLE_SAYS, skyToday, type OracleReply } from '../content/oracleEngine';
-import { ORACLE_TEXT, ORACLE_TONE } from '../content/oracle';
+import { boardInfo, consultOracle, ORACLE_SAYS, skyToday, type BoardInfo, type OracleReply } from '../content/oracleEngine';
+import { ORACLE_TEXT } from '../content/oracle';
 import type { SkyLine } from '../content/today';
-import { FortuneBall, spellFor, TalkingBoard, useShake } from '../components/OracleBoard';
+import { OracleBoard, useShake } from '../components/OracleBoard';
 import { Paywall } from '../components/Paywall';
 import { Back, SafetyPanel } from '../components/ui';
 import { screen } from '../lib/screener';
@@ -79,8 +79,8 @@ export default function Oracle() {
   const [consult, setConsult] = useState<{ q: string; result?: DeepResult; busy?: boolean; error?: string } | null>(null);
   const board = useRef<HTMLDivElement>(null);
   const input = useRef<HTMLTextAreaElement>(null);
-  const [spell, setSpell] = useState<string[] | null>(null);
-  const fallback = useRef(0);
+  const [info, setInfo] = useState<BoardInfo | null>(null);
+  const [prompt, setPrompt] = useState<string | undefined>(undefined);
   const place = { lat: state.birth.lat, lon: state.birth.lon };
   const day = new Date().toISOString().slice(0, 10);
   const asked = state.oracle.filter((a) => a.day === day);
@@ -114,11 +114,9 @@ export default function Oracle() {
     }
     setAnswer(a);
     setPhase('seeking');
-    // The planchette spells the answer; the ball reveals it when the spelling ends.
-    setSpell(spellFor(a));
-    board.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    window.clearTimeout(fallback.current);
-    fallback.current = window.setTimeout(() => setPhase('answered'), 12000);
+    setInfo(null);
+    board.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    window.setTimeout(() => setPhase('answered'), window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ? 0 : 2600);
   };
   const enableShake = useShake(() => ask());
 
@@ -147,18 +145,35 @@ export default function Oracle() {
       </h1>
       <p className="sub">{ORACLE_SAYS.invite}</p>
 
-      <TalkingBoard spell={spell} boardRef={board} onSpelled={() => (window.clearTimeout(fallback.current), setPhase('answered'))} />
-      <FortuneBall
+      <OracleBoard
         phase={phase}
-        text={answer ? (answer.tone ? ORACLE_TONE[answer.tone].label : answer.orb || answer.label) : ''}
-        onAsk={() => {
+        points={answer?.points}
+        tone={answer?.tone}
+        orb={answer?.orb}
+        boardRef={board}
+        prompt={prompt}
+        onPick={(p) => setInfo(boardInfo(p.kind, p.name, me, place))}
+        onOrb={() => {
           void enableShake();
           if (q.trim()) ask();
-          else input.current?.focus();
+          else {
+            setPrompt('ASK ME');
+            input.current?.focus({ preventScroll: true });
+          }
         }}
       />
-      <p className="small oracle-muted oracle-hint">Write your question, then tap or shake the ball. Or slide the planchette across the board yourself.</p>
-      <SkyStrip onAsk={(x) => (setQ(x), ask(x))} />
+      <p className="small oracle-muted oracle-hint">Touch the crystal ball to ask. Tap or drag the pointer onto any planet, sign, or answer to explore.</p>
+      {info && (
+        <section className="oracle-info" aria-live="polite">
+          <h3>{info.title}</h3>
+          <p>{info.text}</p>
+          {info.ask && (
+            <button type="button" className="btn secondary" onClick={() => (setQ(info.ask!), ask(info.ask))}>
+              Ask the Oracle about this
+            </button>
+          )}
+        </section>
+      )}
       {!answer && <p className="small oracle-muted">{ORACLE_SAYS.how}</p>}
       {answer && phase === 'answered' && (
         <section className="oracle-answer" aria-live="polite" aria-labelledby="oa-h">
@@ -243,6 +258,7 @@ export default function Oracle() {
         </section>
       )}
 
+      <SkyStrip onAsk={(x) => (setQ(x), ask(x))} />
       {flagged ? (
         <SafetyPanel />
       ) : (
@@ -255,7 +271,7 @@ export default function Oracle() {
           }}
         >
           <label htmlFor="oracle-q">Ask the stars</label>
-          <textarea ref={input} id="oracle-q" rows={2} maxLength={300} value={q} placeholder="Ask anything about your chart, the sky, or your timing…" onChange={(e) => (setQ(e.target.value), phase === 'answered' && (setPhase('idle'), setSpell(null)))} />
+          <textarea ref={input} id="oracle-q" rows={2} maxLength={300} value={q} placeholder="Ask anything about your chart, the sky, or your timing…" onChange={(e) => (setQ(e.target.value), phase === 'answered' && setPhase('idle'))} />
           <div className="chips">
             {EXAMPLES.map((x) => (
               <button key={x} type="button" className="chip" onClick={() => (setQ(x), ask(x))}>
