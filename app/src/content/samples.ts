@@ -92,7 +92,7 @@ export function buildCorpus(now = new Date('2026-10-06T12:00:00Z')): Passage[] {
       const a = askOracle(q, c, place, new Date(now.getTime() + (i * 7 + k * 13) * 3600000));
       out.push({ source: `${who} · The Oracle · “${q}”`, text: [a.label, a.line, a.because, ...a.why].join(' ') });
     }
-    out.push({ source: 'The Oracle · screen', text: [ORACLE_TEXT.intro, ORACLE_TEXT.limit, ORACLE_TEXT.sameDay, ORACLE_SAYS.welcome, ORACLE_SAYS.invite, ORACLE_SAYS.consult].join(' ') });
+    out.push({ source: 'The Oracle · screen', text: [ORACLE_TEXT.intro, ORACLE_TEXT.limit, ORACLE_TEXT.sameDay, ORACLE_SAYS.welcome, ORACLE_SAYS.invite, ORACLE_SAYS.how, ORACLE_SAYS.consult].join(' ') });
     if (i % 3 === 0)
       for (const q of ['When is a good day to sign the lease?', 'Is Mercury retrograde?', 'When is my Saturn return?', 'When is my Jupiter return?', 'Are we compatible?', 'What dasha am I in?', 'Tell me something', 'When is the next Full Moon?']) {
         const a = consultOracle(q, { chart: c, place, now });

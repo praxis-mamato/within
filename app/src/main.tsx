@@ -4,8 +4,10 @@ import App from './App';
 import './styles.css';
 import { installCrashHandlers } from './services/telemetry';
 import { applyApprovedEdits } from './content/registry';
+import { keepFresh } from './lib/freshness';
 
 installCrashHandlers();
+keepFresh();
 // Readings use the approver's edited wording from content/approvals.json.
 applyApprovedEdits();
 

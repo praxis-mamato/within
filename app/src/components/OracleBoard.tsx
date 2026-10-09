@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type Ref } from 'react';
 import { tropicalLongitude } from '../astro/chart';
 import type { Tone } from '../content/oracle';
+import { CrystalOrb } from './CrystalOrb';
 
 const SIZE = 360;
 const C = SIZE / 2;
@@ -32,6 +33,8 @@ const at = (lon: number, r: number) => {
   return { x: C + r * Math.cos(a), y: C - r * Math.sin(a) };
 };
 const polar = (deg: number, r: number) => ({ x: C + r * Math.cos((deg * Math.PI) / 180), y: C - r * Math.sin((deg * Math.PI) / 180) });
+const ORB_R = 68;
+const REST = { x: C, y: C + 118 };
 const reduced = () => typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 
 /** Where each planet is in the sky right now, spread apart when two sit close. */
@@ -45,37 +48,110 @@ function skyNow(now: Date) {
   return placed;
 }
 
+export type BoardPick = { kind: 'planet' | 'sign' | 'tone'; name: string };
+
 /**
  * The Oracle's board: the zodiac and today's real planet positions on a night-sky board that warms
- * into dawn at the bottom, a glass orb at the centre, and a planchette that searches the board and
- * comes to rest on the planet behind the answer.
+ * into dawn, a living crystal ball on a gold stand, and a pointer that searches the board and comes
+ * to rest on what the answer is about. Everything on it can be touched: tap a planet, a sign, or an
+ * answer word, or drag the pointer onto one, to learn what it means. Touch and hold the ball to ask.
  */
-export function OracleBoard({ phase, points, tone, orb, boardRef }: { phase: 'idle' | 'seeking' | 'answered'; points?: string; tone?: Tone; orb?: string; boardRef?: Ref<HTMLDivElement> }) {
+export function OracleBoard({
+  phase,
+  points,
+  tone,
+  orb,
+  boardRef,
+  onPick,
+  onOrb,
+  prompt,
+}: {
+  phase: 'idle' | 'seeking' | 'answered';
+  points?: string;
+  tone?: Tone;
+  orb?: string;
+  boardRef?: Ref<HTMLDivElement>;
+  onPick?: (p: BoardPick) => void;
+  /** Called when the ball is released after a touch or hold. */
+  onOrb?: () => void;
+  /** Words for the ball before the first answer, e.g. "ASK ME". */
+  prompt?: string;
+}) {
   const sky = useMemo(() => skyNow(new Date()), []);
-  const [pos, setPos] = useState({ x: C, y: C + 112 });
+  const [pos, setPos] = useState(REST);
+  const [picked, setPicked] = useState<BoardPick | null>(null);
+  const [holding, setHolding] = useState(false);
+  const [dragging, setDragging] = useState(false);
   const timers = useRef<number[]>([]);
+  const wrapEl = useRef<HTMLDivElement | null>(null);
+
+  const spots = useMemo(
+    () => [
+      ...sky.map((p) => ({ kind: 'planet' as const, name: p.body, ...at(p.lon, p.r) })),
+      ...SIGN_NAMES.map((name, i) => ({ kind: 'sign' as const, name, ...at(i * 30 + 15, 158) })),
+      ...TONES.map((t) => ({ kind: 'tone' as const, name: t.tone, ...polar(t.deg, 98) })),
+    ],
+    [sky],
+  );
 
   useEffect(() => {
     timers.current.forEach(clearTimeout);
     timers.current = [];
-    const target = sky.find((p) => p.body === points);
-    const sign = SIGN_NAMES.indexOf(points ?? '');
-    const land = target ? at(target.lon, target.r) : sign >= 0 ? at(sign * 30 + 15, 158) : { x: C, y: C + 112 };
+    setPicked(null);
+    const target = spots.find((s) => s.kind !== 'tone' && s.name === points);
+    const land = target ?? REST;
     if (phase === 'seeking' && !reduced()) {
       const hops = [0, 1, 2, 3].map(() => at(Math.random() * 360, 100 + Math.random() * 40));
       hops.forEach((h, i) => timers.current.push(window.setTimeout(() => setPos(h), i * 480)));
-      timers.current.push(window.setTimeout(() => setPos(land), hops.length * 480));
-    } else if (phase !== 'idle') setPos(land);
-    else setPos({ x: C, y: C + 112 });
+      timers.current.push(window.setTimeout(() => setPos({ x: land.x, y: land.y }), hops.length * 480));
+    } else if (phase !== 'idle') setPos({ x: land.x, y: land.y });
+    else setPos(REST);
     return () => timers.current.forEach(clearTimeout);
-  }, [phase, points, sky]);
+  }, [phase, points, spots]);
 
-  // The orb shows the answer's own words, the tone for a decision, or a welcome before the first question.
-  const text = phase === 'answered' ? orb || (tone ? TONES.find((t) => t.tone === tone)!.word : '') : phase === 'idle' ? 'WELCOME' : '';
+  const pick = (p: BoardPick) => {
+    const s = spots.find((x) => x.kind === p.kind && x.name === p.name);
+    if (s) setPos({ x: s.x, y: s.y });
+    setPicked(p);
+    onPick?.(p);
+  };
+  const toBoard = (e: React.PointerEvent) => {
+    const r = wrapEl.current!.getBoundingClientRect();
+    return { x: ((e.clientX - r.left) / r.width) * SIZE, y: ((e.clientY - r.top) / r.height) * SIZE };
+  };
+  const nearest = (x: number, y: number) => {
+    let best: (typeof spots)[number] | null = null;
+    let d = 22 * 22;
+    for (const s of spots) {
+      const dd = (s.x - x) ** 2 + (s.y - y) ** 2;
+      if (dd < d) (d = dd), (best = s);
+    }
+    return best;
+  };
+
+  // The ball shows the answer's own words, the tone for a decision, or an invitation before the first question.
+  const text = phase === 'answered' ? orb || (tone ? TONES.find((t) => t.tone === tone)!.word : '') : phase === 'idle' ? (holding ? 'ASK' : (prompt ?? 'WELCOME')) : '';
   const words = wrap(text);
+  const lit = (kind: BoardPick['kind'], name: string) => (picked ? picked.kind === kind && picked.name === name : phase === 'answered' && (kind === 'tone' ? tone === name : points === name));
+  const key = (p: BoardPick) => (e: React.KeyboardEvent) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), pick(p));
+
   return (
-    <div className={`oracle-board ${phase}`} ref={boardRef}>
-      <svg viewBox={`0 0 ${SIZE} ${SIZE}`} role="img" aria-label={phase === 'answered' ? `The planchette rests on ${points}. The orb reads: ${text.toLowerCase()}.` : 'A talking board of the zodiac with today’s planets, and a glass orb at the centre.'}>
+    <div
+      className={`oracle-board ${phase}${holding ? ' holding' : ''}${dragging ? ' dragging' : ''}`}
+      ref={(el) => {
+        wrapEl.current = el;
+        if (typeof boardRef === 'function') boardRef(el);
+        else if (boardRef) (boardRef as { current: HTMLDivElement | null }).current = el;
+      }}
+      onPointerMove={(e) => dragging && setPos(toBoard(e))}
+      onPointerUp={(e) => {
+        if (!dragging) return;
+        setDragging(false);
+        const s = nearest(toBoard(e).x, toBoard(e).y);
+        if (s) pick({ kind: s.kind, name: s.name });
+      }}
+    >
+      <svg viewBox={`0 0 ${SIZE} ${SIZE}`} role="group" aria-label="The Oracle’s board: the zodiac, today’s planets, and a crystal ball. Tap any planet, sign, or answer to learn what it means.">
         <defs>
           <radialGradient id="ob-sky" cx="50%" cy="38%" r="75%">
             <stop offset="0" stopColor="#1f2a5c" />
@@ -86,34 +162,21 @@ export function OracleBoard({ phase, points, tone, orb, boardRef }: { phase: 'id
             <stop offset="0.55" stopColor="#e9a46a" stopOpacity="0" />
             <stop offset="1" stopColor="#e9a46a" stopOpacity="0.45" />
           </linearGradient>
-          <radialGradient id="ob-glass" cx="36%" cy="30%" r="78%">
-            <stop offset="0" stopColor="#4a63b0" />
-            <stop offset="0.45" stopColor="#1b2a62" />
-            <stop offset="0.85" stopColor="#0b1233" />
-            <stop offset="1" stopColor="#060a1e" />
-          </radialGradient>
-          <radialGradient id="ob-core" cx="50%" cy="50%" r="50%">
-            <stop offset="0" stopColor="#ffdf9a" stopOpacity="0.55" />
-            <stop offset="0.6" stopColor="#e2b765" stopOpacity="0.12" />
-            <stop offset="1" stopColor="#e2b765" stopOpacity="0" />
-          </radialGradient>
           <linearGradient id="ob-gold" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stopColor="#f3d68e" />
-            <stop offset="0.5" stopColor="#c99a4a" />
-            <stop offset="1" stopColor="#8a6327" />
+            <stop offset="0" stopColor="#f6dc98" />
+            <stop offset="0.45" stopColor="#d1a352" />
+            <stop offset="1" stopColor="#7d5820" />
           </linearGradient>
-          <clipPath id="ob-clip">
-            <circle cx={C} cy={C} r="60" />
-          </clipPath>
+          <radialGradient id="ob-halo" cx="50%" cy="50%" r="50%">
+            <stop offset="0.6" stopColor="#ffd98a" stopOpacity="0.28" />
+            <stop offset="1" stopColor="#ffd98a" stopOpacity="0" />
+          </radialGradient>
         </defs>
         <rect x="2" y="2" width={SIZE - 4} height={SIZE - 4} rx="26" fill="url(#ob-sky)" stroke="#c9a15a" strokeWidth="2" />
         <rect x="2" y="2" width={SIZE - 4} height={SIZE - 4} rx="26" fill="url(#ob-dawn)" />
-        {/* Stars */}
-        {Array.from({ length: 46 }, (_, i) => {
-          const x = (i * 97) % SIZE;
-          const y = (i * 61 + 23) % SIZE;
-          return <circle key={i} cx={x} cy={y} r={i % 7 === 0 ? 1.4 : 0.7} fill="#f7e9c8" opacity={0.35 + (i % 5) * 0.1} className={i % 6 === 0 ? 'ob-twinkle' : undefined} />;
-        })}
+        {Array.from({ length: 46 }, (_, i) => (
+          <circle key={i} cx={(i * 97) % SIZE} cy={(i * 61 + 23) % SIZE} r={i % 7 === 0 ? 1.4 : 0.7} fill="#f7e9c8" opacity={0.35 + (i % 5) * 0.1} className={i % 6 === 0 ? 'ob-twinkle' : undefined} />
+        ))}
         {/* Sun and Moon in the top corners, as on old talking boards */}
         <g stroke="#d9b36a" fill="none" strokeWidth="1.4">
           <circle cx="34" cy="34" r="9" />
@@ -124,7 +187,6 @@ export function OracleBoard({ phase, points, tone, orb, boardRef }: { phase: 'id
           <circle cx={SIZE - 34} cy="34" r="12" fill="#d9b36a" stroke="none" />
           <circle cx={SIZE - 28} cy="30" r="11" fill="#141c45" stroke="none" />
         </g>
-        {/* Rings */}
         <circle cx={C} cy={C} r="170" fill="none" stroke="#c9a15a" strokeOpacity="0.7" />
         <circle cx={C} cy={C} r="146" fill="none" stroke="#c9a15a" strokeOpacity="0.45" />
         {ZODIAC.map((_, i) => {
@@ -134,67 +196,111 @@ export function OracleBoard({ phase, points, tone, orb, boardRef }: { phase: 'id
         })}
         {ZODIAC.map((g, i) => {
           const p = at(i * 30 + 15, 158);
-          const on = phase === 'answered' && points === SIGN_NAMES[i];
+          const on = lit('sign', SIGN_NAMES[i]);
+          const pk = { kind: 'sign' as const, name: SIGN_NAMES[i] };
           return (
-            <text key={g} x={p.x} y={p.y} textAnchor="middle" dominantBaseline="central" fontSize={on ? 19 : 14} fill={on ? '#ffe7a8' : '#e8cf98'} className={on ? 'ob-glow' : undefined}>
-              {`${g}\uFE0E`}
-            </text>
+            <g key={g} role="button" tabIndex={0} aria-label={SIGN_NAMES[i]} className="ob-spot" onClick={() => pick(pk)} onKeyDown={key(pk)}>
+              <circle cx={p.x} cy={p.y} r="13" fill="transparent" />
+              <text x={p.x} y={p.y} textAnchor="middle" dominantBaseline="central" fontSize={on ? 19 : 14} fill={on ? '#ffe7a8' : '#e8cf98'} className={on ? 'ob-glow' : undefined}>
+                {`${g}︎`}
+              </text>
+            </g>
           );
         })}
         {sky.map((p) => {
           const q = at(p.lon, p.r);
-          const on = phase === 'answered' && p.body === points;
+          const on = lit('planet', p.body);
+          const pk = { kind: 'planet' as const, name: p.body };
           return (
-            <text key={p.body} x={q.x} y={q.y} textAnchor="middle" dominantBaseline="central" fontSize={on ? 21 : 16} fill={on ? '#ffe7a8' : '#f2e3cf'} className={on ? 'ob-glow' : undefined}>
-              {`${p.glyph}\uFE0E`}
-            </text>
+            <g key={p.body} role="button" tabIndex={0} aria-label={`${p.body} today`} className="ob-spot" onClick={() => pick(pk)} onKeyDown={key(pk)}>
+              <circle cx={q.x} cy={q.y} r="13" fill="transparent" />
+              <text x={q.x} y={q.y} textAnchor="middle" dominantBaseline="central" fontSize={on ? 21 : 16} fill={on ? '#ffe7a8' : '#f2e3cf'} className={on ? 'ob-glow' : undefined}>
+                {`${p.glyph}︎`}
+              </text>
+            </g>
           );
         })}
         {TONES.map((t) => {
-          const p = polar(t.deg, 90);
-          const on = phase === 'answered' && tone === t.tone;
+          const p = polar(t.deg, 98);
+          const on = lit('tone', t.tone);
+          const pk = { kind: 'tone' as const, name: t.tone };
           return (
-            <text key={t.tone} x={p.x} y={p.y} textAnchor="middle" dominantBaseline="central" fontSize="9.5" letterSpacing="1.6" fill={on ? '#ffe7a8' : '#c9b2a0'} fontWeight={on ? 700 : 400} className={on ? 'ob-glow' : undefined}>
-              {t.word}
-            </text>
+            <g key={t.tone} role="button" tabIndex={0} aria-label={`What “${t.word.toLowerCase()}” means`} className="ob-spot" onClick={() => pick(pk)} onKeyDown={key(pk)}>
+              <rect x={p.x - 36} y={p.y - 10} width="72" height="20" fill="transparent" />
+              <text x={p.x} y={p.y} textAnchor="middle" dominantBaseline="central" fontSize="9.5" letterSpacing="1.6" fill={on ? '#ffe7a8' : '#c9b2a0'} fontWeight={on ? 700 : 400} className={on ? 'ob-glow' : undefined}>
+                {t.word}
+              </text>
+            </g>
           );
         })}
-        {/* The orb: a midnight crystal sphere with gold armillary rings, on a gold stand */}
-        <path d={`M ${C - 30} ${C + 74} L ${C + 30} ${C + 74} L ${C + 22} ${C + 58} L ${C - 22} ${C + 58} Z`} fill="url(#ob-gold)" />
-        <rect x={C - 38} y={C + 73} width="76" height="6" rx="3" fill="url(#ob-gold)" />
-        <g className="ob-orb">
-          <circle cx={C} cy={C} r="62" fill="url(#ob-glass)" stroke="url(#ob-gold)" strokeWidth="2.5" />
-          <g clipPath="url(#ob-clip)">
-            {Array.from({ length: 22 }, (_, i) => (
-              <circle key={i} cx={C - 52 + ((i * 37) % 104)} cy={C - 50 + ((i * 53) % 100)} r={i % 5 === 0 ? 1.2 : 0.6} fill="#fdf3d6" opacity={0.4 + (i % 4) * 0.15} />
-            ))}
-            <circle cx={C} cy={C} r="58" fill="url(#ob-core)" className="ob-core" />
-            <g className="ob-rings" fill="none" stroke="#e2c27e" strokeOpacity="0.55">
-              <ellipse cx={C} cy={C} rx="60" ry="17" transform={`rotate(-18 ${C} ${C})`} />
-              <ellipse cx={C} cy={C} rx="18" ry="60" transform={`rotate(-18 ${C} ${C})`} strokeOpacity="0.3" />
-            </g>
-          </g>
-          <ellipse cx={C - 24} cy={C - 32} rx="16" ry="8" fill="#fff" opacity="0.32" transform={`rotate(-30 ${C - 24} ${C - 32})`} />
-          <circle cx={C - 33} cy={C - 37} r="3" fill="#fff" opacity="0.75" />
-          {words.length > 0 && (
-            <text key={text} x={C} y={C + 6 - (words.length - 1) * 9} textAnchor="middle" fill="#fff6e3" fontSize={words.some((w) => w.length > 9) ? 12.5 : 15} letterSpacing="1.5" fontWeight={600} className={phase === 'idle' ? 'ob-breathe' : 'ob-reveal'}>
-              {words.map((w, i) => (
-                <tspan key={`${w}-${i}`} x={C} dy={i ? 18 : 0}>
-                  {w}
-                </tspan>
-              ))}
-            </text>
-          )}
-        </g>
+        {/* A halo of light behind the ball, and its stand */}
+        <circle cx={C} cy={C} r={ORB_R + 16} fill="url(#ob-halo)" className="ob-halo" />
+        <ellipse cx={C} cy={C + ORB_R + 20} rx="46" ry="7" fill="#000" opacity="0.35" />
+        <path d={`M ${C - 40} ${C + ORB_R + 18} C ${C - 36} ${C + ORB_R + 6}, ${C - 22} ${C + ORB_R + 2}, ${C - 18} ${C + ORB_R - 6} L ${C + 18} ${C + ORB_R - 6} C ${C + 22} ${C + ORB_R + 2}, ${C + 36} ${C + ORB_R + 6}, ${C + 40} ${C + ORB_R + 18} Z`} fill="url(#ob-gold)" />
+        <rect x={C - 46} y={C + ORB_R + 16} width="92" height="7" rx="3.5" fill="url(#ob-gold)" />
       </svg>
-      {/* The pointer: a gold celestial lens with a four-pointed star, centred on what it reads */}
-      <svg className="ob-planchette" viewBox="0 0 64 64" aria-hidden="true" style={{ left: `${(pos.x / SIZE) * 100}%`, top: `${(pos.y / SIZE) * 100}%` }}>
+
+      <div className="crystal-wrap" style={{ left: `${((C - ORB_R) / SIZE) * 100}%`, top: `${((C - ORB_R) / SIZE) * 100}%`, width: `${((2 * ORB_R) / SIZE) * 100}%` }}>
+        <CrystalOrb
+          phase={phase}
+          quiet={words.length > 0}
+          onHoldChange={(h) => {
+            setHolding(h);
+            if (!h) onOrb?.();
+          }}
+        />
+      </div>
+
+      {/* Glass highlights, the claws that hold the ball, and the words that rise in it */}
+      <svg className="ob-overlay" viewBox={`0 0 ${SIZE} ${SIZE}`} aria-hidden="true">
+        <defs>
+          <radialGradient id="ob-spec" cx="50%" cy="50%" r="50%">
+            <stop offset="0" stopColor="#fff" stopOpacity="0.85" />
+            <stop offset="1" stopColor="#fff" stopOpacity="0" />
+          </radialGradient>
+          <linearGradient id="ob-gold2" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stopColor="#f6dc98" />
+            <stop offset="1" stopColor="#8a6327" />
+          </linearGradient>
+        </defs>
+        <ellipse cx={C - 26} cy={C - 36} rx="24" ry="12" fill="url(#ob-spec)" opacity="0.55" transform={`rotate(-32 ${C - 26} ${C - 36})`} />
+        <circle cx={C - 36} cy={C - 41} r="3.2" fill="#fff" opacity="0.9" />
+        <path d={`M ${C + 38} ${C + 44} a ${ORB_R - 6} ${ORB_R - 6} 0 0 0 ${18} ${-30}`} stroke="#fff" strokeOpacity="0.25" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+        <circle cx={C} cy={C} r={ORB_R} fill="none" stroke="url(#ob-gold2)" strokeWidth="1.5" strokeOpacity="0.8" />
+        {[-1, 1].map((k) => (
+          <path key={k} d={`M ${C + k * 30} ${C + ORB_R + 2} C ${C + k * 34} ${C + ORB_R - 8}, ${C + k * 40} ${C + ORB_R - 16}, ${C + k * 44} ${C + ORB_R - 24}`} stroke="url(#ob-gold2)" strokeWidth="4" fill="none" strokeLinecap="round" />
+        ))}
+        {words.length > 0 && (
+          <text key={text} x={C} y={C + 6 - (words.length - 1) * 9} textAnchor="middle" fill="#fff8e6" fontSize={words.some((w) => w.length > 9) ? 12.5 : 15} letterSpacing="1.5" fontWeight={600} className={`ob-words ${phase === 'idle' ? 'ob-breathe' : 'ob-reveal'}`}>
+            {words.map((w, i) => (
+              <tspan key={`${w}-${i}`} x={C} dy={i ? 18 : 0}>
+                {w}
+              </tspan>
+            ))}
+          </text>
+        )}
+      </svg>
+
+      {/* The pointer: drag it onto anything on the board */}
+      <svg
+        className="ob-planchette"
+        viewBox="0 0 64 64"
+        role="img"
+        aria-label="The pointer. Drag it onto a planet, sign, or answer."
+        style={{ left: `${(pos.x / SIZE) * 100}%`, top: `${(pos.y / SIZE) * 100}%` }}
+        onPointerDown={(e) => {
+          if (phase === 'seeking') return;
+          wrapEl.current?.setPointerCapture?.(e.pointerId);
+          setDragging(true);
+        }}
+      >
         <defs>
           <linearGradient id="ob-lens-gold" x1="0" y1="0" x2="1" y2="1">
             <stop offset="0" stopColor="#fbe3a0" />
             <stop offset="1" stopColor="#b98a3c" />
           </linearGradient>
         </defs>
+        <circle cx="32" cy="32" r="22" fill="transparent" />
         <circle cx="32" cy="32" r="15" fill="#fffaf0" fillOpacity="0.12" stroke="url(#ob-lens-gold)" strokeWidth="3" />
         <circle cx="32" cy="32" r="20" fill="none" stroke="#f3d68e" strokeOpacity="0.45" strokeWidth="1" strokeDasharray="2 4" />
         {[0, 90, 180, 270].map((a) => (

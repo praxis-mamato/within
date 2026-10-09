@@ -1,7 +1,7 @@
 import { useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useCharts } from '../astro/useCharts';
-import { consultOracle, ORACLE_SAYS, type OracleReply } from '../content/oracleEngine';
+import { boardInfo, consultOracle, ORACLE_SAYS, type BoardInfo, type OracleReply } from '../content/oracleEngine';
 import { ORACLE_TEXT } from '../content/oracle';
 import type { SkyLine } from '../content/today';
 import { OracleBoard, useShake } from '../components/OracleBoard';
@@ -49,6 +49,9 @@ export default function Oracle() {
   const [flagged, setFlagged] = useState(false);
   const [consult, setConsult] = useState<{ q: string; result?: DeepResult; busy?: boolean; error?: string } | null>(null);
   const board = useRef<HTMLDivElement>(null);
+  const input = useRef<HTMLTextAreaElement>(null);
+  const [info, setInfo] = useState<BoardInfo | null>(null);
+  const [prompt, setPrompt] = useState<string | undefined>(undefined);
   const place = { lat: state.birth.lat, lon: state.birth.lon };
   const day = new Date().toISOString().slice(0, 10);
   const asked = state.oracle.filter((a) => a.day === day);
@@ -61,6 +64,7 @@ export default function Oracle() {
     if (!me || !question || phase === 'seeking') return;
     setNote('');
     setConsult(null);
+    setInfo(null);
     if (screen(question).flagged) {
       dispatch({ type: 'text/screen', text: question });
       setFlagged(true);
@@ -111,7 +115,35 @@ export default function Oracle() {
       </h1>
       <p className="sub">{ORACLE_SAYS.invite}</p>
 
-      <OracleBoard phase={phase} points={answer?.points} tone={answer?.tone} orb={answer?.orb} boardRef={board} />
+      <OracleBoard
+        phase={phase}
+        points={answer?.points}
+        tone={answer?.tone}
+        orb={answer?.orb}
+        boardRef={board}
+        prompt={prompt}
+        onPick={(p) => setInfo(boardInfo(p.kind, p.name, me, place))}
+        onOrb={() => {
+          if (q.trim()) ask();
+          else {
+            setPrompt('ASK ME');
+            input.current?.focus({ preventScroll: true });
+          }
+        }}
+      />
+      <p className="small oracle-muted oracle-hint">Touch the crystal ball to ask. Tap or drag the pointer onto any planet, sign, or answer to explore.</p>
+      {!answer && <p className="small oracle-muted">{ORACLE_SAYS.how}</p>}
+      {info && (
+        <section className="oracle-info" aria-live="polite">
+          <h3>{info.title}</h3>
+          <p>{info.text}</p>
+          {info.ask && (
+            <button type="button" className="btn secondary" onClick={() => (setQ(info.ask!), ask(info.ask))}>
+              Ask the Oracle about this
+            </button>
+          )}
+        </section>
+      )}
 
       {answer && phase === 'answered' && (
         <section className="oracle-answer" aria-live="polite" aria-labelledby="oa-h">
@@ -174,7 +206,7 @@ export default function Oracle() {
           }}
         >
           <label htmlFor="oracle-q">Ask the stars</label>
-          <textarea id="oracle-q" rows={2} maxLength={300} value={q} placeholder="Ask anything about your chart, the sky, or your timing…" onChange={(e) => (setQ(e.target.value), phase === 'answered' && setPhase('idle'))} />
+          <textarea ref={input} id="oracle-q" rows={2} maxLength={300} value={q} placeholder="Ask anything about your chart, the sky, or your timing…" onChange={(e) => (setQ(e.target.value), phase === 'answered' && setPhase('idle'))} />
           <div className="chips">
             {EXAMPLES.map((x) => (
               <button key={x} type="button" className="chip" onClick={() => (setQ(x), ask(x))}>
