@@ -5,6 +5,7 @@ import { TabBar } from './components/ui';
 import { LogoMark } from './components/Illustrations';
 import Onboarding from './screens/Onboarding';
 import Today from './screens/Today';
+import Oracle from './screens/Oracle';
 import Reflection from './screens/Reflection';
 import { MilestoneDetail, MilestoneForm, RelationshipHome, RelationshipsList, YouChart, YouCycles, YouPatterns, YouReading, YouSpace } from './screens/Relationships';
 import Growth, { FollowUp } from './screens/Growth';
@@ -106,6 +107,7 @@ function Shell() {
               <Route path="/milestone/:id/edit" element={<MilestoneForm />} />
               <Route path="/milestone/:id" element={<MilestoneDetail />} />
               <Route path="/growth" element={<Growth />} />
+              <Route path="/oracle" element={<Oracle />} />
               <Route path="/follow-up/:id" element={<FollowUp />} />
               <Route path="/settings" element={<Settings />} />
               <Route path="/account" element={<AccountScreen />} />

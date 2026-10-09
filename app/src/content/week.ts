@@ -182,7 +182,7 @@ export const WEEK_TEXT = {
 };
 
 // Houses that speak to each life area, for the tie-back to what the person said.
-const HOUSE_AREA: Record<number, Area> = { 1: 'health', 2: 'money', 3: 'friends', 4: 'family', 5: 'creativity', 6: 'health', 7: 'love', 8: 'money', 9: 'purpose', 10: 'work', 11: 'friends', 12: 'purpose' };
+export const HOUSE_AREA: Record<number, Area> = { 1: 'health', 2: 'money', 3: 'friends', 4: 'family', 5: 'creativity', 6: 'health', 7: 'love', 8: 'money', 9: 'purpose', 10: 'work', 11: 'friends', 12: 'purpose' };
 
 const ord = (n: number) => `${n}${['th', 'st', 'nd', 'rd'][n % 10 > 3 || Math.floor(n / 10) === 1 ? 0 : n % 10]}`;
 const fmtDate = (iso: string) => new Date(`${iso}T12:00:00Z`).toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' });

@@ -10,6 +10,7 @@ import { cycles } from '../content/cycles';
 import { CycleCard } from './Patterns';
 import { chartInBrief, todaySky, TODAY_TEXT, type SkyLine } from '../content/today';
 import { useAccount } from '../services/AccountContext';
+import { MiniOrb } from '../components/OracleBoard';
 
 /** Today: current intention, one reflection, one next step, and a clear finish (PRD §4). */
 export default function Today() {
@@ -43,6 +44,7 @@ export default function Today() {
       <p className="sub">{r.subheading}</p>
       <HorizonSun />
       {state.safety.flagged && <SafetyPanel compact />}
+      <OracleCard />
       <SkyToday />
       <ChartBrief />
       <PurposeCard />
@@ -109,6 +111,21 @@ const Lines = ({ items }: { items: SkyLine[] }) => (
     ))}
   </div>
 );
+
+/** The way into the Oracle: a night card that warms into dawn. */
+function OracleCard() {
+  return (
+    <Link to="/oracle" className="oracle-card" aria-label="Ask the Oracle: one question, answered by the sky right now">
+      <MiniOrb />
+      <span>
+        <span className="oracle-card-kicker">The Oracle</span>
+        <strong>Ask the sky one question</strong>
+        <span className="small">Answered from this moment’s sky and your chart, the way horary astrologers have for centuries.</span>
+      </span>
+      <span aria-hidden="true">›</span>
+    </Link>
+  );
+}
 
 /** Free: the sky right now, read against this person's chart, plus what the rest of the week holds. */
 function SkyToday() {

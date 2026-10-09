@@ -9,6 +9,7 @@ import { findPatterns } from './patternRules';
 import { cycles } from './cycles';
 import { weekReading } from './week';
 import { chartInBrief, todaySky } from './today';
+import { askOracle, ORACLE_TEXT } from './oracle';
 import { PATTERN_AREAS } from './mirror';
 import { timingReading, togetherReading, vedicDeep, westernDeep } from './deepReading';
 import { OUTCOME_STEPS, planFor, SITUATIONS, topicFor } from './topics';
@@ -85,6 +86,12 @@ export function buildCorpus(now = new Date('2026-10-06T12:00:00Z')): Passage[] {
     const sky = todaySky(c, place, now);
     out.push({ source: `${who} · Today · the sky`, text: [sky.moon, ...sky.now].map((x) => `${x.heading}. ${x.text}`).join(' ') + (sky.retrograde.length ? ` ${'Retrograde now, so its themes lean toward review rather than fresh starts:'}` : '') });
     out.push({ source: `${who} · Today · chart at its core`, text: chartInBrief(c).map((x) => `${x.heading}. ${x.text}`).join(' ') });
+    const qs = ['Should I reach out to them this week?', 'Should I apply for the job?', 'Should I start the book?', 'Should I move house?', 'Should I go back to school?', 'Will he come back?', 'Will I get pregnant?', 'Should I buy crypto?', 'Should I sue my landlord?', 'hm'];
+    for (const [k, q] of qs.entries()) {
+      const a = askOracle(q, c, place, new Date(now.getTime() + (i * 7 + k * 13) * 3600000));
+      out.push({ source: `${who} · The Oracle · “${q}”`, text: [a.label, a.line, a.because, ...a.why].join(' ') });
+    }
+    out.push({ source: 'The Oracle · screen', text: [ORACLE_TEXT.intro, ORACLE_TEXT.limit, ORACLE_TEXT.sameDay].join(' ') });
     // More weeks, each with a different area on the person's mind, so the week library is seen in context.
     const areas = ['love', 'work', 'family', 'health', 'money', 'creativity', 'friends', 'purpose'] as const;
     for (const d of [10, 20, 30])

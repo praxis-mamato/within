@@ -17,6 +17,7 @@ import * as MI from './mirror';
 import * as AN from './answer';
 import * as WK from './week';
 import * as TD from './today';
+import * as OR from './oracle';
 import committed from './approvals.json';
 import { lint } from './lint';
 
@@ -120,6 +121,11 @@ const SOURCES: [section: string, module: string, Record<string, unknown>, [name:
     ['WEEK_TEXT', 'Framing'],
   ]],
   ['Today, free', 'today', TD as Record<string, unknown>, [['TODAY_TEXT', 'The sky today']]],
+  ['The Oracle', 'oracle', OR as Record<string, unknown>, [
+    ['ORACLE_TONE', 'Answer tones'],
+    ['ORACLE_REFRAME', 'Questions it does not answer'],
+    ['ORACLE_TEXT', 'Framing and horary notes'],
+  ]],
   ['Answers to sky and feeling questions', 'answer', AN as Record<string, unknown>, [
     ['MOON_TODAY_HOUSE', 'Today’s Moon by natal house'],
     ['MOON_TO_MOON', 'Today’s Moon and the birth Moon'],

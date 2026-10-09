@@ -31,6 +31,7 @@ export const EVENTS = {
   paywall_shown: { where: ['reflection', 'reading', 'relationship', 'check_ins', 'account'] },
   checkout_started: { plan: ['monthly', 'yearly'] },
   today_finished: {},
+  oracle_asked: { tone: ['go', 'wait', 'closer', 'again'] },
 } as const satisfies Record<string, Record<string, Field>>;
 
 export type EventName = keyof typeof EVENTS;

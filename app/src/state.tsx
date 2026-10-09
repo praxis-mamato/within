@@ -3,6 +3,7 @@
  */
 import { createContext, useContext, useEffect, useMemo, useReducer, useRef, useState, type ReactNode } from 'react';
 import type { PatternCheck, Profile } from './content/mirror';
+import type { OracleAnswer } from './content/oracle';
 import { deviceVault } from './storage/vault';
 import { SAMPLE_MILESTONES, type Milestone, type Tradition } from './data/fixtures';
 import { screen, type ScreenResult } from './lib/screener';
@@ -98,6 +99,8 @@ export interface State {
   profile: Profile | null;
   /** How each pattern fits, in the person's own judgment. */
   patternChecks: Record<string, PatternCheck>;
+  /** Questions asked of the Oracle and its answers, newest last. Stays on this device. */
+  oracle: OracleAnswer[];
 }
 
 const now = () => new Date().toISOString();
@@ -138,6 +141,7 @@ export function initialState(): State {
     aiReadings: {},
     profile: null,
     patternChecks: {},
+    oracle: [],
   };
 }
 
@@ -168,6 +172,7 @@ export type Event =
   | { type: 'ai/save'; key: string; reading: State['aiReadings'][string] }
   | { type: 'reset' }
   | { type: 'profile/set'; profile: Profile }
+  | { type: 'oracle/ask'; answer: OracleAnswer }
   | { type: 'pattern/check'; id: string; check: PatternCheck | null }
   | { type: 'hydrate'; state: State };
 
@@ -242,6 +247,8 @@ export function reducer(s: State, e: Event): State {
       return { ...s, aiReadings: { ...s.aiReadings, [e.key]: e.reading } };
     case 'profile/set':
       return { ...s, profile: e.profile };
+    case 'oracle/ask':
+      return { ...s, oracle: [...s.oracle, e.answer].slice(-60) };
     case 'pattern/check': {
       const patternChecks = { ...s.patternChecks };
       if (e.check) patternChecks[e.id] = e.check;
