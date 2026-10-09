@@ -85,13 +85,13 @@ export default function Settings() {
       </section>
 
       <section aria-labelledby="ai-set-h">
-        <h2 id="ai-set-h">AI readings</h2>
+        <h2 id="ai-set-h">Connected readings</h2>
         <label className="toggle">
-          Write deeper readings with AI (subscribers)
+          Write connected deep readings (subscribers)
           <input type="checkbox" checked={state.aiConsent} onChange={(e) => dispatch({ type: 'ai/consent', on: e.target.checked })} />
         </label>
         <p className="small muted">
-          When on, Within sends your calculated placements (never your name, birth details, journal, or notes) to Claude to write connected readings. Turning it off also deletes saved AI readings from this device.
+          When on, Within sends your calculated placements (never your name, birth details, journal, or notes) to Claude, an AI model, which weaves Within’s reviewed interpretations into one reading. Turning it off also deletes saved connected readings from this device.
         </p>
       </section>
 

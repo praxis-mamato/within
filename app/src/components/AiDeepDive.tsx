@@ -48,17 +48,17 @@ export function AiDeepDive({ kind, sections }: { kind: Exclude<Kind, 'question'>
     return (
       <section className="card ai-card" aria-labelledby="ai-h">
         <h2 id="ai-h" style={{ marginTop: 0 }}>
-          Go deeper with AI
+          Your connected reading
         </h2>
-        <p>Get a connected reading of {LABEL[kind]} that ties your placements together, and ask your own questions about your chart.</p>
+        <p>Get a connected reading of {LABEL[kind]} that ties your placements together, drawn from centuries of Western and Vedic tradition, and ask your own questions about your chart.</p>
         <ul className="small">
-          <li>Written by Claude, an AI model, from your calculated placements and Within’s reviewed interpretations.</li>
+          <li>The meanings come from centuries of astrological tradition, reviewed by Within. Claude, an AI model, weaves them into one reading for your exact chart.</li>
           <li>Only the placements are sent (for example “Venus in Libra, 7th house”). Never your name, birth date, time, place, journal, or notes about anyone.</li>
           <li>Within doesn’t store what’s sent. The reading is saved only on this device.</li>
           <li>Every reading is checked against Within’s rules before you see it. It can still be wrong; tell us if it is.</li>
         </ul>
         <button type="button" className="btn" onClick={() => dispatch({ type: 'ai/consent', on: true })}>
-          Turn on AI readings
+          Turn on connected readings
         </button>
         <p className="small muted" style={{ marginTop: 8 }}>
           You can turn this off any time in Settings.
@@ -108,7 +108,7 @@ export function AiDeepDive({ kind, sections }: { kind: Exclude<Kind, 'question'>
     <section className="card ai-card" aria-labelledby="ai-h" aria-busy={!!busy}>
       <div className="lens-label">
         <span className="dot" aria-hidden="true" />
-        AI-written from your chart
+        Your chart, read through centuries of tradition
       </div>
       <h2 id="ai-h" style={{ marginTop: 0 }}>
         A deeper reading of {LABEL[kind]}
@@ -121,7 +121,7 @@ export function AiDeepDive({ kind, sections }: { kind: Exclude<Kind, 'question'>
         <>
           <AiSections reading={saved} />
           <p className="small muted">
-            Written {new Date(saved.at).toLocaleDateString()} · saved on this device ·{' '}
+            Written {new Date(saved.at).toLocaleDateString()} with AI help · saved on this device ·{' '}
             <button type="button" className="link small" disabled={!!busy} onClick={write}>
               {busy === 'reading' ? 'Rewriting…' : 'Write it again'}
             </button>

@@ -170,7 +170,7 @@ function DeeperLinks() {
     { to: '/you/reading?tab=timing', title: 'Your week, planet by planet', text: 'Every transit to your chart, dated, with the New and Full Moons' },
     { to: '/you/patterns', title: 'Your patterns', text: 'What shapes you, read from your whole chart' },
     { to: '/you/cycles', title: 'Your cycles', text: 'What you’re moving through now, with dates' },
-    { to: '/you/reading', title: 'Your full reading', text: 'Western, Vedic, timing, and AI deep dives' },
+    { to: '/you/reading', title: 'Your full reading', text: 'Western, Vedic, timing, and connected deep readings' },
   ];
   return (
     <nav className="deeper" aria-label="Go deeper">

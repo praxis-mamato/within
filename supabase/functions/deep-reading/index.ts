@@ -15,7 +15,7 @@ Deno.serve(async (req) => {
 
   // Subscribers only.
   const { data: ent } = await admin.from('entitlements').select('status').eq('user_id', user.id).maybeSingle();
-  if (!ent || !['active', 'trialing'].includes(ent.status)) return json({ error: 'AI deep readings are part of a subscription.' }, 402);
+  if (!ent || !['active', 'trialing'].includes(ent.status)) return json({ error: 'Connected readings are part of a subscription.' }, 402);
 
   const parsed = validateRequest(await req.json().catch(() => null));
   if (typeof parsed === 'string') return json({ error: parsed }, 400);
@@ -23,7 +23,7 @@ Deno.serve(async (req) => {
   // Monthly limit per person.
   const period = new Date().toISOString().slice(0, 7);
   const { data: usage } = await admin.from('ai_usage').select('count').eq('user_id', user.id).eq('period', period).maybeSingle();
-  if ((usage?.count ?? 0) >= MONTHLY_LIMIT) return json({ error: `You’ve used this month’s ${MONTHLY_LIMIT} AI readings. They reset on the 1st.` }, 429);
+  if ((usage?.count ?? 0) >= MONTHLY_LIMIT) return json({ error: `You’ve used this month’s ${MONTHLY_LIMIT} connected readings. They reset on the 1st.` }, 429);
 
   let response;
   try {
@@ -41,7 +41,7 @@ Deno.serve(async (req) => {
     if (e instanceof Anthropic.APIError) {
       console.error('anthropic error', e.status, e.message);
       // The account needs API credits before the first reading can be written.
-      if (e.status === 400 && /credit balance/i.test(e.message)) return json({ error: 'AI readings aren’t switched on yet. Please try again later.' }, 503);
+      if (e.status === 400 && /credit balance/i.test(e.message)) return json({ error: 'Connected readings aren’t switched on yet. Please try again later.' }, 503);
       return json({ error: 'The reading couldn’t be written right now. Try again later.' }, 502);
     }
     throw e;
