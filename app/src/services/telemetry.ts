@@ -31,7 +31,7 @@ export const EVENTS = {
   paywall_shown: { where: ['reflection', 'reading', 'relationship', 'check_ins', 'account'] },
   checkout_started: { plan: ['monthly', 'yearly'] },
   today_finished: {},
-  astrologer_checkout: { package: ['two-sessions', 'season', 'coaching', 'year'] },
+  astrologer_checkout: { package: ['single', 'two-sessions', 'season', 'coaching', 'year'] },
   moon_calendar: { months: 'number' },
   oracle_asked: { intent: ['decision', 'when', 'return', 'retro', 'lunation', 'together', 'chart', 'patterns', 'feeling', 'cycle', 'week', 'planet', 'sky', 'open'] },
 } as const satisfies Record<string, Record<string, Field>>;
