@@ -547,3 +547,9 @@ details > summary { cursor: pointer; margin: 8px 0; }
 .answer-points { margin: 6px 0 0; padding-left: 1.1em; display: grid; gap: 6px; }
 .answer-points li { line-height: 1.5; }
 .answer-care { margin-top: 14px; }
+
+/* Go deeper links on Today */
+.deeper { margin: 16px 0; }
+.deeper h2 { margin-bottom: 8px; }
+.deeper .list-link { margin: 8px 0; }
+.done .deeper { text-align: left; }

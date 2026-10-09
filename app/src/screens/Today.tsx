@@ -26,6 +26,7 @@ export default function Today() {
         <HorizonSun />
         <h1>You’re done for today</h1>
         <p className="sub">Nothing else needs your attention. Come back whenever you like.</p>
+        <DeeperLinks />
         <Link className="link" to="/growth">
           See your growth
         </Link>
@@ -41,6 +42,7 @@ export default function Today() {
       <HorizonSun />
       {state.safety.flagged && <SafetyPanel compact />}
       <PurposeCard />
+      <DeeperLinks />
 
       {dueFollowUp && (
         <div className="card soft">
@@ -68,16 +70,6 @@ export default function Today() {
         </section>
       )}
 
-      <Link className="card soft list-link" to="/you/reading" style={{ textDecoration: 'none' }}>
-        <span>
-          <strong>Your full reading</strong>
-          <span className="small muted" style={{ display: 'block' }}>
-            Every placement in both traditions, and what the sky is doing for you now
-          </span>
-        </span>
-        <span aria-hidden="true">›</span>
-      </Link>
-
       {action ? (
         <div className="card">
           <p className="small muted">Your next step</p>
@@ -99,5 +91,30 @@ export default function Today() {
         </div>
       )}
     </>
+  );
+}
+
+/** The deeper material, one tap from Today: patterns, cycles, and the full reading with AI deep dives. */
+function DeeperLinks() {
+  const links = [
+    { to: '/you/patterns', title: 'Your patterns', text: 'What shapes you, read from your whole chart' },
+    { to: '/you/cycles', title: 'Your cycles', text: 'What you’re moving through now, with dates' },
+    { to: '/you/reading', title: 'Your full reading', text: 'Western, Vedic, timing, and AI deep dives' },
+  ];
+  return (
+    <nav className="deeper" aria-label="Go deeper">
+      <h2>Go deeper</h2>
+      {links.map((l) => (
+        <Link key={l.to} className="card soft list-link" to={l.to} style={{ textDecoration: 'none' }}>
+          <span>
+            <strong>{l.title}</strong>
+            <span className="small muted" style={{ display: 'block' }}>
+              {l.text}
+            </span>
+          </span>
+          <span aria-hidden="true">›</span>
+        </Link>
+      ))}
+    </nav>
   );
 }
