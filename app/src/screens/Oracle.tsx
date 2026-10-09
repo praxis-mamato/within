@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useCharts } from '../astro/useCharts';
+import { computeNatal } from '../astro/natal';
 import { boardInfo, consultOracle, ORACLE_SAYS, skyToday, type BoardInfo, type OracleReply } from '../content/oracleEngine';
 import { ORACLE_TEXT } from '../content/oracle';
 import type { SkyLine } from '../content/today';
@@ -104,8 +105,19 @@ export default function Oracle() {
       setNote(ORACLE_TEXT.limit);
       return;
     }
-    const theirs = state.person?.birth;
-    const a = consultOracle(question, { chart: me, place, profile: state.profile, other: other && theirs ? { chart: other, place: { lat: theirs.lat, lon: theirs.lon }, name: state.person!.nickname } : null });
+    // The person the question names, or the one currently open in Relationships.
+    const esc = (x: string) => x.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const named = state.people.find((p) => p.birth && new RegExp(`\\b${esc(p.nickname)}\\b`, 'i').test(question));
+    const who = named ?? state.person;
+    let theirChart = who === state.person ? other : null;
+    if (who?.birth && !theirChart) {
+      try {
+        theirChart = computeNatal(who.birth);
+      } catch {
+        theirChart = null;
+      }
+    }
+    const a = consultOracle(question, { chart: me, place, profile: state.profile, other: who?.birth && theirChart ? { chart: theirChart, place: { lat: who.birth.lat, lon: who.birth.lon }, name: who.nickname } : null });
     if (same) setNote(ORACLE_TEXT.sameDay);
     else {
       // History keeps the answer itself; the full reading is recalculated when asked again.

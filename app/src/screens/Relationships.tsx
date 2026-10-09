@@ -6,7 +6,9 @@ import { describePrecision, formatFuzzyDate, type DateKind } from '../lib/dates'
 import { Landscape, Leaf, Orbit, Venn } from '../components/Illustrations';
 import { Back, ConfirmButton, PromptChips, PurposeCard, SafetyPanel } from '../components/ui';
 import { MILESTONE_MEANINGS, MILESTONE_TITLES } from '../data/prompts';
-import { personalize, SAMPLE_BIRTH, useStore, type Birth } from '../state';
+import { personalize, RELATIONS, SAMPLE_BIRTH, useStore, type Birth, type Relation } from '../state';
+import { MiniOrb } from '../components/OracleBoard';
+import { PeopleSwitch } from './RelationshipChart';
 import { BirthFields } from '../components/BirthFields';
 import Chart, { ChartTables } from './Chart';
 import Reading from './Reading';
@@ -14,79 +16,124 @@ import { useCharts } from '../astro/useCharts';
 import { currentTransits } from '../astro/facts';
 import { antardashas, vimshottari } from '../astro/chart';
 
-/** List: the "You" space always, plus at most one relationship in the MVP. */
+/** Everyone the user has added, in the Oracle's night sky; tap someone to open your synastry. */
 export function RelationshipsList() {
   const { state, dispatch } = useStore();
   const nav = useNavigate();
   const [adding, setAdding] = useState(false);
   const [nick, setNick] = useState('');
-  const p = state.person;
+  const [relation, setRelation] = useState<Relation>('partner');
+  const open = (id: string) => {
+    dispatch({ type: 'person/select', id });
+    nav('/relationship/chart');
+  };
+  const active = state.people.filter((p) => p.status === 'active');
+  const archived = state.people.filter((p) => p.status === 'archived');
   return (
-    <>
-      <p className="kicker">Relationships</p>
-      <h1>Who you’re exploring</h1>
-      <ul className="list card" style={{ padding: '4px 16px' }}>
-        <li>
-          <Link className="list-link" to="/you/self">
-            <span>
-              <strong>You</strong>
-              <span className="small muted" style={{ display: 'block' }}>
-                Self and purpose
+    <div className="night">
+      <div className="orb-head" aria-hidden="true">
+        <MiniOrb />
+      </div>
+      <p className="kicker" style={{ textAlign: 'center' }}>
+        The Oracle · Relationships
+      </p>
+      <h1 style={{ textAlign: 'center' }}>Your people</h1>
+      <p className="sub" style={{ textAlign: 'center' }}>
+        Two charts, read together.
+      </p>
+      <ul className="people">
+        {active.map((p) => (
+          <li key={p.id}>
+            <button type="button" className={`person-card ${p.id === state.activePersonId ? 'on' : ''}`} onClick={() => open(p.id)}>
+              <span className="person-initial" aria-hidden="true">
+                {p.nickname.charAt(0).toUpperCase()}
               </span>
-            </span>
-            <span aria-hidden="true">›</span>
-          </Link>
-        </li>
-        {p && (
-          <li>
-            <Link className="list-link" to="/relationship/self">
-              <span>
-                <strong>{p.nickname}</strong>{' '}
-                {p.status === 'archived' && <span className="pill">Archived</span>}
+              <span style={{ flex: 1 }}>
+                <strong>{p.nickname}</strong>
+                {p.relation && <span className="rel-pill">{RELATIONS[p.relation]}</span>}
                 <span className="small muted" style={{ display: 'block' }}>
-                  {p.milestones.length} milestones · {p.birth ? 'birth details added' : 'no birth details'}
+                  {p.birth ? 'Synastry ready' : 'Add birth details to see your synastry'}
                 </span>
               </span>
               <span aria-hidden="true">›</span>
-            </Link>
-          </li>
-        )}
-      </ul>
-      {!p &&
-        (adding ? (
-          <div className="card">
-            <label htmlFor="new-nick">
-              A nickname for them <span className="hint">No surname or contact details.</span>
-            </label>
-            <input id="new-nick" type="text" value={nick} onChange={(e) => setNick(e.target.value)} />
-            <div className="btn-row">
-              <button
-                type="button"
-                className="btn"
-                disabled={!nick.trim()}
-                onClick={() => {
-                  dispatch({ type: 'person/add', nickname: nick.trim() });
-                  setAdding(false);
-                  nav('/relationship/chart');
-                }}
-              >
-                Add
-              </button>
-              <button type="button" className="btn quiet" onClick={() => setAdding(false)}>
-                Cancel
-              </button>
-            </div>
-          </div>
-        ) : (
-          <div className="btn-row">
-            <button type="button" className="btn secondary" onClick={() => setAdding(true)}>
-              Add someone
             </button>
-            <p className="small muted">Optional. Within is complete on your own.</p>
-          </div>
+          </li>
         ))}
-      {p && <p className="small muted">This version supports one relationship at a time.</p>}
-    </>
+      </ul>
+      {adding ? (
+        <div className="card">
+          <label htmlFor="new-nick">
+            Their name or a nickname <span className="hint">No surname or contact details.</span>
+          </label>
+          <input id="new-nick" type="text" value={nick} onChange={(e) => setNick(e.target.value)} />
+          <p className="small" style={{ margin: '10px 0 0' }}>
+            Who are they to you?
+          </p>
+          <div className="relation-chips">
+            {(Object.keys(RELATIONS) as Relation[]).map((r) => (
+              <button key={r} type="button" aria-pressed={relation === r} onClick={() => setRelation(r)}>
+                {RELATIONS[r]}
+              </button>
+            ))}
+          </div>
+          <div className="btn-row">
+            <button
+              type="button"
+              className="btn"
+              disabled={!nick.trim()}
+              onClick={() => {
+                dispatch({ type: 'person/add', nickname: nick.trim(), relation });
+                setAdding(false);
+                setNick('');
+                nav('/relationship/chart');
+              }}
+            >
+              Add
+            </button>
+            <button type="button" className="btn quiet" onClick={() => setAdding(false)}>
+              Cancel
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="btn-row" style={{ justifyContent: 'center' }}>
+          <button type="button" className="btn" onClick={() => setAdding(true)}>
+            Add someone
+          </button>
+        </div>
+      )}
+      {archived.length > 0 && (
+        <details style={{ marginTop: 16 }}>
+          <summary className="link">Archived ({archived.length})</summary>
+          <ul className="people">
+            {archived.map((p) => (
+              <li key={p.id}>
+                <button type="button" className="person-card" onClick={() => open(p.id)}>
+                  <span className="person-initial" aria-hidden="true">
+                    {p.nickname.charAt(0).toUpperCase()}
+                  </span>
+                  <span style={{ flex: 1 }}>
+                    <strong>{p.nickname}</strong>
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </details>
+      )}
+      <Link className="person-card" to="/you/self" style={{ marginTop: 16 }}>
+        <span className="person-initial" aria-hidden="true">
+          ✦
+        </span>
+        <span style={{ flex: 1 }}>
+          <strong>You</strong>
+          <span className="small muted" style={{ display: 'block' }}>
+            Your chart, patterns, cycles, and purpose
+          </span>
+        </span>
+        <span aria-hidden="true">›</span>
+      </Link>
+    </div>
   );
 }
 
@@ -289,8 +336,9 @@ export function RelationshipHome() {
     );
   }
   return (
-    <>
-      <Back to="/relationships" label="Relationships" />
+    <div className="night">
+      <Back to="/relationships" label="Your people" />
+      <PeopleSwitch />
       <h2 style={{ margin: '4px 0 0', textAlign: 'center' }}>{p.nickname}</h2>
       <nav className="segmented" aria-label={`Pillars for ${p.nickname}`}>
         {PILLARS.map((x) => (
@@ -335,7 +383,7 @@ export function RelationshipHome() {
           />
         </div>
       </details>
-    </>
+    </div>
   );
 }
 

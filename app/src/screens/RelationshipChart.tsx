@@ -9,6 +9,23 @@ import { Back } from '../components/ui';
 import { biWheel, relationshipReading } from '../content/relationship';
 import { SAMPLE_BIRTH, useStore, type Birth } from '../state';
 import { ReadingBlock } from './Reading';
+import { MiniOrb } from '../components/OracleBoard';
+
+/** Everyone added, as chips: tap one to switch whose chart is read with yours. */
+export function PeopleSwitch() {
+  const { state, dispatch } = useStore();
+  const people = state.people.filter((p) => p.status === 'active');
+  if (people.length < 2) return null;
+  return (
+    <div className="people-switch" role="group" aria-label="Choose whose chart to read with yours">
+      {people.map((p) => (
+        <button key={p.id} type="button" className={p.id === state.activePersonId ? 'on' : ''} aria-pressed={p.id === state.activePersonId} onClick={() => dispatch({ type: 'person/select', id: p.id })}>
+          {p.nickname}
+        </button>
+      ))}
+    </div>
+  );
+}
 
 /** Two charts together: the synastry wheel and the relationship's dynamics free; the full reading for subscribers. */
 export default function RelationshipChart() {
@@ -27,19 +44,23 @@ export default function RelationshipChart() {
 
   if (!p)
     return (
-      <>
+      <div className="night">
         <Back to="/relationships" label="Relationships" />
         <h1>Two charts together</h1>
         <p className="sub">Add someone to see your synastry.</p>
         <Link className="btn" to="/relationships">
           Add someone
         </Link>
-      </>
+      </div>
     );
   if (!data)
     return (
-      <>
-        <Back to="/relationship/relationship" label={p.nickname} />
+      <div className="night">
+        <Back to="/relationships" label="Your people" />
+        <PeopleSwitch />
+        <div className="orb-head" aria-hidden="true">
+          <MiniOrb />
+        </div>
         <p className="kicker">Synastry</p>
         <h1>You and {p.nickname}</h1>
         <p className="sub">Add {p.nickname}’s birth details to see your chart together. A birth time adds houses and angles.</p>
@@ -50,13 +71,14 @@ export default function RelationshipChart() {
             See our synastry
           </button>
         </div>
-      </>
+      </div>
     );
   const [first, ...rest] = data.sections;
   return (
-    <>
-      <Back to="/relationship/relationship" label={p.nickname} />
-      <p className="kicker">Synastry</p>
+    <div className="night">
+      <Back to="/relationships" label="Your people" />
+      <PeopleSwitch />
+      <p className="kicker">The Oracle · Synastry</p>
       <h1>You and {p.nickname}</h1>
       <SynastryWheel mine={data.wheel.mine} theirs={data.wheel.theirs} aspects={data.wheel.aspects} asc={data.wheel.asc} name={p.nickname} />
       <ReadingBlock s={first} tab="together" />
@@ -67,6 +89,9 @@ export default function RelationshipChart() {
         <AiDeepDive kind="together" sections={data.sections} />
       </Paywall>
       <p className="small muted">Possible dynamics between two charts, never what the other person feels or intends. No compatibility number.</p>
-    </>
+      <Link className="btn secondary" to="/relationship/relationship" style={{ marginTop: 8 }}>
+        Milestones and reflections with {p.nickname}
+      </Link>
+    </div>
   );
 }

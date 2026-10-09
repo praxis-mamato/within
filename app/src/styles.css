@@ -739,3 +739,46 @@ details > summary { cursor: pointer; margin: 8px 0; }
 .syn-wheel figcaption { margin-top: 6px; color: var(--ink-muted); }
 .syn-key { margin: 0 6px; white-space: nowrap; }
 .syn-cta { margin: 10px 0; border-color: var(--gold); }
+
+/* ─── Night: the Oracle's palette for whole screens (relationships) ─── */
+.night {
+  --bg: #0b1030; --surface: #141b40; --surface-2: #1a2250; --line: #3a3f6e;
+  --ink-display: #fff6e6; --ink-body: #e9dfd2; --ink-muted: #b9adc0;
+  --accent: #e9b56c; --accent-pressed: #f3c98a; --accent-soft: #2a2a4f; --on-accent: #1b1430;
+  --gold: #e2c27e; --west: #f0a27e; --vedic: #9fb2ff; --together: #e2c27e; --sage: #a9b38f; --focus: #fff6e6;
+  --field-bg: #10163a; --field-line: #5a5f8a; --tag-line: #6f6a90;
+  --banner-bg: #2a2440; --banner-line: #6b5a3a; --info-bg: #1a2140; --info-line: #3b4a6b; --info-ink: #c9d6f0;
+  --ok-soft: #1f2a24; --ok-ink: #c5d3a8; --warn-soft: #2f2716; --warn-ink: #e6c88f; --mark: #4a3f1e;
+  --danger: #f08a78; --danger-line: #8a4a40; --danger-soft: #3a2220; --safety-bg: #2d1f33; --safety-line: #6f4a5b;
+  --shadow: rgb(0 0 0 / 0.45);
+  color: var(--ink-body);
+  margin: -8px -20px 0; padding: 16px 20px 32px; border-radius: 0 0 24px 24px; min-height: 100%;
+  background:
+    radial-gradient(120% 50% at 50% 108%, rgb(233 164 106 / 0.45), transparent 60%),
+    radial-gradient(1px 1px at 12% 18%, #f7e9c8, transparent), radial-gradient(1px 1px at 78% 9%, #f7e9c8, transparent),
+    radial-gradient(1.5px 1.5px at 64% 32%, #f7e9c8, transparent), radial-gradient(1px 1px at 30% 44%, #f7e9c8, transparent),
+    radial-gradient(1px 1px at 88% 52%, #f7e9c8, transparent), radial-gradient(1.5px 1.5px at 8% 70%, #f7e9c8, transparent),
+    linear-gradient(180deg, #0a0f26 0%, #141b40 45%, #2b2547 78%, #4a3242 100%);
+}
+.night h1, .night h2, .night h3 { color: var(--ink-display); }
+.night .kicker { color: var(--gold); }
+.night a:not(.btn):not(.list-link):not(.person-card) { color: var(--gold); }
+.night .card { background: rgb(20 27 64 / 0.78); border-color: var(--line); }
+.night .btn:not(.secondary):not(.quiet) { background: linear-gradient(180deg, #e9b56c, #c98b4a); color: #24122a; border: none; }
+.night .btn.secondary { color: var(--gold); border-color: var(--gold); background: transparent; }
+.night .segmented a, .night .segmented button { color: var(--ink-body); }
+.night .segmented a.active, .night .segmented .seg-on { background: var(--accent-soft); color: var(--ink-display); }
+.night .orb-head { display: flex; justify-content: center; margin: 4px 0 6px; }
+.night .orb-head .mini-orb { width: 84px; height: 84px; filter: drop-shadow(0 0 18px rgb(120 150 255 / 0.4)); }
+.people { list-style: none; padding: 0; margin: 12px 0; display: grid; gap: 10px; }
+.person-card { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 16px; text-decoration: none; color: var(--ink-body); background: rgb(20 27 64 / 0.78); border: 1px solid var(--line); min-height: 56px; width: 100%; text-align: left; font: inherit; cursor: pointer; }
+.person-card.on { border-color: var(--gold); box-shadow: 0 0 0 1px var(--gold); }
+.person-card strong { color: var(--ink-display); font-size: 1.1rem; }
+.person-initial { flex: none; width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; font-family: 'Cormorant Garamond', serif; font-size: 1.3rem; color: #fff6e6; background: radial-gradient(circle at 36% 30%, #4a63b0, #1b2a62 55%, #060a1e); box-shadow: 0 0 0 1px var(--gold); }
+.rel-pill { font-size: 0.75rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--gold); border: 1px solid rgb(226 194 126 / 0.5); border-radius: 999px; padding: 1px 8px; margin-left: 6px; }
+.people-switch { display: flex; gap: 6px; overflow-x: auto; padding: 4px 0 10px; }
+.people-switch button { flex: none; background: rgb(255 255 255 / 0.06); color: var(--ink-body); border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px; font: inherit; font-size: 0.875rem; min-height: 36px; cursor: pointer; }
+.people-switch button.on { border-color: var(--gold); color: var(--ink-display); background: var(--accent-soft); }
+.relation-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 12px; }
+.relation-chips button { background: rgb(255 255 255 / 0.06); color: var(--ink-body); border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px; font: inherit; font-size: 0.875rem; min-height: 36px; cursor: pointer; }
+.relation-chips button[aria-pressed='true'] { border-color: var(--gold); color: var(--ink-display); background: var(--accent-soft); }

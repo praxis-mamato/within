@@ -71,3 +71,29 @@ describe('reducer', () => {
     expect(s.person).toBeNull();
   });
 });
+
+describe('several people', () => {
+  it('adds, switches between, and deletes people, keeping the open one in step', () => {
+    let s = initialState();
+    s = reducer(s, { type: 'person/add', nickname: 'Sam', relation: 'partner' });
+    s = reducer(s, { type: 'person/add', nickname: 'Ana', relation: 'friend' });
+    expect(s.people.map((p) => p.nickname)).toEqual(['Sam', 'Ana']);
+    expect(s.person?.nickname).toBe('Ana');
+    const sam = s.people[0].id;
+    s = reducer(s, { type: 'person/select', id: sam });
+    expect(s.person?.nickname).toBe('Sam');
+    s = reducer(s, { type: 'person/archive' });
+    expect(s.people.find((p) => p.id === sam)?.status).toBe('archived');
+    s = reducer(s, { type: 'person/delete' });
+    expect(s.people.map((p) => p.nickname)).toEqual(['Ana']);
+    expect(s.person?.nickname).toBe('Ana');
+  });
+  it('carries a single saved person from an earlier version into the list', () => {
+    const old = { ...initialState(), person: { id: 'x1', nickname: 'Lee', birth: null, status: 'active' as const, milestones: [] } } as unknown as Record<string, unknown>;
+    delete old.people;
+    delete old.activePersonId;
+    const s = reducer(initialState(), { type: 'hydrate', state: old as never });
+    expect(s.people.map((p) => p.nickname)).toEqual(['Lee']);
+    expect(s.person?.id).toBe('x1');
+  });
+});

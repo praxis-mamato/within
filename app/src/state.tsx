@@ -27,12 +27,16 @@ export interface Birth {
   tz: string;
 }
 
+export type Relation = 'partner' | 'dating' | 'ex' | 'crush' | 'family' | 'friend' | 'work' | 'other';
+export const RELATIONS: Record<Relation, string> = { partner: 'Partner', dating: 'Dating', crush: 'Crush', ex: 'Ex', family: 'Family', friend: 'Friend', work: 'Work', other: 'Someone else' };
+
 export interface Person {
   id: string;
   nickname: string;
   birth: Birth | null;
   status: 'active' | 'archived';
   milestones: Milestone[];
+  relation?: Relation;
 }
 
 export interface Intention {
@@ -74,7 +78,11 @@ export interface State {
   focusText: string;
   outcome: string;
   birth: Birth;
+  /** The person currently open; always one of `people` (or null). Kept in step by the reducer. */
   person: Person | null;
+  /** Everyone the user has added. */
+  people: Person[];
+  activePersonId: string | null;
   intentions: Intention[];
   actions: Action[];
   journal: JournalEntry[];
@@ -125,6 +133,8 @@ export function initialState(): State {
     outcome: '',
     birth: SAMPLE_BIRTH,
     person: null,
+    people: [],
+    activePersonId: null,
     intentions: [],
     actions: [],
     journal: [],
@@ -150,7 +160,8 @@ export type Event =
   | { type: 'onboarding/finish'; birth: Birth; nickname: string | null; intention: string; behavior: string }
   | { type: 'birth/update'; birth: Birth }
   | { type: 'stale/refresh' }
-  | { type: 'person/add'; nickname: string }
+  | { type: 'person/add'; nickname: string; relation?: Relation }
+  | { type: 'person/select'; id: string }
   | { type: 'person/birth'; birth: Birth | null }
   | { type: 'person/archive' }
   | { type: 'person/unarchive' }
@@ -187,7 +198,21 @@ function withScreen(s: State, text: string): State {
   return r.flagged && !s.safety.flagged ? { ...s, safety: r } : s;
 }
 
+/** Applies an event, then keeps the list of people in step with the person currently open. */
 export function reducer(s: State, e: Event): State {
+  const next = reduceOne(s, e);
+  if (e.type === 'hydrate' || e.type === 'reset' || next.person === s.person) return next;
+  if (!next.person) {
+    const people = next.people.filter((p) => p.id !== s.person?.id);
+    const first = people.find((p) => p.status === 'active') ?? people[0] ?? null;
+    return { ...next, people, person: first, activePersonId: first?.id ?? null };
+  }
+  const cur = next.person;
+  const people = next.people.some((p) => p.id === cur.id) ? next.people.map((p) => (p.id === cur.id ? cur : p)) : [...next.people, cur];
+  return { ...next, people, activePersonId: cur.id };
+}
+
+function reduceOne(s: State, e: Event): State {
   switch (e.type) {
     case 'onboarding/answers':
       return withScreen({ ...s, focus: e.focus, focusText: e.focusText, outcome: e.outcome }, e.focusText);
@@ -202,7 +227,9 @@ export function reducer(s: State, e: Event): State {
     case 'stale/refresh':
       return { ...s, stale: false };
     case 'person/add':
-      return { ...s, person: { id: id(), nickname: e.nickname, birth: null, status: 'active', milestones: SAMPLE_MILESTONES } };
+      return { ...s, person: { id: id(), nickname: e.nickname, birth: null, status: 'active', milestones: [], relation: e.relation } };
+    case 'person/select':
+      return { ...s, person: s.people.find((p) => p.id === e.id) ?? s.person };
     case 'person/birth':
       return s.person ? { ...s, person: { ...s.person, birth: e.birth } } : s;
     case 'person/archive':
@@ -259,7 +286,13 @@ export function reducer(s: State, e: Event): State {
       return initialState();
     case 'hydrate':
       // Safety flags are per session: a past flag shouldn't keep suppressing steps forever.
-      return { ...initialState(), ...e.state, safety: { flagged: false, suppressContactActions: false }, todayDone: false };
+      {
+        // Earlier versions kept one person; carry them into the list.
+        const people = e.state.people ?? (e.state.person ? [e.state.person] : []);
+        const activePersonId = e.state.activePersonId ?? e.state.person?.id ?? people[0]?.id ?? null;
+        const person = people.find((p) => p.id === activePersonId) ?? null;
+        return { ...initialState(), ...e.state, people, activePersonId, person, safety: { flagged: false, suppressContactActions: false }, todayDone: false };
+      }
   }
 }
 
