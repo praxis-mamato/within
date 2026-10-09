@@ -204,7 +204,7 @@ function retrogradeNow(now: Date) {
   );
 }
 
-function saturnFromMoon(c: NatalChart, now: Date): { n: number; text: string } | null {
+export function saturnFromMoon(c: NatalChart, now: Date): { n: number; text: string } | null {
   if (!c.vedic.moonRashi.certain) return null;
   const sat = Math.floor(norm(tropicalLongitude('Saturn', now) - lahiriAyanamsa(now)) / 30);
   const moon = SIGNS.indexOf(c.vedic.planets.find((p) => p.body === 'Moon')!.sign);

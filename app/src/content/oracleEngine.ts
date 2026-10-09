@@ -11,18 +11,18 @@
 import { houseOf, placidusCusps, SIGNS, tropicalLongitude } from '../astro/chart';
 import { fmtDeg, type NatalChart } from '../astro/natal';
 import { allAspects, monthAhead } from '../astro/deep';
-import { weekAhead, MOVERS, type WeekAspect } from '../astro/week';
+import { weekAhead, MOVERS } from '../astro/week';
 import { answerFor, feelingIn } from './answer';
 import { cycles } from './cycles';
 import { findPatterns } from './patternRules';
 import { togetherReading } from './deepReading';
-import { TARGET_AREAS, type Area, type Profile } from './mirror';
+import type { Area, Profile } from './mirror';
 import { askOracle, areaOf, limitOf, ORACLE_REFRAME, ORACLE_TONE, type Limit, type Tone } from './oracle';
 import { chartInBrief, todaySky, type SkyLine } from './today';
 import { topicFor } from './topics';
 import { WEEK_CONTACT, WEEK_MOVER, WEEK_TARGET, weekReading } from './week';
 import * as D from './deep';
-import { consulted, oracleLayers, type Layer } from './oracleLayers';
+import { consulted, dayScores, oracleLayers, type Layer } from './oracleLayers';
 import * as V from './vedic';
 import * as W from './western';
 
@@ -94,8 +94,6 @@ const bodyIn = (q: string) => {
   const m = q.match(BODY_RE);
   return m ? cap(m[1].toLowerCase()) : null;
 };
-const SOFT: WeekAspect[] = ['sextile', 'trine'];
-const HARD: WeekAspect[] = ['square', 'opposite'];
 
 // ─── Reading the question ─────────────────────────────────────────────────────
 
@@ -109,15 +107,15 @@ const INTENTS: [Intent, RegExp][] = [
   ['patterns', /\bpatterns?\b|\bwhy do i (always|keep)\b|\bkeep (repeating|doing|attracting)\b|\bstrengths?\b|\bweakness|\bwho am i\b|\bpersonality\b|\bmy gifts?\b|\bwhat am i (like|good at)\b/i],
   ['chart', /\bmy (sun|moon|rising|ascendant|mercury|venus|mars|jupiter|saturn|uranus|neptune|pluto|north node|node|chart|big three|signs?|nakshatra|dasha|lagna|midheaven|mc|houses?|placements?|birth chart)\b|\bwhat sign am i\b|\bwhat('s| is) my\b|\b(maha)?dasha\b|\bnakshatra\b|\bmy (rising|moon|sun) sign\b/i],
   ['feeling', /\bwhy do i feel\b|\bi('m| am)? feel(ing)?\b|\bfeeling\b/i],
-  ['cycle', /\bgoing through\b|\bthis (year|season|chapter)\b|\blife (phase|lesson)\b|\bcycles?\b|\bwhat('s| is) (happening|going on) (to|with|in) (me|my life)\b|\bmy life\b/i],
+  ['cycle', /\bgoing through\b|\bchapter\b|\bphase of (my )?life\b|\bthis (year|season|chapter)\b|\blife (phase|lesson)\b|\bcycles?\b|\bwhat('s| is) (happening|going on) (to|with|in) (me|my life)\b|\bmy life\b/i],
   ['planet', BODY_RE],
   ['sky', /\bsky\b|\bright now\b|\btoday\b|\btonight\b|\bstars?\b|\bcosmic\b|\benergy\b|\bthe moon\b/i],
-  ['decision', /^(should|shall|is it|will|would|can|could|do|does|am i|are|is|must)\b|\bshould i\b|\byes or no\b/i],
+  ['decision', /^(should|shall|is it|will|would|can|could|do|does|am i|are|is|must)\b|^(?!what|where|how|who|which)[^?]*\bshould i\b|\byes or no\b/i],
 ];
 
 export function intentOf(q: string): Intent {
   // A "should I" question is a decision, even when it mentions the week or the sky.
-  if (/^(should|shall)\b|\bshould i\b/i.test(q) && !/\bwhen\b|\breturn\b|\bretrograde\b/i.test(q)) return 'decision';
+  if (/^(should|shall)\b|\bshould i\b/i.test(q) && !/^(what|where|how|who|which)\b|\bwhen\b|\b(what|which|best|good) (day|time|week|month)\b|\breturn\b|\bretrograde\b/i.test(q)) return 'decision';
   for (const [intent, re] of INTENTS) if (re.test(q)) return intent === 'feeling' || !feelingIn(q) || intent === 'retro' || intent === 'return' ? intent : 'feeling';
   return feelingIn(q) ? 'feeling' : 'open';
 }
@@ -130,41 +128,15 @@ function cuspsOf(c: NatalChart, place: { lat: number; lon: number }) {
 
 /** The best days in the next two months for what the question is about (electional astrology). */
 export function bestDays(c: NatalChart, place: { lat: number; lon: number }, now: Date, area: Area | null, q: string) {
-  const w = weekAhead(c, place.lat, place.lon, now, 60);
-  const targets = new Set(Object.entries(TARGET_AREAS).filter(([, as]) => !area || as.includes(area)).map(([t]) => t));
-  if (!area) ['Sun', 'Moon', 'Venus', 'Jupiter'].forEach((t) => targets.add(t));
+  const days = dayScores(c, place, now, area, q);
   const talk = /\b(sign|contract|text|talk|email|call|send|launch|buy|sell|interview|apply|ask)\b/i.test(q) || area === 'work' || area === 'money';
-  const contacts = w.movers.flatMap((m) => m.contacts.map((x) => ({ mover: m.mover, ...x })));
-  const days: { date: string; score: number; reasons: string[]; waxing: boolean }[] = [];
-  for (let i = 1; i <= 60; i++) {
-    const d = new Date(now.getTime() + i * DAY);
-    const date = iso(d);
-    let score = 0;
-    const reasons: string[] = [];
-    const phase = (((tropicalLongitude('Moon', d) - tropicalLongitude('Sun', d)) % 360) + 360) % 360;
-    if (phase < 180) score += 1;
-    if (talk && speed('Mercury', d) < 0) score -= 4;
-    if ((area === 'love' || area === 'money') && speed('Venus', d) < 0) score -= 3;
-    for (const x of contacts) {
-      if (Math.abs(new Date(`${x.date}T12:00:00Z`).getTime() - d.getTime()) > 1.1 * DAY || !targets.has(x.natal)) continue;
-      if (['Venus', 'Jupiter', 'Sun'].includes(x.mover) && (SOFT.includes(x.aspect) || x.aspect === 'conjunct')) {
-        score += 3;
-        reasons.push(`${x.mover} ${x.aspect} your ${x.natal} (${fmtDate(x.date)})`);
-      } else if (['Mercury', 'Mars'].includes(x.mover) && SOFT.includes(x.aspect)) {
-        score += 1.5;
-        reasons.push(`${x.mover} ${x.aspect} your ${x.natal} (${fmtDate(x.date)})`);
-      } else if (['Saturn', 'Mars', 'Pluto', 'Uranus'].includes(x.mover) && HARD.includes(x.aspect)) score -= 3;
-    }
-    days.push({ date, score, reasons: [...new Set(reasons)], waxing: phase < 180 });
-  }
   const picked: typeof days = [];
   for (const d of [...days].sort((a, b) => b.score - a.score || a.date.localeCompare(b.date)))
     if (d.score > 1 && d.reasons.length && picked.every((p) => Math.abs(new Date(p.date).getTime() - new Date(d.date).getTime()) > 3 * DAY)) {
       picked.push(d);
       if (picked.length === 3) break;
     }
-  const waxing = days.filter((d) => d.waxing).map((d) => d.date);
-  return { picked: picked.sort((a, b) => a.date.localeCompare(b.date)), waxing, mercuryRx: talk && speed('Mercury', now) < 0 };
+  return { picked: picked.sort((a, b) => a.date.localeCompare(b.date)), waxing: days.filter((d) => d.waxing).map((d) => d.date), mercuryRx: talk && speed('Mercury', now) < 0 };
 }
 
 /** The next time a slow planet returns to its birth position, and whether it is active now. */

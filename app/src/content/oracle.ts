@@ -67,7 +67,7 @@ const AREA_WORDS: [Area, RegExp][] = [
 ];
 const LIMIT_WORDS: [Limit, RegExp][] = [
   ['health', /\b(sick|illness|ill|cancer|disease|diagnos\w*|surgery|pregnan\w*|baby|miscarr\w*|die|dying|death|dead|tumou?r|test results?|doctor|medication)\b/i],
-  ['others', /\b(does|do|is|will|would|did)\s+(he|she|they|my \w+)\s+(?:still\s+|really\s+|even\s+|ever\s+)?(love|like|miss|want|think|care|cheat|cheating|lying|lie|come back|regret|feel)\b|\b(cheating|cheat on me|faithful|seeing someone else|thinking (about|of) me)\b/i],
+  ['others', /\b(does|do|is|will|would|did)\s+(he|she|they|my (?:partner|husband|wife|boyfriend|girlfriend|ex|crush|boss|friend|mother|father|mom|mum|dad|sister|brother|son|daughter))\s+(?:still\s+|really\s+|even\s+|ever\s+)?(love|like|miss|want|think|care|cheat|cheating|lying|lie|come back|regret|feel)\b|\b(cheating|cheat on me|faithful|seeing someone else|thinking (about|of) me)\b/i],
   ['legal', /\b(court|lawsuit|sue|custody|divorce settlement|lawyer|trial|verdict|visa|immigration)\b/i],
   ['gamble', /\b(lottery|lotto|bet|betting|casino|stocks?|crypto|bitcoin|gamble|gambling|numbers? to play)\b/i],
 ];
