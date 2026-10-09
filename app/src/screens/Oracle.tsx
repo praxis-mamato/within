@@ -258,6 +258,11 @@ export default function Oracle() {
         </section>
       )}
 
+      {answer && phase === 'answered' && (
+        <p className="small oracle-muted">
+          Want to talk it through with a person? <Link to="/astrologer">Book a session with a Within astrologer</Link>.
+        </p>
+      )}
       <SkyStrip onAsk={(x) => (setQ(x), ask(x))} />
       {flagged ? (
         <SafetyPanel />

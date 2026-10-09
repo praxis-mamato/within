@@ -6,6 +6,8 @@ import { LogoMark } from './components/Illustrations';
 import Onboarding from './screens/Onboarding';
 import Today from './screens/Today';
 import Oracle from './screens/Oracle';
+import Astrologer from './screens/Astrologer';
+import MoonCalendar from './screens/MoonCalendar';
 import Reflection from './screens/Reflection';
 import { MilestoneDetail, MilestoneForm, RelationshipHome, RelationshipsList, YouChart, YouCycles, YouPatterns, YouReading, YouSpace } from './screens/Relationships';
 import Growth, { FollowUp } from './screens/Growth';
@@ -108,6 +110,8 @@ function Shell() {
               <Route path="/milestone/:id" element={<MilestoneDetail />} />
               <Route path="/growth" element={<Growth />} />
               <Route path="/oracle" element={<Oracle />} />
+              <Route path="/astrologer" element={<Astrologer />} />
+              <Route path="/moon-calendar" element={<MoonCalendar />} />
               <Route path="/follow-up/:id" element={<FollowUp />} />
               <Route path="/settings" element={<Settings />} />
               <Route path="/account" element={<AccountScreen />} />

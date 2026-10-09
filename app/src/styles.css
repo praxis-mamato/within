@@ -676,3 +676,13 @@ details > summary { cursor: pointer; margin: 8px 0; }
 .sky-strip ul { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
 .sky-strip button { width: 100%; display: flex; gap: 8px; align-items: center; text-align: left; background: rgb(255 255 255 / 0.04); border: 1px solid rgb(226 194 126 / 0.3); border-radius: 10px; color: var(--o-ink); padding: 6px 8px; font: inherit; font-size: 0.875rem; min-height: 44px; cursor: pointer; }
 .sky-glyph { color: var(--o-gold); font-size: 1.2rem; width: 1.2em; text-align: center; }
+.packages { border: 0; padding: 0; margin: 0; display: grid; gap: 10px; }
+.package { display: flex; gap: 10px; align-items: flex-start; cursor: pointer; }
+.package.on { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.package input { margin-top: 6px; }
+.package-head { display: flex; justify-content: space-between; gap: 8px; }
+.package-price { font-weight: 700; color: var(--ink-display); }
+.package ul { margin: 6px 0 0; padding-left: 18px; }
+.booking-list, .moon-preview { list-style: none; padding: 0; display: grid; gap: 8px; }
+.moon-options { border: 0; padding: 0; margin: 0 0 12px; }
+.moon-options legend { font-weight: 600; margin-bottom: 6px; }

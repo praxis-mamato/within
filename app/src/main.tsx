@@ -8,6 +8,8 @@ import { keepFresh } from './lib/freshness';
 
 installCrashHandlers();
 keepFresh();
+// Back from paying for astrologer sessions: show the booking page.
+if (/[?&]booking=success/.test(location.search) && !location.hash.startsWith('#/astrologer')) location.hash = '#/astrologer';
 // Readings use the approver's edited wording from content/approvals.json.
 applyApprovedEdits();
 

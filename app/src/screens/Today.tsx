@@ -188,6 +188,8 @@ function DeeperLinks() {
     { to: '/you/patterns', title: 'Your patterns', text: 'What shapes you, read from your whole chart' },
     { to: '/you/cycles', title: 'Your cycles', text: 'What you’re moving through now, with dates' },
     { to: '/you/reading', title: 'Your full reading', text: 'Western, Vedic, timing, and connected deep readings' },
+    { to: '/moon-calendar', title: 'Your Moon calendar', text: 'Every phase and Moon sign, mapped to your chart, in your own calendar' },
+    { to: '/astrologer', title: 'Work with an astrologer', text: 'Live 45-minute sessions with a person, from $1,000 for two' },
   ];
   return (
     <nav className="deeper" aria-label="Go deeper">

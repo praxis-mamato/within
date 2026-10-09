@@ -140,3 +140,21 @@ Use Stripe test cards with any future expiry date, any CVC, and any postcode.
 - In-app purchase for the iOS and Android apps (Apple and Google require it for subscriptions sold in-app; RevenueCat plan in `docs/next-features.md` B2).
 - Add the Apple secrets in step 4.5 so account deletion revokes Apple's token.
 - Your own SMTP sender, privacy policy, Stripe live mode, and template approval.
+
+## 8. Sessions with a human astrologer
+
+People book from **Work with an astrologer** (linked from Today and under every Oracle answer). The
+packages and prices live in one file, `supabase/functions/_shared/packages.ts`, used by both the app
+and the `book-astrologer` function, so the price charged is always the price shown. Change a price
+there and redeploy `book-astrologer`.
+
+- Payment: Stripe Checkout, one-time, in live mode. No Stripe product setup is needed; promotion
+  codes work here too.
+- Each booking is a row in the Supabase table `astrologer_bookings` (Table editor): package, amount,
+  status (`pending` until paid, then `paid`), the person's email, what they want to explore, when
+  they are free, their time zone, and their birth details only if they ticked the box to share them.
+- To fulfil: filter `status = paid`, email the person to schedule, then set the status to
+  `scheduled` and later `completed`. Stripe also emails you a payment notice for each one.
+- Refunds: issue them in Stripe, then set the status to `refunded`. The booking page promises
+  refunds for unused sessions within 30 days; change that line in `app/src/screens/Astrologer.tsx`
+  if your policy differs.

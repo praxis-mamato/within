@@ -40,6 +40,13 @@ Deno.serve(async (req) => {
     switch (event.type) {
       case 'checkout.session.completed': {
         const s = event.data.object as Stripe.Checkout.Session;
+        // Sessions with a human astrologer: mark the booking paid.
+        if (s.metadata?.kind === 'astrologer' && s.payment_status === 'paid') {
+          const { error } = await admin.from('astrologer_bookings').update({ status: 'paid', paid_at: new Date().toISOString() }).eq('stripe_session_id', s.id);
+          if (error) throw error;
+          console.log('astrologer booking paid', JSON.stringify({ session: s.id, package: s.metadata.package_id }));
+          break;
+        }
         if (s.subscription) await record(await stripe.subscriptions.retrieve(typeof s.subscription === 'string' ? s.subscription : s.subscription.id));
         break;
       }
