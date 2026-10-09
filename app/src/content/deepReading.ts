@@ -2,8 +2,8 @@
  * Subscriber deep sections, assembled from src/astro/deep.ts calculations and the depth library.
  * Added to the full reading for subscribers, plus two new tabs: Timing and Together.
  */
-import { placidusCusps, RASHIS, SIGNS } from '../astro/chart';
-import { aspectPatterns, allAspects, dashaCalendar, dominantPlanet, drishti, houseRulers, lordshipYogas, monthAhead, synastry, vargas } from '../astro/deep';
+import { RASHIS, SIGNS } from '../astro/chart';
+import { aspectPatterns, allAspects, dashaCalendar, dominantPlanet, drishti, houseRulers, lordshipYogas, monthAhead, vargas } from '../astro/deep';
 import { fmtDeg, type NatalChart } from '../astro/natal';
 import type { ReadingItem, ReadingSection } from './fullReading';
 import * as D from './deep';
@@ -203,61 +203,3 @@ export function timingReading(c: NatalChart, place: Place, now = new Date(), pro
 
 // ─── Together ───────────────────────────────────────────────────────────────
 
-const ROLE: Record<string, string> = {
-  Sun: 'sense of self',
-  Moon: 'emotional needs',
-  Mercury: 'way of talking',
-  Venus: 'way of showing affection',
-  Mars: 'drive',
-  Jupiter: 'optimism',
-  Saturn: 'sense of responsibility',
-  Uranus: 'need for freedom',
-  Neptune: 'ideals',
-  Pluto: 'intensity',
-};
-
-export function togetherReading(me: NatalChart, mePlace: Place, them: NatalChart, themPlace: Place, name: string): ReadingSection[] {
-  const meCusps = me.timePrecision === 'exact' ? placidusCusps(me.utc, mePlace.lat, mePlace.lon) : null;
-  const themCusps = them.timePrecision === 'exact' ? placidusCusps(them.utc, themPlace.lat, themPlace.lon) : null;
-  const s = synastry(me, them, themCusps, meCusps);
-  const role = (b: string) => ROLE[b];
-  const PERSONAL = ['Sun', 'Moon', 'Mercury', 'Venus', 'Mars'];
-  const weight = (a: { a: string; b: string }) => Number(PERSONAL.includes(a.a)) + Number(PERSONAL.includes(a.b));
-  const fill = (t: string, planet: string, house: number) => t.replace('{planet}', planet).replace('{house}', `${ord(house)} house`).replace('{role}', role(planet)).replace('{area}', W.HOUSE[house].area);
-  const out: ReadingSection[] = [];
-  out.push({
-    id: 'r-aspects',
-    title: `Your chart and ${name}’s`,
-    intro: 'Aspects between your planets and theirs. They describe possible dynamics, not what either of you thinks or intends. No compatibility score is given.',
-    // Contacts between personal planets (Sun to Mars) matter most between two people; outer planets come after.
-    items: [...s.aspects]
-      .sort((x, y) => weight(y) - weight(x) || x.orb - y.orb)
-      .slice(0, 14)
-      .map((a) => ({
-      heading: `Your ${a.a} ${a.aspect} ${name}’s ${a.b}`,
-      text: `Your ${role(a.a)} and their ${role(a.b)} ${a.aspect === 'quincunx' ? 'sit at an awkward angle that asks for ongoing adjustment' : `may ${W.ASPECT_MEANING[a.aspect]}`}.`,
-      basis: `Orb ${fmtDeg(a.orb)}`,
-    })),
-  });
-  const overlays: ReadingItem[] = [
-    ...s.overlays.theirsInMine.filter((o) => ['Sun', 'Moon', 'Venus', 'Mars', 'Saturn'].includes(o.body)).map((o) => ({ heading: `${name}’s ${o.body} in your ${ord(o.house)}`, text: fill(D.OVERLAY_TEXT.theirsInMine, o.body, o.house), basis: 'Their planet in your houses' })),
-    ...s.overlays.mineInTheirs.filter((o) => ['Sun', 'Moon', 'Venus', 'Mars', 'Saturn'].includes(o.body)).map((o) => ({ heading: `Your ${o.body} in ${name}’s ${ord(o.house)}`, text: fill(D.OVERLAY_TEXT.mineInTheirs, o.body, o.house), basis: 'Your planet in their houses' })),
-  ];
-  out.push({
-    id: 'r-overlays',
-    title: 'Where you land in each other’s charts',
-    items: overlays.length ? overlays : [{ heading: 'Not included', text: 'House overlays need an exact birth time for at least one of you.' }],
-  });
-  const comp = (b: string) => s.composite.find((x) => x.body === b)!;
-  out.push({
-    id: 'r-composite',
-    title: 'The relationship itself',
-    intro: D.COMPOSITE_INTRO,
-    items: ['Sun', 'Moon', 'Venus'].map((b) => ({
-      heading: `Composite ${b} in ${comp(b).sign}`,
-      text: b === 'Sun' ? `The relationship’s core may be colored by ${W.SIGN_KEYWORD[comp(b).sign]}.` : b === 'Moon' ? `Its emotional climate may lean toward ${W.SIGN_KEYWORD[comp(b).sign]}.` : `Affection between you may be expressed through ${W.SIGN_KEYWORD[comp(b).sign]}.`,
-      basis: `Midpoint ${fmtDeg(comp(b).longitude % 30)} ${comp(b).sign}`,
-    })),
-  });
-  return out;
-}

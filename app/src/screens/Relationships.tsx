@@ -4,8 +4,6 @@ import { Link, NavLink, useNavigate, useParams, useSearchParams } from 'react-ro
 import { MILESTONE_INTERPRETATION, MILESTONE_TYPES, REFLECTIONS, type Milestone, type MilestoneType, type Pillar } from '../data/fixtures';
 import { describePrecision, formatFuzzyDate, type DateKind } from '../lib/dates';
 import { Landscape, Leaf, Orbit, Venn } from '../components/Illustrations';
-import { Paywall } from '../components/Paywall';
-import { useAccount } from '../services/AccountContext';
 import { Back, ConfirmButton, PromptChips, PurposeCard, SafetyPanel } from '../components/ui';
 import { MILESTONE_MEANINGS, MILESTONE_TITLES } from '../data/prompts';
 import { personalize, SAMPLE_BIRTH, useStore, type Birth } from '../state';
@@ -19,7 +17,7 @@ import { antardashas, vimshottari } from '../astro/chart';
 /** List: the "You" space always, plus at most one relationship in the MVP. */
 export function RelationshipsList() {
   const { state, dispatch } = useStore();
-  const { entitlement } = useAccount();
+  const nav = useNavigate();
   const [adding, setAdding] = useState(false);
   const [nick, setNick] = useState('');
   const p = state.person;
@@ -69,6 +67,7 @@ export function RelationshipsList() {
                 onClick={() => {
                   dispatch({ type: 'person/add', nickname: nick.trim() });
                   setAdding(false);
+                  nav('/relationship/chart');
                 }}
               >
                 Add
@@ -78,8 +77,6 @@ export function RelationshipsList() {
               </button>
             </div>
           </div>
-        ) : !entitlement.active ? (
-          <Paywall where="relationship" what="A relationship space">{null}</Paywall>
         ) : (
           <div className="btn-row">
             <button type="button" className="btn secondary" onClick={() => setAdding(true)}>
@@ -303,6 +300,15 @@ export function RelationshipHome() {
         ))}
       </nav>
       {state.safety.flagged && <SafetyPanel compact />}
+      <Link to="/relationship/chart" className="card list-link syn-cta">
+        <span>
+          <strong>Your synastry with {p.nickname}</strong>
+          <span className="small muted" style={{ display: 'block' }}>
+            The two charts together: dynamics, composite, timing
+          </span>
+        </span>
+        <span aria-hidden="true">›</span>
+      </Link>
       <PillarBody pillar={(PILLARS.find((x) => x.id === pillar)?.id ?? 'self') as Pillar} />
       <hr />
       <details>

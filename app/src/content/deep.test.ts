@@ -1,5 +1,6 @@
 import * as D from './deep';
-import { timingReading, togetherReading, vedicDeep, westernDeep } from './deepReading';
+import { timingReading, vedicDeep, westernDeep } from './deepReading';
+import { relationshipReading } from './relationship';
 import { computeNatal } from '../astro/natal';
 
 const strings = (x: unknown): string[] =>
@@ -27,7 +28,7 @@ describe('depth library', () => {
 describe('deep readings', () => {
   const all = charts.map((c, i) => {
     const place = { lat: people[i].lat, lon: people[i].lon };
-    return [...westernDeep(c, place), ...vedicDeep(c), ...timingReading(c, place, now), ...togetherReading(c, place, charts[(i + 1) % 4], { lat: people[(i + 1) % 4].lat, lon: people[(i + 1) % 4].lon }, 'Alex')];
+    return [...westernDeep(c, place), ...vedicDeep(c), ...timingReading(c, place, now), ...relationshipReading(c, place, charts[(i + 1) % 4], { lat: people[(i + 1) % 4].lat, lon: people[(i + 1) % 4].lon }, 'Alex')];
   });
   it('are complete and filled for every chart, including unknown birth time', () => {
     for (const sections of all) {

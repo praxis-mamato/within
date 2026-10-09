@@ -21,6 +21,7 @@ import * as OR from './oracle';
 import * as OE from './oracleEngine';
 import * as OL from './oracleLayers';
 import * as MC from './moonCalendar';
+import * as RL from './relationship';
 import committed from './approvals.json';
 import { lint } from './lint';
 
@@ -134,6 +135,12 @@ const SOURCES: [section: string, module: string, Record<string, unknown>, [name:
     ['RETURN_MEANING', 'Planetary returns'],
   ]],
   ['The Oracle’s full reading', 'oracleLayers', OL as Record<string, unknown>, [['LAYER_TEXT', 'Layer framing']]],
+  ['Relationships', 'relationship', RL as Record<string, unknown>, [
+    ['DYNAMIC_TEXT', 'Relationship dynamics'],
+    ['SYN_PAIR', 'Synastry pairs'],
+    ['KOOTA_TEXT', 'Vedic factors'],
+    ['REL_TEXT', 'Framing'],
+  ]],
   ['Your Moon calendar', 'moonCalendar', MC as Record<string, unknown>, [['MOON_CAL_TEXT', 'Calendar notes']]],
   ['Answers to sky and feeling questions', 'answer', AN as Record<string, unknown>, [
     ['MOON_TODAY_HOUSE', 'Today’s Moon by natal house'],

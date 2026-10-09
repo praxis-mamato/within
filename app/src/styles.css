@@ -734,3 +734,8 @@ details > summary { cursor: pointer; margin: 8px 0; }
 .intro-form .resolved a { color: var(--accent-pressed); }
 .intro-form [role='listbox'], .intro-form [role='option'] { color: var(--ink-body); }
 .intro-form .resolved button, .intro-form .resolved .link { color: var(--accent-pressed); opacity: 1; }
+.syn-wheel { margin: 8px auto 16px; max-width: 380px; text-align: center; }
+.syn-wheel svg { width: 100%; height: auto; display: block; }
+.syn-wheel figcaption { margin-top: 6px; color: var(--ink-muted); }
+.syn-key { margin: 0 6px; white-space: nowrap; }
+.syn-cta { margin: 10px 0; border-color: var(--gold); }

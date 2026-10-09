@@ -9,6 +9,7 @@ import Oracle from './screens/Oracle';
 import OracleIntro from './screens/OracleIntro';
 import { load as loadInterviewSession } from './interview/session';
 import Astrologer from './screens/Astrologer';
+import RelationshipChart from './screens/RelationshipChart';
 import MoonCalendar from './screens/MoonCalendar';
 import Reflection from './screens/Reflection';
 import { MilestoneDetail, MilestoneForm, RelationshipHome, RelationshipsList, YouChart, YouCycles, YouPatterns, YouReading, YouSpace } from './screens/Relationships';
@@ -113,6 +114,7 @@ function Shell() {
               <Route path="/growth" element={<Growth />} />
               <Route path="/oracle" element={<Oracle />} />
               <Route path="/astrologer" element={<Astrologer />} />
+              <Route path="/relationship/chart" element={<RelationshipChart />} />
               <Route path="/moon-calendar" element={<MoonCalendar />} />
               <Route path="/follow-up/:id" element={<FollowUp />} />
               <Route path="/settings" element={<Settings />} />

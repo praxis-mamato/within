@@ -12,7 +12,8 @@ import { chartInBrief, todaySky } from './today';
 import { askOracle, ORACLE_TEXT } from './oracle';
 import { consultOracle, ORACLE_SAYS } from './oracleEngine';
 import { PATTERN_AREAS } from './mirror';
-import { timingReading, togetherReading, vedicDeep, westernDeep } from './deepReading';
+import { timingReading, vedicDeep, westernDeep } from './deepReading';
+import { relationshipReading } from './relationship';
 import { OUTCOME_STEPS, planFor, SITUATIONS, topicFor } from './topics';
 import { answerFor, answerText } from './answer';
 import type { Element } from './templates';
@@ -115,7 +116,7 @@ export function buildCorpus(now = new Date('2026-10-06T12:00:00Z')): Passage[] {
       const a = answerFor(q, topicFor(q, []), c, place, now);
       if (a) out.push({ source: `${who} · Your question · “${q}”`, text: answerText(a) });
     }
-    out.push(...sectionPassages(`${who} · Together`, togetherReading(c, place, charts[j], { lat: births[j].lat, lon: births[j].lon }, 'Alex')));
+    out.push(...sectionPassages(`${who} · Together`, relationshipReading(c, place, charts[j], { lat: births[j].lat, lon: births[j].lon }, 'Alex')));
   });
   const elements: Element[] = ['fire', 'earth', 'air', 'water'];
   const outcomes = Object.keys(OUTCOME_STEPS);

@@ -2,7 +2,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { track } from '../services/telemetry';
 import { useCharts } from '../astro/useCharts';
 import { READING_VERSION, vedicReading, westernReading, type ReadingSection } from '../content/fullReading';
-import { timingReading, togetherReading, vedicDeep, westernDeep } from '../content/deepReading';
+import { timingReading, vedicDeep, westernDeep } from '../content/deepReading';
+import { relationshipReading } from '../content/relationship';
 import { useStore } from '../state';
 import { Paywall } from '../components/Paywall';
 import { AiDeepDive } from '../components/AiDeepDive';
@@ -33,7 +34,7 @@ export default function Reading({ initial = 'western' }: { initial?: Tab }) {
     if (tab === 'western') return [westernPlacements(me, place), ...merge(westernReading(me), westernDeep(me, place))];
     if (tab === 'vedic') return [vedicPlacements(me), ...merge(vedicReading(me, state.birth.date), vedicDeep(me))];
     if (tab === 'timing') return timingReading(me, place, new Date(), state.profile);
-    if (other && theirBirth) return togetherReading(me, place, other, { lat: theirBirth.lat, lon: theirBirth.lon }, state.person!.nickname);
+    if (other && theirBirth) return relationshipReading(me, place, other, { lat: theirBirth.lat, lon: theirBirth.lon }, state.person!.nickname);
     return [];
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [me, other, tab, state.profile, state.birth.date, state.birth.lat, state.birth.lon, theirBirth]);
@@ -79,7 +80,7 @@ export default function Reading({ initial = 'western' }: { initial?: Tab }) {
   );
 }
 
-function ReadingBlock({ s, tab }: { s: ReadingSection; tab: string }) {
+export function ReadingBlock({ s, tab }: { s: ReadingSection; tab: string }) {
   return (
     <section id={s.id} className={`card lens ${tab === 'vedic' ? 'vedic' : tab === 'western' ? 'western' : 'together'}`} aria-labelledby={`${s.id}-h`}>
       <h2 id={`${s.id}-h`} style={{ marginTop: 0 }}>

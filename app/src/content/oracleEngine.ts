@@ -15,7 +15,7 @@ import { weekAhead, MOVERS } from '../astro/week';
 import { answerFor, feelingIn } from './answer';
 import { cycles } from './cycles';
 import { findPatterns } from './patternRules';
-import { togetherReading } from './deepReading';
+import { relationshipReading } from './relationship';
 import type { Area, Profile } from './mirror';
 import { askOracle, areaOf, limitOf, ORACLE_REFRAME, ORACLE_TONE, type Limit, type Tone } from './oracle';
 import { chartInBrief, todaySky, type SkyLine } from './today';
@@ -248,8 +248,17 @@ export function consultOracle(question: string, ctx: OracleContext): OracleReply
   const q = question.trim();
   const body = reply.intent === 'chart' || reply.intent === 'planet' || reply.intent === 'retro' ? (/north node|\bnode\b/i.test(q) ? 'Node' : bodyIn(q)) : null;
   const area = body ? null : (areaOf(q) ?? (['decision', 'when', 'feeling', 'cycle', 'open', 'week', 'sky'].includes(reply.intent) ? (ctx.profile?.onMind[0] ?? null) : null));
-  const layers = oracleLayers(ctx.chart, ctx.place, area, body && body !== 'Moon' ? body : body === 'Moon' ? 'Moon' : null, ctx.now ?? new Date());
-  return layers.length ? { ...reply, layers, consulted: consulted(ctx.chart, layers) } : reply;
+  let layers = oracleLayers(ctx.chart, ctx.place, area, body && body !== 'Moon' ? body : body === 'Moon' ? 'Moon' : null, ctx.now ?? new Date());
+  // With someone added, love and relationship questions also read the two charts together.
+  if (ctx.other && (reply.intent === 'together' || area === 'love')) {
+    const rel = relationshipReading(ctx.chart, ctx.place, ctx.other.chart, ctx.other.place, ctx.other.name, ctx.now ?? new Date())
+      .filter((s) => reply.intent === 'together' || ['r-dynamics', 'r-progressed', 'r-timeline'].includes(s.id))
+      .map((s) => ({ title: s.title, tradition: (s.id === 'r-vedic' ? 'Vedic' : 'Western') as Layer['tradition'], lines: s.items.map((i) => ({ heading: i.heading, text: i.text, basis: i.basis })) }));
+    layers = reply.intent === 'together' ? rel : [...rel, ...layers];
+  }
+  const read = consulted(ctx.chart, layers);
+  if (ctx.other && (reply.intent === 'together' || area === 'love')) read.unshift(`${ctx.other.name}’s chart`, 'synastry both ways', 'composite and Davison charts', 'progressed synastry', 'the relationship’s year', 'ashtakoota, factor by factor');
+  return layers.length ? { ...reply, layers, consulted: read } : reply;
 }
 
 function answerOnly(question: string, ctx: OracleContext): OracleReply {
@@ -260,7 +269,10 @@ function answerOnly(question: string, ctx: OracleContext): OracleReply {
   const base = { question: q, day };
   const limit = limitOf(q);
   if (limit && limit !== 'unclear') return { ...base, intent: 'decision', label: ORACLE_TONE.again.label, orb: 'ASK AGAIN', tone: 'again', points: 'Moon', lines: [{ heading: 'Ask it another way', text: ORACLE_REFRAME[limit] }], deeper: [], limit };
-  const intent = intentOf(q);
+  const i0 = intentOf(q);
+  // A question that names the other person is about the two of you (unless it asks a decision or a date).
+  const named = !!ctx.other && new RegExp(`\\b${ctx.other.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i').test(q);
+  const intent: Intent = named && !['decision', 'when'].includes(i0) ? 'together' : i0;
   if (limit === 'unclear' && (intent === 'open' || intent === 'decision')) return { ...base, intent: 'decision', label: ORACLE_TONE.again.label, orb: 'ASK AGAIN', tone: 'again', points: 'Moon', lines: [{ heading: 'Ask it another way', text: ORACLE_REFRAME.unclear }], deeper: [], limit };
   const cusps = cuspsOf(c, place);
   const area = areaOf(q);
@@ -319,9 +331,9 @@ function answerOnly(question: string, ctx: OracleContext): OracleReply {
     }
     case 'together': {
       if (!ctx.other) return { ...base, intent, label: 'The two of you', orb: 'TWO CHARTS', points: 'Venus', lines: [{ heading: 'Add them first', text: ORACLE_SAYS.noPerson }], deeper: [] };
-      const t = togetherReading(c, place, ctx.other.chart, ctx.other.place, ctx.other.name);
-      const items = t.flatMap((s) => s.items.map((i) => ({ heading: i.heading, text: i.text, basis: i.basis })));
-      return { ...base, intent, label: `You and ${ctx.other.name}`, orb: 'TWO CHARTS', points: 'Venus', lines: items.slice(0, 2), deeper: items.slice(2, 8) };
+      const dyn = relationshipReading(c, place, ctx.other.chart, ctx.other.place, ctx.other.name, now)[0];
+      const items = dyn.items.map((i) => ({ heading: i.heading, text: i.text, basis: i.basis }));
+      return { ...base, intent, label: `You and ${ctx.other.name}`, orb: 'TWO CHARTS', points: 'Venus', lines: items.slice(0, 2), deeper: items.slice(2) };
     }
     case 'chart': {
       const r = natalLines(c, q, place);
