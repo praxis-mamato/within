@@ -8,6 +8,8 @@ import { useMemo } from 'react';
 import { useCharts } from '../astro/useCharts';
 import { cycles } from '../content/cycles';
 import { CycleCard } from './Patterns';
+import { chartInBrief, todaySky, TODAY_TEXT, type SkyLine } from '../content/today';
+import { useAccount } from '../services/AccountContext';
 
 /** Today: current intention, one reflection, one next step, and a clear finish (PRD §4). */
 export default function Today() {
@@ -41,6 +43,8 @@ export default function Today() {
       <p className="sub">{r.subheading}</p>
       <HorizonSun />
       {state.safety.flagged && <SafetyPanel compact />}
+      <SkyToday />
+      <ChartBrief />
       <PurposeCard />
       <DeeperLinks />
 
@@ -91,6 +95,72 @@ export default function Today() {
         </div>
       )}
     </>
+  );
+}
+
+const Lines = ({ items }: { items: SkyLine[] }) => (
+  <div className="reading-items">
+    {items.map((i) => (
+      <div className="reading-item" key={i.heading}>
+        <h3>{i.heading}</h3>
+        <p>{i.text}</p>
+        {i.basis && <p className="basis">{i.basis}</p>}
+      </div>
+    ))}
+  </div>
+);
+
+/** Free: the sky right now, read against this person's chart, plus what the rest of the week holds. */
+function SkyToday() {
+  const { state } = useStore();
+  const { me } = useCharts();
+  const { entitlement } = useAccount();
+  const sky = useMemo(() => (me ? todaySky(me, { lat: state.birth.lat, lon: state.birth.lon }) : null), [me, state.birth.lat, state.birth.lon]);
+  if (!sky) return null;
+  return (
+    <section className="card" aria-labelledby="sky-h">
+      <h2 id="sky-h" style={{ marginTop: 0 }}>
+        The sky today, for you
+      </h2>
+      <Lines items={[sky.moon, ...sky.now]} />
+      {sky.retrograde.length > 0 && (
+        <p className="small muted" style={{ marginTop: 12 }}>
+          {TODAY_TEXT.retro} {sky.retrograde.join(', ')}.
+        </p>
+      )}
+      {sky.later.length > 0 && (
+        <>
+          <h3 style={{ marginBottom: 4 }}>Later this week</h3>
+          <ul className="small" style={{ margin: 0, paddingLeft: 18 }}>
+            {sky.later.slice(0, 5).map((l) => (
+              <li key={l}>{l}</li>
+            ))}
+          </ul>
+          {!entitlement.active && <p className="small muted">Each of these is read in full, with what it means for you, in a subscription.</p>}
+        </>
+      )}
+      <Link className="btn secondary" to="/you/reading?tab=timing" style={{ marginTop: 12 }}>
+        Your week, planet by planet
+      </Link>
+    </section>
+  );
+}
+
+/** Free: the core of the birth chart, read in full. */
+function ChartBrief() {
+  const { me } = useCharts();
+  const lines = useMemo(() => (me ? chartInBrief(me) : []), [me]);
+  if (!lines.length) return null;
+  return (
+    <section className="card" aria-labelledby="brief-h">
+      <h2 id="brief-h" style={{ marginTop: 0 }}>
+        Your chart, at its core
+      </h2>
+      <Lines items={lines} />
+      <Link className="btn quiet" to="/you/reading" style={{ marginTop: 12 }}>
+        Every placement, Western and Vedic
+      </Link>
+    </section>
   );
 }
 

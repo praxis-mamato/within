@@ -8,6 +8,7 @@ import { vedicReading, westernReading, type ReadingSection } from './fullReading
 import { findPatterns } from './patternRules';
 import { cycles } from './cycles';
 import { weekReading } from './week';
+import { chartInBrief, todaySky } from './today';
 import { PATTERN_AREAS } from './mirror';
 import { timingReading, togetherReading, vedicDeep, westernDeep } from './deepReading';
 import { OUTCOME_STEPS, planFor, SITUATIONS, topicFor } from './topics';
@@ -81,6 +82,9 @@ export function buildCorpus(now = new Date('2026-10-06T12:00:00Z')): Passage[] {
     out.push(...sectionPassages(`${who} · Western deep reading`, westernDeep(c, place)));
     out.push(...sectionPassages(`${who} · Vedic deep reading`, vedicDeep(c)));
     out.push(...sectionPassages(`${who} · Timing`, timingReading(c, place, now)));
+    const sky = todaySky(c, place, now);
+    out.push({ source: `${who} · Today · the sky`, text: [sky.moon, ...sky.now].map((x) => `${x.heading}. ${x.text}`).join(' ') + (sky.retrograde.length ? ` ${'Retrograde now, so its themes lean toward review rather than fresh starts:'}` : '') });
+    out.push({ source: `${who} · Today · chart at its core`, text: chartInBrief(c).map((x) => `${x.heading}. ${x.text}`).join(' ') });
     // More weeks, each with a different area on the person's mind, so the week library is seen in context.
     const areas = ['love', 'work', 'family', 'health', 'money', 'creativity', 'friends', 'purpose'] as const;
     for (const d of [10, 20, 30])

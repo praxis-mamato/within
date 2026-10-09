@@ -41,8 +41,9 @@ export default function Reading({ initial = 'western' }: { initial?: Tab }) {
 
   if (!me) return <p className="banner">These birth details can’t be calculated. Check the date, place, and time zone in Settings.</p>;
 
-  // Western and Vedic show the placements table and the first reading section free; Timing and Together are for subscribers.
-  const free = tab === 'western' || tab === 'vedic' ? 2 : 0;
+  // Western and Vedic show the placements table and the first reading section free; Timing shows the week's
+  // first planet free; Together is for subscribers.
+  const free = tab === 'western' || tab === 'vedic' || tab === 'timing' ? 2 : 0;
   return (
     <>
       <p className="kicker">Your full reading</p>
@@ -65,7 +66,7 @@ export default function Reading({ initial = 'western' }: { initial?: Tab }) {
       {sections.slice(0, free).map((s) => (
         <ReadingBlock key={s.id} s={s} tab={tab} />
       ))}
-      <Paywall where="reading" what={free ? `The rest of your ${tab === 'western' ? 'Western' : 'Vedic'} reading` : tab === 'timing' ? 'Your timing' : 'Reading the two of you together'}>
+      <Paywall where="reading" what={free ? tab === 'timing' ? 'The rest of your week and your timing' : `The rest of your ${tab === 'western' ? 'Western' : 'Vedic'} reading` : tab === 'timing' ? 'Your timing' : 'Reading the two of you together'}>
         {sections.slice(free).map((s) => (
           <ReadingBlock key={s.id} s={s} tab={tab} />
         ))}

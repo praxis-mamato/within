@@ -175,7 +175,7 @@ const cls = (a: string): 'conj' | 'hard' | 'soft' => (a === 'conjunct' ? 'conj' 
 const HEAVY = ['Saturn', 'Uranus', 'Neptune', 'Pluto'];
 const FEELING_POINTS = ['Moon', 'Sun', 'Mercury', 'Ascendant'];
 
-function moonToday(c: NatalChart, now: Date, lat: number, lon: number) {
+export function moonToday(c: NatalChart, now: Date, lat: number, lon: number) {
   const lonNow = tropicalLongitude('Moon', now);
   const sign = SIGNS[Math.floor(lonNow / 30)];
   // When the Moon changes sign: step forward an hour at a time (it spends about 2.5 days in a sign).

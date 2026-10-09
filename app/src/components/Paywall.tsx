@@ -91,6 +91,15 @@ export function VerifyDevice() {
  * section, safety, privacy, export, and delete. Never shows a sales pitch in a session that
  * raised a safety flag (PRD §10).
  */
+/** Why a subscription, rather than asking a chatbot: what Within does that a chat window does not. */
+export const WHY: [string, string][] = [
+  ['Calculated, not guessed.', 'Every position comes from an astronomical ephemeris for your exact birth time and place, to the minute of arc.'],
+  ['It comes to you.', 'Every transit, New Moon, and turning point is dated for your chart ahead of time; you do not have to know what to ask.'],
+  ['It remembers you.', 'What you said fits, what is on your mind, and your check-ins shape every reading after.'],
+  ['Two traditions, side by side.', 'Western and Vedic, each kept true to itself, with dashas, progressions, and solar arcs.'],
+  ['Private by design.', 'Your birth details and journal stay on your device.'],
+];
+
 export function Paywall({ children, what, where }: { children: ReactNode; what: string; where: 'reflection' | 'reading' | 'relationship' | 'check_ins' | 'account' }) {
   const { entitlement, account, loading } = useAccount();
   const { state } = useStore();
@@ -117,6 +126,13 @@ export function Paywall({ children, what, where }: { children: ReactNode; what: 
       <p>
         {what} is included in a subscription, along with weekly chapters, your full history, check-ins, and a relationship space.
       </p>
+      <ul className="why small">
+        {WHY.map(([h, t]) => (
+          <li key={h}>
+            <strong>{h}</strong> {t}
+          </li>
+        ))}
+      </ul>
       <fieldset className="plans">
         <legend className="sr-only">Choose a plan</legend>
         {(['yearly', 'monthly'] as const).map((p) => (

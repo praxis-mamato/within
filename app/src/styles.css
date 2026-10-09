@@ -429,6 +429,7 @@ details > summary { cursor: pointer; margin: 8px 0; }
 .btn.auth.apple:hover { background: var(--apple-bg); opacity: 0.9; }
 .paywall { border-color: var(--accent); }
 .paywall .price { font-size: 1.0625rem; }
+.paywall .why { margin: 8px 0 14px; padding-left: 18px; display: grid; gap: 6px; }
 .demo-note { font-size: 0.8125rem; background: var(--info-bg); border: 1px solid var(--info-line); color: var(--info-ink); border-radius: 10px; padding: 8px 12px; }
 .plans { display: grid; gap: 8px; margin: 12px 0 4px; }
 .plan { display: flex; gap: 10px; align-items: flex-start; border: 1px solid var(--line); border-radius: 12px; padding: 12px; font-weight: 400; color: var(--ink-body); cursor: pointer; margin: 0; }

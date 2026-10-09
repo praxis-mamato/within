@@ -16,6 +16,7 @@ import * as CY from './cycles';
 import * as MI from './mirror';
 import * as AN from './answer';
 import * as WK from './week';
+import * as TD from './today';
 import committed from './approvals.json';
 import { lint } from './lint';
 
@@ -118,6 +119,7 @@ const SOURCES: [section: string, module: string, Record<string, unknown>, [name:
     ['WEEK_STATION', 'Outer planets turning'],
     ['WEEK_TEXT', 'Framing'],
   ]],
+  ['Today, free', 'today', TD as Record<string, unknown>, [['TODAY_TEXT', 'The sky today']]],
   ['Answers to sky and feeling questions', 'answer', AN as Record<string, unknown>, [
     ['MOON_TODAY_HOUSE', 'Today’s Moon by natal house'],
     ['MOON_TO_MOON', 'Today’s Moon and the birth Moon'],
