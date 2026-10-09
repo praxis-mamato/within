@@ -48,9 +48,9 @@ export default function Today() {
       <Link to="/astrologer" className="live-cta">
         <MiniOrb />
         <span>
-          <span className="oracle-card-kicker">The Oracle · Live readings</span>
+          <span className="oracle-card-kicker">Live readings</span>
           <strong>Seeking a live reading…</strong>
-          <span className="small">Sit with a Within astrologer, face to face on video. Two 45-minute readings, $1,000.</span>
+          <span className="small">Sit with an astrologer. 2 × 45 min · $1,000</span>
         </span>
         <span aria-hidden="true">›</span>
       </Link>
@@ -59,7 +59,7 @@ export default function Today() {
         <span>
           <strong>Map the Moon to your calendar</strong>
           <span className="small muted" style={{ display: 'block' }}>
-            Every New and Full Moon and Moon sign, in your houses, in Apple, Google, or Outlook. See yours.
+            Your Moons, in your houses.
           </span>
         </span>
         <span aria-hidden="true">›</span>
@@ -138,8 +138,8 @@ function OracleCard() {
       <MiniOrb />
       <span>
         <span className="oracle-card-kicker">The Oracle</span>
-        <strong>Navigate life with the Oracle</strong>
-        <span className="small">Your guide to the energy within you and how it shows up in the world. Ask it anything.</span>
+        <strong>Ask the Oracle</strong>
+        <span className="small">Anything. Answered from your chart.</span>
       </span>
       <span aria-hidden="true">›</span>
     </Link>

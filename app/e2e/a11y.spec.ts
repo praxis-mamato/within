@@ -16,30 +16,17 @@ async function audit(page: Page, label: string) {
 
 async function onboard(page: Page, found: string[]) {
   await page.goto('./');
-  await page.getByRole('button', { name: 'Start free' }).click();
-  await expect(page.getByRole('heading', { name: 'What would you like help understanding?' })).toBeVisible();
-  found.push(...(await audit(page, 'onboarding 1')));
-  await page.getByRole('button', { name: 'Recurring patterns' }).click();
+  await expect(page.getByRole('heading', { name: 'Welcome to the Oracle…' })).toBeVisible();
+  found.push(...(await audit(page, 'intro: welcome')));
+  await page.getByRole('button', { name: 'Begin' }).click();
+  await expect(page.getByRole('heading', { name: 'When were you born?' })).toBeVisible();
+  found.push(...(await audit(page, 'intro: birth')));
   await page.getByRole('button', { name: 'Continue' }).click();
-  found.push(...(await audit(page, 'onboarding 2')));
-  await page.getByRole('radio', { name: 'Clarity' }).click();
-  await page.getByRole('button', { name: 'Continue' }).click();
-  await page.getByText('Help improve Within').click();
-  found.push(...(await audit(page, 'onboarding 3')));
-  await page.getByRole('button', { name: 'I understand' }).click();
-  found.push(...(await audit(page, 'onboarding 4')));
-  await page.getByRole('button', { name: 'Continue' }).click();
-  await page.getByRole('radio', { name: 'Just me for now' }).check();
-  found.push(...(await audit(page, 'onboarding 5')));
-  await page.getByRole('button', { name: 'Continue' }).click();
-  found.push(...(await audit(page, 'onboarding 6')));
-  await page.getByRole('button', { name: 'Continue' }).click();
-  await page.locator('input[name="ob-step"]').first().check();
-  found.push(...(await audit(page, 'onboarding 7')));
-  await page.getByRole('button', { name: 'Continue' }).click();
-  found.push(...(await audit(page, 'onboarding 8')));
-  await page.getByRole('button', { name: 'Save and go to Today' }).click();
-  await expect(page).toHaveURL(/#\/today/);
+  await expect(page.getByRole('heading', { name: 'What do you seek?' })).toBeVisible();
+  found.push(...(await audit(page, 'intro: ask')));
+  await page.getByLabel('Your question').fill('What’s my rising sign?');
+  await page.getByRole('button', { name: 'Ask the Oracle' }).click();
+  await expect(page).toHaveURL(/#\/oracle/);
 }
 
 test('onboarding and main screens have no serious accessibility issues', async ({ page }) => {
@@ -53,7 +40,7 @@ test('onboarding and main screens have no serious accessibility issues', async (
   expect(found, found.join('\n')).toEqual([]);
 });
 
-const SCREENS = ['/interview', '/today', '/reflection/self', '/reflection/purpose', '/relationships', '/you/chart', '/you/reading', '/growth', '/settings', '/account'];
+const SCREENS = ['/oracle', '/astrologer', '/moon-calendar', '/interview', '/today', '/reflection/self', '/reflection/purpose', '/relationships', '/you/chart', '/you/reading', '/growth', '/settings', '/account'];
 
 async function sideways(page: Page) {
   await page.addStyleTag({ content: 'html { font-size: 200% !important; }' });
@@ -62,7 +49,6 @@ async function sideways(page: Page) {
 
 test('text at 200% never makes a screen scroll sideways', async ({ page }) => {
   await page.goto('./');
-  await page.getByRole('button', { name: 'Start free' }).click();
   const wide: string[] = [];
   if ((await sideways(page)) > 1) wide.push('onboarding');
   await onboard(page, []);

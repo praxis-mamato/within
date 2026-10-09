@@ -1,5 +1,5 @@
-import { useMemo, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useCharts } from '../astro/useCharts';
 import { boardInfo, consultOracle, ORACLE_SAYS, skyToday, type BoardInfo, type OracleReply } from '../content/oracleEngine';
 import { ORACLE_TEXT } from '../content/oracle';
@@ -120,6 +120,20 @@ export default function Oracle() {
   };
   const enableShake = useShake(() => ask());
 
+  // Arriving from the intro with a question: the Oracle answers it straight away.
+  const loc = useLocation();
+  const navTo = useNavigate();
+  const asked0 = useRef(false);
+  useEffect(() => {
+    const first = (loc.state as { ask?: string } | null)?.ask;
+    if (!first || !me || asked0.current) return;
+    asked0.current = true;
+    setQ(first);
+    ask(first);
+    navTo('/oracle', { replace: true, state: null });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [me]);
+
   const runConsult = async (a: OracleReply) => {
     if (!me) return;
     setConsult({ q: a.question, busy: true });
@@ -162,9 +176,9 @@ export default function Oracle() {
           }
         }}
       />
-      <p className="small oracle-muted oracle-hint">Touch the crystal ball to ask. Tap or drag the pointer onto any planet, sign, or answer to explore.</p>
+      <p className="small oracle-muted oracle-hint">Touch the ball to ask · tap the stars to explore</p>
       <p className="small oracle-hint">
-        <Link to="/astrologer">Seeking a live reading… sit with a Within astrologer ›</Link>
+        <Link to="/astrologer">Seeking a live reading… ›</Link>
       </p>
       {info && (
         <section className="oracle-info" aria-live="polite">
@@ -177,7 +191,6 @@ export default function Oracle() {
           )}
         </section>
       )}
-      {!answer && <p className="small oracle-muted">{ORACLE_SAYS.how}</p>}
       {answer && phase === 'answered' && (
         <section className="oracle-answer" aria-live="polite" aria-labelledby="oa-h">
           <p className="small oracle-muted">“{answer.question}”</p>

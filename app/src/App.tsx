@@ -6,6 +6,8 @@ import { LogoMark } from './components/Illustrations';
 import Onboarding from './screens/Onboarding';
 import Today from './screens/Today';
 import Oracle from './screens/Oracle';
+import OracleIntro from './screens/OracleIntro';
+import { load as loadInterviewSession } from './interview/session';
 import Astrologer from './screens/Astrologer';
 import MoonCalendar from './screens/MoonCalendar';
 import Reflection from './screens/Reflection';
@@ -89,7 +91,7 @@ function Shell() {
         <Routes>
           {!state.onboarded ? (
             <>
-              <Route path="/" element={<Onboarding />} />
+              <Route path="/" element={loadInterviewSession() ? <Onboarding /> : <OracleIntro />} />
               <Route path="/interview" element={<Interview />} />
               <Route path="/interview/check" element={<ComprehensionCheck />} />
               <Route path="*" element={<Navigate to="/" replace />} />
@@ -117,7 +119,7 @@ function Shell() {
               <Route path="/account" element={<AccountScreen />} />
               <Route path="/interview" element={<Interview />} />
               <Route path="/interview/check" element={<ComprehensionCheck />} />
-              <Route path="*" element={<Navigate to="/today" replace />} />
+              <Route path="*" element={<Navigate to="/oracle" replace />} />
             </>
           )}
         </Routes>

@@ -103,13 +103,11 @@ export const WHY: [string, string][] = [
 
 /** What a subscription adds, side by side with what is free. */
 export const COMPARE: [string, string, string][] = [
-  ['The Oracle', '3 questions a day', 'Unlimited, with an 11-layer reading behind every answer'],
-  ['Today', 'The sky today and your chart’s core', 'Your whole week, planet by planet'],
-  ['Your chart', 'Placements and the first section', 'Every placement, Western and Vedic, with navamsa and dashamsa'],
-  ['Timing', 'The first planet of your week', 'Transits, progressions, solar arcs, solar return, dashas'],
-  ['Patterns and cycles', 'Your strongest two and your main cycle', 'All of them, with dates and the reasons'],
-  ['Moon calendar', 'A preview of your next Moons', 'Add every Moon phase and sign, mapped to your chart, to your calendar'],
-  ['Relationships', '—', 'Two charts read together'],
+  ['The Oracle', '3 a day', 'Unlimited, with the full reading'],
+  ['Timing', 'This week’s first planet', 'Every transit, progression, dasha'],
+  ['Your chart', 'The core', 'Every placement, Western + Vedic'],
+  ['Patterns', 'Your top two', 'All, with dates'],
+  ['Moon calendar', 'Preview', 'In your calendar'],
 ];
 
 export function Paywall({ children, what, where }: { children: ReactNode; what: string; where: 'reflection' | 'reading' | 'relationship' | 'check_ins' | 'account' }) {
@@ -133,11 +131,9 @@ export function Paywall({ children, what, where }: { children: ReactNode; what: 
   return (
     <section className="card paywall" aria-labelledby="pw-h">
       <h2 id="pw-h" style={{ marginTop: 0 }}>
-        Keep going with Within
+        Unlock the Oracle
       </h2>
-      <p>
-        {what} is included in a subscription, along with weekly chapters, your full history, check-ins, and a relationship space.
-      </p>
+      <p>Unlimited questions, and the full reading behind every answer.</p>
       <table className="compare small">
         <caption className="sr-only">Free compared with a subscription</caption>
         <colgroup>
@@ -207,9 +203,9 @@ export function Paywall({ children, what, where }: { children: ReactNode; what: 
       <Link to="/astrologer" className="live-cta">
         <MiniOrb />
         <span>
-          <span className="oracle-card-kicker">The Oracle · Live readings</span>
+          <span className="oracle-card-kicker">Live readings</span>
           <strong>Seeking a live reading…</strong>
-          <span className="small">Two 45-minute readings with a Within astrologer, $1,000. Longer guidance and coaching too.</span>
+          <span className="small">Sit with an astrologer. 2 × 45 min · $1,000</span>
         </span>
         <span aria-hidden="true">›</span>
       </Link>

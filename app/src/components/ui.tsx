@@ -67,10 +67,6 @@ export function TabBar() {
   );
   return (
     <nav className="tabbar" aria-label="Main">
-      <NavLink to="/today">
-        {icon(<path d="M5 19c0-8 6-14 14-14 0 8-6 14-14 14Zm0 0 7-7" />)}
-        Today
-      </NavLink>
       <NavLink to="/oracle" className="oracle-tab">
         {icon(
           <>
@@ -79,6 +75,10 @@ export function TabBar() {
           </>,
         )}
         Oracle
+      </NavLink>
+      <NavLink to="/today">
+        {icon(<path d="M5 19c0-8 6-14 14-14 0 8-6 14-14 14Zm0 0 7-7" />)}
+        Today
       </NavLink>
       <NavLink to="/relationships">
         {icon(

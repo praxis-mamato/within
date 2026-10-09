@@ -48,7 +48,7 @@ export default function Astrologer() {
       <Back to="/oracle" label="The Oracle" />
       <p className="kicker">The Oracle · Live readings</p>
       <h1 className="oracle-welcome">Seeking a live reading…</h1>
-      <p className="sub">Sit with a Within astrologer, face to face on video. They read your Western and Vedic chart with you, and the Oracle’s questions become a conversation.</p>
+      <p className="sub">Face to face, on video, with a Within astrologer.</p>
       <div className="live-orb" aria-hidden="true">
         <MiniOrb />
       </div>
