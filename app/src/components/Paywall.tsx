@@ -100,6 +100,17 @@ export const WHY: [string, string][] = [
   ['Private by design.', 'Your birth details and journal stay on your device.'],
 ];
 
+/** What a subscription adds, side by side with what is free. */
+export const COMPARE: [string, string, string][] = [
+  ['The Oracle', '3 questions a day', 'Unlimited, with an 11-layer reading behind every answer'],
+  ['Today', 'The sky today and your chart’s core', 'Your whole week, planet by planet'],
+  ['Your chart', 'Placements and the first section', 'Every placement, Western and Vedic, with navamsa and dashamsa'],
+  ['Timing', 'The first planet of your week', 'Transits, progressions, solar arcs, solar return, dashas'],
+  ['Patterns and cycles', 'Your strongest two and your main cycle', 'All of them, with dates and the reasons'],
+  ['Moon calendar', '—', 'Every Moon phase and sign mapped to your chart, in your calendar'],
+  ['Relationships', '—', 'Two charts read together'],
+];
+
 export function Paywall({ children, what, where }: { children: ReactNode; what: string; where: 'reflection' | 'reading' | 'relationship' | 'check_ins' | 'account' }) {
   const { entitlement, account, loading } = useAccount();
   const { state } = useStore();
@@ -126,13 +137,30 @@ export function Paywall({ children, what, where }: { children: ReactNode; what: 
       <p>
         {what} is included in a subscription, along with weekly chapters, your full history, check-ins, and a relationship space.
       </p>
-      <ul className="why small">
-        {WHY.map(([h, t]) => (
-          <li key={h}>
-            <strong>{h}</strong> {t}
-          </li>
-        ))}
-      </ul>
+      <table className="compare small">
+        <caption className="sr-only">Free compared with a subscription</caption>
+        <colgroup>
+          <col className="k" />
+          <col className="f" />
+          <col />
+        </colgroup>
+        <thead>
+          <tr>
+            <th scope="col" />
+            <th scope="col">Free</th>
+            <th scope="col">Subscription</th>
+          </tr>
+        </thead>
+        <tbody>
+          {COMPARE.map(([k, free, paid]) => (
+            <tr key={k}>
+              <th scope="row">{k}</th>
+              <td>{free}</td>
+              <td>{paid}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
       <fieldset className="plans">
         <legend className="sr-only">Choose a plan</legend>
         {(['yearly', 'monthly'] as const).map((p) => (
@@ -175,6 +203,9 @@ export function Paywall({ children, what, where }: { children: ReactNode; what: 
         </div>
       )}
       {account && <RedeemCode />}
+      <Link to="/astrologer" className="human-cta">
+        <strong>Prefer a person?</strong> Book live sessions with a Within astrologer: two 45-minute sessions for $1,000, or a coaching package. <span aria-hidden="true">›</span>
+      </Link>
       <p className="small muted" style={{ marginTop: 12 }}>
         Safety resources, privacy controls, export, and delete are always free. <Link to="/account">Account</Link>
       </p>

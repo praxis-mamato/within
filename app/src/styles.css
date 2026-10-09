@@ -686,3 +686,12 @@ details > summary { cursor: pointer; margin: 8px 0; }
 .booking-list, .moon-preview { list-style: none; padding: 0; display: grid; gap: 8px; }
 .moon-options { border: 0; padding: 0; margin: 0 0 12px; }
 .moon-options legend { font-weight: 600; margin-bottom: 6px; }
+
+.compare { width: 100%; table-layout: fixed; border-collapse: collapse; margin: 10px 0 14px; overflow-wrap: anywhere; }
+.compare col.k { width: 27%; } .compare col.f { width: 30%; }
+.compare th, .compare td { white-space: normal; text-align: left; vertical-align: top; padding: 6px 4px; hyphens: auto; border-bottom: 1px solid var(--line); }
+.compare thead th { font-size: 0.6875rem; letter-spacing: 0.04em; text-transform: uppercase; color: var(--ink-muted); }
+.compare tbody th { font-weight: 600; color: var(--ink-display); width: 28%; }
+.compare td:last-child { color: var(--ink-display); }
+.human-cta { display: block; margin: 12px 0; padding: 12px 14px; border-radius: 14px; border: 1px solid var(--gold); background: var(--banner-bg); color: var(--ink-body); text-decoration: none; min-height: 44px; }
+.human-cta strong { color: var(--ink-display); }

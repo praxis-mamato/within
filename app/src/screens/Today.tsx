@@ -45,6 +45,9 @@ export default function Today() {
       <HorizonSun />
       {state.safety.flagged && <SafetyPanel compact />}
       <OracleCard />
+      <Link to="/astrologer" className="human-cta">
+        <strong>Talk to a human astrologer.</strong> Live 45-minute sessions, Western and Vedic, from $1,000 for two. <span aria-hidden="true">›</span>
+      </Link>
       <SkyToday />
       <ChartBrief />
       <PurposeCard />

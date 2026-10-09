@@ -163,6 +163,9 @@ export default function Oracle() {
         }}
       />
       <p className="small oracle-muted oracle-hint">Touch the crystal ball to ask. Tap or drag the pointer onto any planet, sign, or answer to explore.</p>
+      <p className="small oracle-hint">
+        <Link to="/astrologer">Prefer a person? Book a session with a human astrologer ›</Link>
+      </p>
       {info && (
         <section className="oracle-info" aria-live="polite">
           <h3>{info.title}</h3>
@@ -258,11 +261,6 @@ export default function Oracle() {
         </section>
       )}
 
-      {answer && phase === 'answered' && (
-        <p className="small oracle-muted">
-          Want to talk it through with a person? <Link to="/astrologer">Book a session with a Within astrologer</Link>.
-        </p>
-      )}
       <SkyStrip onAsk={(x) => (setQ(x), ask(x))} />
       {flagged ? (
         <SafetyPanel />
