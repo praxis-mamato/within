@@ -89,7 +89,7 @@ export default function Astrologer() {
                   <span className="package-price">{fmtUsd(p.amount)}</span>
                 </span>
                 <span className="small muted" style={{ display: 'block' }}>
-                  {p.sessions} × {p.minutes}-minute sessions · {fmtUsd(Math.round(p.amount / p.sessions))} a session
+                  {p.sessions === 1 ? `One ${p.minutes}-minute session` : `${p.sessions} × ${p.minutes}-minute sessions · ${fmtUsd(Math.round(p.amount / p.sessions))} a session`}
                 </span>
                 <span style={{ display: 'block', marginTop: 4 }}>{p.summary}</span>
                 <ul className="small">
