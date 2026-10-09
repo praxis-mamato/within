@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
 import { SignInButtons } from '../components/Paywall';
+import { MiniOrb } from '../components/OracleBoard';
 import { Back } from '../components/ui';
 import { useAccount } from '../services/AccountContext';
 import { bookAstrologer, fmtUsd, myBookings, PACKAGES, packageById, type Booking } from '../services/astrologer';
 import { track } from '../services/telemetry';
 import { useStore } from '../state';
 
-const STATUS: Record<string, string> = { paid: 'Paid: your astrologer will email you to schedule', scheduled: 'Scheduled', completed: 'Completed', refunded: 'Refunded', cancelled: 'Cancelled' };
+const STATUS: Record<string, string> = { paid: 'Paid: your astrologer will email you to set a time', scheduled: 'Scheduled', completed: 'Completed', refunded: 'Refunded', cancelled: 'Cancelled' };
 
 /** Sessions with a human astrologer: packages, a short intake, and Stripe Checkout. */
 export default function Astrologer() {
@@ -43,22 +44,25 @@ export default function Astrologer() {
   const chosen = packageById(pick)!;
 
   return (
-    <>
-      <Back to="/today" label="Today" />
-      <p className="kicker">Work with an astrologer</p>
-      <h1>Talk it through with a person</h1>
-      <p className="sub">Live 45-minute video sessions with a Within astrologer, who reads your Western and Vedic chart with you and works on the questions you bring.</p>
+    <div className="oracle-scene live-scene">
+      <Back to="/oracle" label="The Oracle" />
+      <p className="kicker">The Oracle · Live readings</p>
+      <h1 className="oracle-welcome">Seeking a live reading…</h1>
+      <p className="sub">Sit with a Within astrologer, face to face on video. They read your Western and Vedic chart with you, and the Oracle’s questions become a conversation.</p>
+      <div className="live-orb" aria-hidden="true">
+        <MiniOrb />
+      </div>
 
       {justPaid && (
         <div className="card soft" role="status">
-          <h2 style={{ marginTop: 0 }}>Thank you, you’re booked</h2>
-          <p style={{ margin: 0 }}>Your astrologer will email you within one business day to schedule your first session. A receipt is on its way from Stripe.</p>
+          <h2 style={{ marginTop: 0 }}>The Oracle has heard you</h2>
+          <p style={{ margin: 0 }}>Your astrologer will email you within one business day to set the time of your first reading. A receipt is on its way from Stripe.</p>
         </div>
       )}
 
       {bookings.length > 0 && (
         <section aria-labelledby="bk-h">
-          <h2 id="bk-h">Your sessions</h2>
+          <h2 id="bk-h">Your live readings</h2>
           <ul className="booking-list">
             {bookings.map((x) => (
               <li key={x.id} className="card">
@@ -73,7 +77,7 @@ export default function Astrologer() {
       )}
 
       <section aria-labelledby="pk-h">
-        <h2 id="pk-h">Choose a package</h2>
+        <h2 id="pk-h">Choose your readings</h2>
         <fieldset className="packages">
           <legend className="sr-only">Package</legend>
           {PACKAGES.map((p) => (
@@ -101,13 +105,13 @@ export default function Astrologer() {
 
       {!account ? (
         <div className="card">
-          <p>Sign in to book, so your sessions and receipts stay with your account.</p>
+          <p>Sign in to book, so your readings and receipts stay with your account.</p>
           <SignInButtons />
         </div>
       ) : (
         <form className="card" onSubmit={submit}>
-          <h2 style={{ marginTop: 0 }}>Before your first session</h2>
-          <label htmlFor="as-q">What would you like to explore?</label>
+          <h2 style={{ marginTop: 0 }}>Before you sit with the Oracle</h2>
+          <label htmlFor="as-q">What do you seek?</label>
           <textarea id="as-q" rows={4} maxLength={1500} required minLength={10} value={questions} onChange={(e) => setQuestions(e.target.value)} placeholder="A decision, a relationship, a transition, your timing this year…" />
           <label htmlFor="as-a">When are you usually free?</label>
           <input id="as-a" maxLength={400} value={availability} onChange={(e) => setAvailability(e.target.value)} placeholder="e.g. weekday evenings, Saturday mornings" />
@@ -127,11 +131,11 @@ export default function Astrologer() {
             </p>
           )}
           <button type="submit" className="btn" disabled={busy || questions.trim().length < 10}>
-            {busy ? 'Opening checkout…' : `Book ${chosen.name}: ${fmtUsd(chosen.amount)}`}
+            {busy ? 'Opening checkout…' : `Book your live reading: ${fmtUsd(chosen.amount)}`}
           </button>
           <p className="small muted">Secure payment by Stripe. Sessions are for reflection and guidance, not medical, legal, financial, or mental health care. Unused sessions can be refunded within 30 days of purchase.</p>
         </form>
       )}
-    </>
+    </div>
   );
 }

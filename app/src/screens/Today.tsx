@@ -45,8 +45,24 @@ export default function Today() {
       <HorizonSun />
       {state.safety.flagged && <SafetyPanel compact />}
       <OracleCard />
-      <Link to="/astrologer" className="human-cta">
-        <strong>Talk to a human astrologer.</strong> Live 45-minute sessions, Western and Vedic, from $1,000 for two. <span aria-hidden="true">›</span>
+      <Link to="/astrologer" className="live-cta">
+        <MiniOrb />
+        <span>
+          <span className="oracle-card-kicker">The Oracle · Live readings</span>
+          <strong>Seeking a live reading…</strong>
+          <span className="small">Sit with a Within astrologer, face to face on video. Two 45-minute readings, $1,000.</span>
+        </span>
+        <span aria-hidden="true">›</span>
+      </Link>
+      <Link to="/moon-calendar" className="moon-cta">
+        <span aria-hidden="true">🌕</span>
+        <span>
+          <strong>Map the Moon to your calendar</strong>
+          <span className="small muted" style={{ display: 'block' }}>
+            Every New and Full Moon and Moon sign, in your houses, in Apple, Google, or Outlook. See yours.
+          </span>
+        </span>
+        <span aria-hidden="true">›</span>
       </Link>
       <SkyToday />
       <ChartBrief />
@@ -191,8 +207,6 @@ function DeeperLinks() {
     { to: '/you/patterns', title: 'Your patterns', text: 'What shapes you, read from your whole chart' },
     { to: '/you/cycles', title: 'Your cycles', text: 'What you’re moving through now, with dates' },
     { to: '/you/reading', title: 'Your full reading', text: 'Western, Vedic, timing, and connected deep readings' },
-    { to: '/moon-calendar', title: 'Your Moon calendar', text: 'Every phase and Moon sign, mapped to your chart, in your own calendar' },
-    { to: '/astrologer', title: 'Work with an astrologer', text: 'Live 45-minute sessions with a person, from $1,000 for two' },
   ];
   return (
     <nav className="deeper" aria-label="Go deeper">

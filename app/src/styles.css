@@ -695,3 +695,22 @@ details > summary { cursor: pointer; margin: 8px 0; }
 .compare td:last-child { color: var(--ink-display); }
 .human-cta { display: block; margin: 12px 0; padding: 12px 14px; border-radius: 14px; border: 1px solid var(--gold); background: var(--banner-bg); color: var(--ink-body); text-decoration: none; min-height: 44px; }
 .human-cta strong { color: var(--ink-display); }
+
+.live-cta, .moon-cta { display: flex; align-items: center; gap: 12px; margin: 12px 0; padding: 12px 14px; border-radius: 18px; text-decoration: none; min-height: 44px; }
+.live-cta { color: #f6ebdd; background: radial-gradient(90% 80% at 50% 120%, rgb(233 164 106 / 0.55), transparent 70%), linear-gradient(160deg, #0d1330, #232552 70%, #5d3a45); border: 1px solid rgb(226 194 126 / 0.6); }
+.live-cta > span:nth-child(2), .moon-cta > span:nth-child(2) { display: grid; gap: 2px; flex: 1; }
+.live-cta strong { font-family: 'Cormorant Garamond', serif; font-size: 1.3rem; color: #fff6e6; }
+.live-cta .small { color: #d8c6cf; }
+.live-cta .mini-orb { width: 56px; height: 56px; flex: none; }
+.moon-cta { color: var(--ink-body); background: var(--surface); border: 1px solid var(--line); }
+.moon-cta > span:first-child { font-size: 1.6rem; }
+.live-scene .card { background: rgb(10 15 38 / 0.6); border-color: rgb(226 194 126 / 0.4); color: var(--o-ink); }
+.live-scene .card strong, .live-scene h2, .live-scene .package-price { color: #fff6e6; }
+.live-scene .muted, .live-scene .small.muted { color: var(--o-muted); }
+.live-scene .package.on { border-color: var(--o-gold); box-shadow: 0 0 0 1px var(--o-gold); }
+.live-scene textarea, .live-scene input:not([type]) , .live-scene input[type='text'] { background: rgb(255 255 255 / 0.08); color: var(--o-ink); border: 1px solid rgb(226 194 126 / 0.6); border-radius: 12px; }
+.live-scene label { color: var(--o-ink); }
+.live-orb { display: flex; justify-content: center; margin: 4px 0 12px; }
+.live-orb .mini-orb { width: 110px; height: 110px; }
+.package label, .package span { font-weight: 400; }
+.package strong { font-weight: 700; }

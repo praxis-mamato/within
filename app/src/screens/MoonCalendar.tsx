@@ -22,7 +22,7 @@ export default function MoonCalendar() {
   const [months, setMonths] = useState(12);
   const [done, setDone] = useState('');
   const place = { lat: state.birth.lat, lon: state.birth.lon };
-  const preview = useMemo(() => (me ? moonCalendar(me, place, new Date(), 1, opt).slice(0, 8) : []), [me, opt.phases, opt.signs, opt.voidOfCourse, opt.retrogrades]); // eslint-disable-line react-hooks/exhaustive-deps
+  const preview = useMemo(() => (me ? moonCalendar(me, place, new Date(), 1, opt).slice(0, 6) : []), [me, opt.phases, opt.signs, opt.voidOfCourse, opt.retrogrades]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!me) return <p className="banner">These birth details can’t be calculated. Check them in Settings.</p>;
   const save = () => {
@@ -39,7 +39,24 @@ export default function MoonCalendar() {
       <p className="kicker">Your Moon calendar</p>
       <h1>The Moon, in your calendar</h1>
       <p className="sub">Every phase and sign change, mapped to your own chart, in the calendar you already use. Made on this device from your chart; nothing is uploaded.</p>
-      <Paywall where="reading" what="Your Moon calendar">
+        <section aria-labelledby="mc-prev">
+          <h2 id="mc-prev">Your next Moons</h2>
+          <ul className="moon-preview">
+            {preview.map((e) => (
+              <li key={e.uid} className="card">
+                <strong>{e.title}</strong>
+                <span className="small muted" style={{ display: 'block' }}>
+                  {e.allDay ? `${e.start.toLocaleDateString()} – ${e.end.toLocaleDateString()}` : fmt(e.start)}
+                </span>
+                <span className="small" style={{ display: 'block', marginTop: 4 }}>
+                  {e.description.split('\n')[1] ?? e.description.split('\n')[0]}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </section>
+        <h2>Add them all to your calendar</h2>
+      <Paywall where="reading" what="Adding your Moon calendar">
         <form className="card" onSubmit={(e) => (e.preventDefault(), save())}>
           <fieldset className="moon-options">
             <legend>What to include</legend>
@@ -79,22 +96,6 @@ export default function MoonCalendar() {
             </ul>
           </details>
         </form>
-        <section aria-labelledby="mc-prev">
-          <h2 id="mc-prev">Coming up</h2>
-          <ul className="moon-preview">
-            {preview.map((e) => (
-              <li key={e.uid} className="card">
-                <strong>{e.title}</strong>
-                <span className="small muted" style={{ display: 'block' }}>
-                  {e.allDay ? `${e.start.toLocaleDateString()} – ${e.end.toLocaleDateString()}` : fmt(e.start)}
-                </span>
-                <span className="small" style={{ display: 'block', marginTop: 4 }}>
-                  {e.description.split('\n')[1] ?? e.description.split('\n')[0]}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </section>
       </Paywall>
     </>
   );

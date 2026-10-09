@@ -38,7 +38,7 @@ Deno.serve(async (req) => {
       mode: 'payment',
       customer,
       client_reference_id: user.id,
-      line_items: [{ quantity: 1, price_data: { currency: 'usd', unit_amount: pkg.amount, product_data: { name: `Within: ${pkg.name}`, description: `${pkg.sessions} × ${pkg.minutes}-minute sessions with a Within astrologer` } } }],
+      line_items: [{ quantity: 1, price_data: { currency: 'usd', unit_amount: pkg.amount, product_data: { name: `Within: ${pkg.name}`, description: `${pkg.sessions} × ${pkg.minutes}-minute live readings with a Within astrologer` } } }],
       metadata: { kind: 'astrologer', user_id: user.id, package_id: pkg.id },
       payment_intent_data: { metadata: { kind: 'astrologer', user_id: user.id, package_id: pkg.id }, description: `Within astrologer: ${pkg.name}` },
       allow_promotion_codes: true,

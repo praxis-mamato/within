@@ -15,7 +15,7 @@ export interface AstrologerPackage {
 export const PACKAGES: AstrologerPackage[] = [
   {
     id: 'two-sessions',
-    name: 'Two sessions',
+    name: 'Two live readings',
     sessions: 2,
     minutes: 45,
     amount: 100000,
@@ -24,16 +24,16 @@ export const PACKAGES: AstrologerPackage[] = [
   },
   {
     id: 'season',
-    name: 'A season of guidance',
+    name: 'A season with the Oracle',
     sessions: 4,
     minutes: 45,
     amount: 180000,
     summary: 'Four sessions over about three months, to work through a decision, a transition, or a relationship.',
-    includes: ['Everything in Two sessions', 'Electional dates chosen for your plans', 'Message support between sessions'],
+    includes: ['Everything in Two live readings', 'Electional dates chosen for your plans', 'Message support between sessions'],
   },
   {
     id: 'coaching',
-    name: 'Astrology-informed coaching',
+    name: 'Oracle coaching',
     sessions: 6,
     minutes: 45,
     amount: 240000,

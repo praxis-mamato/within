@@ -5,6 +5,7 @@ import { accountService, type Plan, type Provider } from '../services/account';
 import { useAccount } from '../services/AccountContext';
 import { APPLE_SIGN_IN, CONFIG } from '../services/config';
 import { useStore } from '../state';
+import { MiniOrb } from './OracleBoard';
 
 export function SignInButtons() {
   const [busy, setBusy] = useState<Provider | null>(null);
@@ -107,7 +108,7 @@ export const COMPARE: [string, string, string][] = [
   ['Your chart', 'Placements and the first section', 'Every placement, Western and Vedic, with navamsa and dashamsa'],
   ['Timing', 'The first planet of your week', 'Transits, progressions, solar arcs, solar return, dashas'],
   ['Patterns and cycles', 'Your strongest two and your main cycle', 'All of them, with dates and the reasons'],
-  ['Moon calendar', '—', 'Every Moon phase and sign mapped to your chart, in your calendar'],
+  ['Moon calendar', 'A preview of your next Moons', 'Add every Moon phase and sign, mapped to your chart, to your calendar'],
   ['Relationships', '—', 'Two charts read together'],
 ];
 
@@ -203,8 +204,14 @@ export function Paywall({ children, what, where }: { children: ReactNode; what: 
         </div>
       )}
       {account && <RedeemCode />}
-      <Link to="/astrologer" className="human-cta">
-        <strong>Prefer a person?</strong> Book live sessions with a Within astrologer: two 45-minute sessions for $1,000, or a coaching package. <span aria-hidden="true">›</span>
+      <Link to="/astrologer" className="live-cta">
+        <MiniOrb />
+        <span>
+          <span className="oracle-card-kicker">The Oracle · Live readings</span>
+          <strong>Seeking a live reading…</strong>
+          <span className="small">Two 45-minute readings with a Within astrologer, $1,000. Longer guidance and coaching too.</span>
+        </span>
+        <span aria-hidden="true">›</span>
       </Link>
       <p className="small muted" style={{ marginTop: 12 }}>
         Safety resources, privacy controls, export, and delete are always free. <Link to="/account">Account</Link>
