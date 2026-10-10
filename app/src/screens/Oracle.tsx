@@ -6,6 +6,9 @@ import { boardInfo, consultOracle, intentOf, ORACLE_SAYS, skyToday, type BoardIn
 import { ORACLE_TEXT } from '../content/oracle';
 import type { SkyLine } from '../content/today';
 import { OracleBoard, useShake } from '../components/OracleBoard';
+import { EnergyWheel } from '../components/EnergyWheel';
+import { chartEnergy } from '../content/energy';
+import { ascendantAndMidheaven } from '../astro/chart';
 import { Paywall } from '../components/Paywall';
 import { Back, SafetyPanel } from '../components/ui';
 import { screen } from '../lib/screener';
@@ -16,6 +19,7 @@ import { useStore } from '../state';
 
 const FREE_PER_DAY = 3;
 const EXAMPLES = [
+  'Show my chart’s energy',
   'What’s my rising sign?',
   'When is a good day to ask for a raise?',
   'Is Mercury retrograde?',
@@ -122,7 +126,7 @@ export default function Oracle() {
         theirChart = null;
       }
     }
-    const a = consultOracle(question, { chart: me, place, profile: state.profile, other: who?.birth && theirChart ? { chart: theirChart, place: { lat: who.birth.lat, lon: who.birth.lon }, name: who.nickname } : null });
+    const a = consultOracle(question, { chart: me, place, profile: state.profile, history: state.oracle, other: who?.birth && theirChart ? { chart: theirChart, place: { lat: who.birth.lat, lon: who.birth.lon }, name: who.nickname } : null });
     if (same) setNote(ORACLE_TEXT.sameDay);
     else {
       // History keeps the answer itself; the full reading is recalculated when asked again.
@@ -136,6 +140,12 @@ export default function Oracle() {
     window.setTimeout(() => setPhase('answered'), window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ? 0 : 2600);
   };
   const enableShake = useShake(() => ask());
+  const energy = useMemo(() => {
+    if (!me || answer?.intent !== 'energy') return null;
+    const asc = me.timePrecision === 'exact' ? ascendantAndMidheaven(me.utc, place.lat, place.lon).asc : null;
+    return { aspects: chartEnergy(me, place).aspects, asc };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [me, answer?.intent, state.birth.lat, state.birth.lon]);
 
   /** Rewrites the current answer in plain words, in place. */
   const sayItSimply = (question = 'Say it simply') => {
@@ -226,6 +236,7 @@ export default function Oracle() {
               Say it simply
             </button>
           )}
+          {answer.intent === 'energy' && energy && <EnergyWheel planets={me.western.planets} aspects={energy.aspects} asc={energy.asc} />}
           <Lines items={answer.lines} />
           {answer.consulted && (
             <div className="oracle-consulted">

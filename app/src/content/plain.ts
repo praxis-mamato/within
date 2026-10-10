@@ -20,7 +20,7 @@ export const PLAIN_WORDS: [RegExp, string][] = [
   [/\btransiting\b/gi, 'passing'],
   [/\btransits?\b/gi, 'passing planets'],
   [/\bconjunct(ion)?\b/gi, 'meets'],
-  [/\bopposite\b|\bopposition\b|\bopposes\b/gi, 'faces'],
+  [/\b[Oo]pposition\b|\b[Oo]pposes\b|\b[Oo]pposite(?= (your|their|the|natal|birth|[A-Z]))/g, 'faces'],
   [/\bsquares?\b/gi, 'clashes with'],
   [/\btrines?\b/gi, 'flows with'],
   [/\bsextiles?\b/gi, 'helps'],
@@ -58,6 +58,8 @@ export const TODO: Record<string, string> = {
   feeling: 'Be gentle with yourself today; this passes.',
   together: 'Talk about one of these together.',
   week: 'Pick the day that matters most and plan for it.',
+  energy: 'Pick your strongest tension and try its release once this week.',
+  area: 'Mark the best date above, and try one thing from this on that day.',
 };
 
 export const PLAIN_TEXT = {

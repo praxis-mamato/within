@@ -27,6 +27,7 @@ const CASES: [string, Intent | 'limit'][] = [
   ['Should I buy bitcoin?', 'limit'], ['Is my test result going to be cancer?', 'limit'], ['Will he come back?', 'limit'], ['What lottery numbers should I play?', 'limit'],
   ['Is he thinking about me?', 'limit'], ['Will my divorce settlement go well?', 'limit'], ['When will I get pregnant?', 'limit'], ['Is my partner faithful?', 'limit'],
   ['Can you simplify my reading?', 'simplify'], ['Say it in plain English', 'simplify'], ['I don’t understand', 'simplify'], ['What does that mean?', 'simplify'], ['ELI5 my chart', 'simplify'], ['Explain that simply', 'simplify'],
+  ['Show my chart’s energy', 'energy'], ['Where is the tension in my chart?', 'energy'], ['What are my squares?', 'energy'], ['Where is my effortless energy?', 'energy'], ['What does my high road look like?', 'energy'], ['Show me my birth chart', 'energy'],
   ['Tell me something I need to hear', 'open'], ['Give me a message', 'open'], ['What should I focus on?', 'open'], ['Hello Oracle', 'open'],
 ];
 

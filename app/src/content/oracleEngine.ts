@@ -17,6 +17,11 @@ import { cycles } from './cycles';
 import { findPatterns } from './patternRules';
 import { relationshipReading } from './relationship';
 import { PLAIN_TEXT, plainChart, simplify } from './plain';
+import { chartEnergy, energyLayers } from './energy';
+import { healthAnswer } from './health';
+import { AREA_SIGNIFICATOR } from './oracleLayers';
+import { MOVER_AREA, TARGET_AREAS } from './mirror';
+import { HOUSE_AREA } from './week';
 import type { Area, Profile } from './mirror';
 import { askOracle, areaOf, limitOf, ORACLE_REFRAME, ORACLE_TONE, type Limit, type Tone } from './oracle';
 import { chartInBrief, todaySky, type SkyLine } from './today';
@@ -27,7 +32,7 @@ import { consulted, dayScores, oracleLayers, type Layer } from './oracleLayers';
 import * as V from './vedic';
 import * as W from './western';
 
-export type Intent = 'simplify' | 'decision' | 'when' | 'return' | 'retro' | 'lunation' | 'together' | 'chart' | 'patterns' | 'feeling' | 'cycle' | 'week' | 'planet' | 'sky' | 'open';
+export type Intent = 'simplify' | 'energy' | 'area' | 'decision' | 'when' | 'return' | 'retro' | 'lunation' | 'together' | 'chart' | 'patterns' | 'feeling' | 'cycle' | 'week' | 'planet' | 'sky' | 'open';
 
 export interface OracleReply {
   intent: Intent;
@@ -60,13 +65,15 @@ export interface OracleContext {
   other?: { chart: NatalChart; place: { lat: number; lon: number }; name: string } | null;
   /** The answer before this one, for 'say it simply' and 'what does that mean'. */
   previous?: OracleReply | null;
+  /** Earlier questions and answers, kept only on this device, so the Oracle does not repeat itself. */
+  history?: OracleReply[];
 }
 
 export const ORACLE_SAYS = {
   welcome: 'Welcome to the Oracle…',
   invite: 'Ask anything. The stars answer, from your own chart.',
   how: 'Ask about your chart, today’s sky, the right time for something, what you are moving through, or what is on your heart. The Oracle reads the sky against your chart, the way astrologers have for centuries, to help you navigate life.',
-  open: 'The Oracle hears a question it cannot place on one star, so it reads the sky at this moment against your chart.',
+  lastTime: 'Last time',
   quietWhen: 'The next two months hold no standout window for this, so the Oracle points to the waxing Moon, the traditional time to begin.',
   waxing: 'The Moon is waxing, the traditional time to begin and build.',
   mercuryRx: 'Mercury is retrograde, a traditional time to review rather than sign, launch, or send.',
@@ -117,6 +124,7 @@ const INTENTS: [Intent, RegExp][] = [
 ];
 
 export function intentOf(q: string): Intent {
+  if (/\btension|\btense\b|\bmy (squares|oppositions|trines|sextiles|aspects)\b|\beffortless|\bwhere (do|does) (my )?energy\b|\bhigh road\b|\blow road\b|\bshow (me )?my (birth )?chart\b|\bmy chart'?s energy\b|\bstuck energy\b|\bwhat (blocks|holds) me\b|\bmy (strengths and )?challenges\b/i.test(q)) return 'energy';
   if (/\bsimplif|\bplain (english|words|language)\b|\beli5\b|\bsimpl(y|er)\b|\bin simple terms\b|\bdon[’']?t (understand|get it)\b|\bdo not understand\b|\bconfus|\bwhat does (that|this|it) mean\b|\btl;?dr\b|\bsum (it|that) up\b|\bin short\b|\bexplain (that|this|it)\b/i.test(q)) return 'simplify';
   // A "should I" question is a decision, even when it mentions the week or the sky.
   if (/^(should|shall)\b|\bshould i\b/i.test(q) && !/^(what|where|how|who|which)\b|\bwhen\b|\b(what|which|best|good) (day|time|week|month)\b|\breturn\b|\bretrograde\b/i.test(q)) return 'decision';
@@ -246,6 +254,39 @@ function natalLines(c: NatalChart, q: string, place: { lat: number; lon: number 
 }
 
 export function consultOracle(question: string, ctx: OracleContext): OracleReply {
+  return remember(question, ctx, consultFresh(question, ctx));
+}
+
+/**
+ * Local memory: the Oracle checks what it already told this person (kept only on their device) so it
+ * does not repeat a line given earlier today, varies its wording, and refers back to a related question.
+ */
+function remember(question: string, ctx: OracleContext, r: OracleReply): OracleReply {
+  const history = (ctx.history ?? []).filter((h) => h.lines && h.question.toLowerCase() !== question.trim().toLowerCase());
+  if (!history.length || r.intent === 'simplify' || r.limit) return r;
+  const day = r.day;
+  // 1. Lines already given today are not repeated.
+  const said = new Set(history.filter((h) => h.day === day).flatMap((h) => h.lines.map((l) => l.text)));
+  let lines = r.lines.filter((l) => !l.text || !said.has(l.text));
+  // Never strip an answer down to its framing: keep the substance if too little would remain.
+  if (lines.filter((l) => l.text).length < 2) lines = r.lines;
+  // 2. A decision does not reuse the exact wording of a recent one.
+  if (r.tone && lines[0] && history.slice(-6).some((h) => h.lines[0]?.text === lines[0].text)) {
+    const used = new Set(history.slice(-6).map((h) => h.lines[0]?.text));
+    const fresh = ORACLE_TONE[r.tone].lines.find((x) => !used.has(x));
+    if (fresh) lines = [{ ...lines[0], text: fresh }, ...lines.slice(1)];
+  }
+  // 3. A related earlier question is brought back.
+  const area = areaOf(question);
+  const related = [...history].reverse().find((h) => h.day !== day && (area ? areaOf(h.question) === area : h.intent === r.intent && !['open', 'sky'].includes(r.intent)));
+  if (related) {
+    const when = new Date(`${related.day}T12:00:00Z`).toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' });
+    lines = [...lines, { heading: ORACLE_SAYS.lastTime, text: `On ${when} you asked “${related.question}”, and the Oracle said: ${related.label}.` }];
+  }
+  return { ...r, lines };
+}
+
+function consultFresh(question: string, ctx: OracleContext): OracleReply {
   // 'Say it simply': rewrite the last answer in plain words (or, with none yet, the chart in three lines).
   if (intentOf(question.trim()) === 'simplify' && !limitOf(question.trim())?.match(/health|others|legal|gamble/)) {
     const prev = ctx.previous && ctx.previous.intent !== 'simplify' ? ctx.previous : null;
@@ -258,6 +299,27 @@ export function consultOracle(question: string, ctx: OracleContext): OracleReply
       points: prev?.points ?? 'Sun',
       lines: prev ? simplify(prev) : [{ heading: '', text: PLAIN_TEXT.noPrevious }, ...plainChart(ctx.chart)],
       deeper: [],
+    };
+  }
+  if (intentOf(question.trim()) === 'energy') {
+    const e = chartEnergy(ctx.chart, ctx.place, ctx.now ?? new Date());
+    const layers = energyLayers(e);
+    const t = e.aspects.filter((x) => x.kind === 'tension');
+    const f = e.aspects.filter((x) => x.kind === 'flow');
+    return {
+      intent: 'energy',
+      question: question.trim(),
+      day: iso(ctx.now ?? new Date()),
+      label: 'Your chart’s energy',
+      orb: 'YOUR ENERGY',
+      points: t[0]?.a ?? 'Sun',
+      lines: [
+        ...(t[0] ? [{ heading: `Your strongest tension: ${t[0].a} ${t[0].aspect} ${t[0].b}`, text: `${t[0].about} To release it: ${t[0].release.charAt(0).toLowerCase()}${t[0].release.slice(1)}` }] : []),
+        ...(f[0] ? [{ heading: `Your easiest flow: ${f[0].a} ${f[0].aspect} ${f[0].b}`, text: f[0].about }] : []),
+      ],
+      deeper: [],
+      layers,
+      consulted: [`${t.length} tensions`, `${f.length} flows`, `${e.aspects.filter((x) => x.kind === 'fusion').length} fusions`, 'your progressed chart', 'a year of slow transits', `${e.natalRx.length} birth retrogrades`, 'retrogrades in the sky now'],
     };
   }
   const reply = answerOnly(question, ctx);
@@ -279,6 +341,62 @@ export function consultOracle(question: string, ctx: OracleContext): OracleReply
   return layers.length ? { ...reply, layers, consulted: read } : reply;
 }
 
+const TONE_LEAD: Record<Tone, string> = { go: 'Yes, gently.', wait: 'Not yet.', closer: 'Look closer first.', again: 'Ask it another way.' };
+const AREA_WORD: Record<Area, string> = { love: 'love', work: 'your work', money: 'money', family: 'home and family', health: 'your body and energy', creativity: 'what you make', friends: 'your friendships', purpose: 'your direction' };
+
+/** A decision answered from this chart and this question: the tone, the planets behind it, and a date to act on. */
+function decisionLines(a: ReturnType<typeof askOracle>, area: Area | null, ctx: OracleContext): SkyLine[] {
+  const now = ctx.now ?? new Date();
+  const fmt = (s: string) => new Date(`${s}T12:00:00Z`).toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric', timeZone: 'UTC' });
+  const lead = TONE_LEAD[a.tone];
+  const k = a.contact;
+  const out: SkyLine[] = [];
+  if (k) {
+    const verb = k.aspect === 'opposite' ? 'opposes' : k.aspect === 'conjunct' ? 'meets' : `${k.aspect}s`;
+    const where = k.house ? `, crossing your ${ord(k.house)} house of ${W.HOUSE[k.house].area}` : '';
+    // Area advice only when the contact flows; a hard contact is read from its own aspect.
+    const flows = ['trine', 'sextile', 'conjunct'].includes(k.aspect) && a.tone === 'go';
+    const forArea = area && flows ? MOVER_AREA[k.mover]?.[area] : undefined;
+    const ties = area && ((TARGET_AREAS[k.natal] ?? []).includes(area) || (k.house && HOUSE_AREA[k.house] === area));
+    out.push({
+      heading: '',
+      text: `${lead} ${k.mover === 'Sun' ? 'The Sun' : k.mover} ${verb} your ${k.natal} ${k.date === iso(now) ? 'today' : `on ${fmt(k.date)}`}${where}. Your ${k.natal} is ${WEEK_TARGET[k.natal] ?? W.PLANET_FUNCTION[k.natal]}${ties ? `, and this is the part of your chart ${AREA_WORD[area!]} runs through` : ''}. ${forArea ?? WEEK_CONTACT[k.mover][k.aspect as keyof (typeof WEEK_CONTACT)[string]]}`,
+    });
+  } else out.push({ heading: '', text: `${lead} ${a.because}` });
+  // A date to act on, from this chart's best days for the question.
+  const days = dayScores(ctx.chart, ctx.place, now, area, a.question, 30);
+  const best = days.filter((d) => d.score > 1 && d.reasons.length).sort((x, y) => y.score - x.score)[0];
+  if (a.tone === 'wait') out.push({ heading: 'When', text: a.voidUntil ? `Ask again after ${a.voidUntil}.` : k ? `Let ${fmt(k.date)} pass, then ask again${best && best.date > k.date ? `; ${fmt(best.date)} looks clearer` : ''}.` : best ? `${fmt(best.date)} looks clearer.` : 'Ask again in a few days.' });
+  else if (best) out.push({ heading: a.tone === 'go' ? 'Best day to act' : 'A clearer day', text: `${fmt(best.date)}: ${best.reasons[0]}.` });
+  return out;
+}
+
+const AREA_LABEL: Record<Area, [string, string]> = {
+  love: ['Your love life', 'LOVE'],
+  work: ['Your work and career', 'WORK'],
+  money: ['Your money', 'MONEY'],
+  family: ['Your home and family', 'HOME'],
+  health: ['Your health and energy', 'YOUR BODY'],
+  creativity: ['Your creativity', 'CREATE'],
+  friends: ['Your friends and community', 'FRIENDS'],
+  purpose: ['Your purpose and direction', 'PURPOSE'],
+};
+
+/** A question about a part of life, answered from that part of the chart, with dates. */
+function areaAnswer(area: Area, ctx: OracleContext, base: { question: string; day: string }, boundary = false): OracleReply {
+  const now = ctx.now ?? new Date();
+  const [label, orb] = AREA_LABEL[area];
+  if (area === 'health') {
+    const h = healthAnswer(ctx.chart, ctx.place, now, boundary);
+    return { ...base, intent: 'area', label, orb, points: 'Mars', lines: h.lines, deeper: h.deeper };
+  }
+  const layers = oracleLayers(ctx.chart, ctx.place, area, null, now);
+  const pick = (title: string, n: number) => layers.find((l) => l.title.startsWith(title))?.lines.filter((l) => l.text).slice(0, n) ?? [];
+  const lines = [...pick('Your birth chart', 2), ...pick('The next 30 days', 1).filter((l) => !/^Quiet$/.test(l.heading)), ...pick('Your best and hardest', 2).filter((l) => l.heading.startsWith('Best'))].slice(0, 4);
+  const deeper = [...pick('The year ahead', 2), ...pick('The Vedic view', 1)];
+  return { ...base, intent: 'area', label, orb, points: AREA_SIGNIFICATOR[area], lines, deeper };
+}
+
 function answerOnly(question: string, ctx: OracleContext): OracleReply {
   const { chart: c, place } = ctx;
   const now = ctx.now ?? new Date();
@@ -286,6 +404,7 @@ function answerOnly(question: string, ctx: OracleContext): OracleReply {
   const day = iso(now);
   const base = { question: q, day };
   const limit = limitOf(q);
+  if (limit === 'health') return areaAnswer('health', ctx, base, true);
   if (limit && limit !== 'unclear') return { ...base, intent: 'decision', label: ORACLE_TONE.again.label, orb: 'ASK AGAIN', tone: 'again', points: 'Moon', lines: [{ heading: 'Ask it another way', text: ORACLE_REFRAME[limit] }], deeper: [], limit };
   const i0 = intentOf(q);
   // A question that names the other person is about the two of you (unless it asks a decision or a date).
@@ -294,11 +413,14 @@ function answerOnly(question: string, ctx: OracleContext): OracleReply {
   if (limit === 'unclear' && (intent === 'open' || intent === 'decision')) return { ...base, intent: 'decision', label: ORACLE_TONE.again.label, orb: 'ASK AGAIN', tone: 'again', points: 'Moon', lines: [{ heading: 'Ask it another way', text: ORACLE_REFRAME.unclear }], deeper: [], limit };
   const cusps = cuspsOf(c, place);
   const area = areaOf(q);
+  // A question about a part of life gets that part of the chart, not a general reading.
+  const specific = /\b(rising|ascendant|lagna|nakshatra|dasha|north node|node|sun|moon|mercury|venus|mars|jupiter|saturn|uranus|neptune|pluto)\b/i.test(q);
+  if (area && (['open', 'sky', 'cycle'].includes(intent) || (intent === 'chart' && !specific))) return areaAnswer(area, ctx, base);
 
   switch (intent) {
     case 'decision': {
       const a = askOracle(q, c, place, now);
-      return { ...base, intent, label: a.label, orb: '', tone: a.tone, points: a.points, lines: [{ heading: '', text: a.line }, ...(a.because ? [{ heading: 'In the sky', text: a.because }] : [])], deeper: a.why.map((w) => ({ heading: '', text: w })), limit: a.limit };
+      return { ...base, intent, label: a.label, orb: '', tone: a.tone, points: a.points, lines: decisionLines(a, area, ctx), deeper: a.why.map((w) => ({ heading: '', text: w })), limit: a.limit };
     }
     case 'when': {
       if (/\b(saturn|jupiter)\b/i.test(q) && /\breturn\b/i.test(q)) break;
@@ -435,20 +557,33 @@ function answerOnly(question: string, ctx: OracleContext): OracleReply {
     return { ...base, intent: 'return', label: `Your ${body} return`, orb: `${body} RETURN`.toUpperCase(), points: body, lines, deeper: [] };
   }
 
-  // The sky now, and anything the Oracle cannot place.
+  // A question the Oracle cannot place: answer from what is on the person's mind, or from what their
+  // chart is working on right now, never from a general reading.
+  if (intent === 'open') {
+    const focus = ctx.profile?.onMind[0];
+    if (focus) return areaAnswer(focus, ctx, base);
+    const season = cycles(c, place.lat, place.lon, now, ctx.profile ?? null).now[0];
+    const sky = todaySky(c, place, now);
+    const lines: SkyLine[] = [
+      ...(season ? [{ heading: `What you are moving through: ${season.title}`, text: `${season.feel} What helps: ${season.helps}`, basis: season.basis }] : []),
+      ...sky.now.slice(0, 1),
+      sky.moon,
+    ];
+    return { ...base, intent: 'open', label: 'What your chart is working on now', orb: 'RIGHT NOW', points: season?.title.split(' ')[0] ?? 'Moon', lines, deeper: sky.now.slice(1, 4), consult: true };
+  }
+
+  // The sky now, read against this chart.
   const s = todaySky(c, place, now);
-  const lines = [s.moon, ...s.now.slice(0, intent === 'sky' ? 3 : 1)];
-  const deeper: SkyLine[] = [...s.now.slice(intent === 'sky' ? 3 : 1), ...s.later.slice(0, 5).map((l) => ({ heading: l, text: '' }))];
+  const deeper: SkyLine[] = [...s.now.slice(3), ...s.later.slice(0, 5).map((l) => ({ heading: l, text: '' }))];
   if (s.retrograde.length) deeper.push({ heading: 'Retrograde now', text: `${s.retrograde.join(', ')}.` });
   return {
     ...base,
-    intent: intent === 'sky' ? 'sky' : 'open',
-    label: intent === 'sky' ? 'The sky right now, for you' : 'The Oracle reads the sky for you',
+    intent: 'sky',
+    label: 'The sky right now, for you',
     orb: 'THE SKY NOW',
     points: s.now[0]?.heading.match(BODY_RE)?.[0] ?? 'Moon',
-    lines: intent === 'sky' ? lines : [{ heading: '', text: ORACLE_SAYS.open }, ...lines],
+    lines: [s.moon, ...s.now.slice(0, 3)],
     deeper,
-    consult: intent === 'open',
   };
 }
 

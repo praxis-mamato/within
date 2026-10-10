@@ -33,7 +33,7 @@ export const EVENTS = {
   today_finished: {},
   astrologer_checkout: { package: ['two-sessions', 'season', 'coaching', 'year'] },
   moon_calendar: { months: 'number' },
-  oracle_asked: { intent: ['simplify', 'decision', 'when', 'return', 'retro', 'lunation', 'together', 'chart', 'patterns', 'feeling', 'cycle', 'week', 'planet', 'sky', 'open'] },
+  oracle_asked: { intent: ['simplify', 'energy', 'area', 'decision', 'when', 'return', 'retro', 'lunation', 'together', 'chart', 'patterns', 'feeling', 'cycle', 'week', 'planet', 'sky', 'open'] },
 } as const satisfies Record<string, Record<string, Field>>;
 
 export type EventName = keyof typeof EVENTS;

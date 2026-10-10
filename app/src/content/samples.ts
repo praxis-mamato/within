@@ -9,6 +9,9 @@ import { findPatterns } from './patternRules';
 import { cycles } from './cycles';
 import { weekReading } from './week';
 import { chartInBrief, todaySky } from './today';
+import { chartEnergy, energyLayers, ENERGY_TEXT } from './energy';
+import { simplify, PLAIN_TEXT } from './plain';
+import { healthAnswer } from './health';
 import { askOracle, ORACLE_TEXT } from './oracle';
 import { consultOracle, ORACLE_SAYS } from './oracleEngine';
 import { PATTERN_AREAS } from './mirror';
@@ -99,6 +102,17 @@ export function buildCorpus(now = new Date('2026-10-06T12:00:00Z')): Passage[] {
         const a = consultOracle(q, { chart: c, place, now });
         out.push({ source: `${who} · The Oracle · “${q}”`, text: [a.label, ...[...a.lines, ...a.deeper].map((l) => `${l.heading} ${l.text}`)].join(' ') });
       }
+    // Health, answered from the chart.
+    { const h = healthAnswer(c, place, now, i % 5 === 0); out.push({ source: `${who} · The Oracle · Health`, text: [...h.lines, ...h.deeper].map((x) => `${x.heading} ${x.text}`).join(' ') }); }
+    // Your chart's energy, and a plain-words version of one answer.
+    const en = i % 3 === 0 ? chartEnergy(c, place, now) : { aspects: [], natalRx: [], skyRx: [] };
+    if (i % 3 === 0) for (const l of energyLayers(en)) out.push({ source: `${who} · The Oracle · Your chart’s energy · ${l.title}`, text: l.lines.map((x) => `${x.heading} ${x.text}`).join(' ') });
+    out.push({ source: `${who} · The Oracle · Your chart’s energy · roads`, text: en.aspects.map((x) => `${x.high} ${x.low} ${x.release}`).join(' ') });
+    out.push({ source: 'The Oracle · energy framing', text: Object.values(ENERGY_TEXT).join(' ') });
+    if (i % 4 === 0) {
+      const first = consultOracle(['Should I apply for the job?', 'When is a good day to ask for a raise?', 'What does my Venus mean?', 'Show my chart’s energy'][(i / 4) % 4], { chart: c, place, now });
+      out.push({ source: `${who} · The Oracle · Say it simply`, text: [PLAIN_TEXT.title, ...simplify(first).map((l) => `${l.heading} ${l.text}`)].join(' ') });
+    }
     // More weeks, each with a different area on the person's mind, so the week library is seen in context.
     const areas = ['love', 'work', 'family', 'health', 'money', 'creativity', 'friends', 'purpose'] as const;
     for (const d of [10, 20, 30])

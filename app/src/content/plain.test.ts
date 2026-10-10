@@ -10,6 +10,7 @@ describe('say it simply', () => {
   it('swaps astrology terms for everyday words', () => {
     expect(plain('Transiting Saturn square your natal Moon, within 0°34′.')).toBe('passing planets Saturn clashes with your birth Moon, closely.'.replace('passing planets Saturn', 'passing Saturn'));
     expect(plain('Your progressed Moon is in your 5th house')).toBe('Your grown-up Moon is in your 5th house');
+    expect(plain('They pull in opposite directions. Mars opposite your Moon.')).toBe('They pull in opposite directions. Mars faces your Moon.');
   });
   it('rewrites any earlier answer in plain words, with no jargon and within the lint', () => {
     for (const q of ['Should I apply for the new job?', 'When is a good day to ask for a raise?', 'What does my Venus mean?', 'Is Mercury retrograde?', 'What am I moving through this year?']) {

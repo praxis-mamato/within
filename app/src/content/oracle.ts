@@ -63,7 +63,7 @@ const AREA_WORDS: [Area, RegExp][] = [
   ['friends', /\b(friends?|group|party|community|team|neighbou?r)\b/i],
   ['creativity', /\b(create|creative|write|writing|art|music|paint|design|book|launch|post|perform)\b/i],
   ['purpose', /\b(purpose|meaning|path|direction|study|school|travel|trip|course|degree|spiritual)\b/i],
-  ['health', /\b(exercise|gym|run|sleep|routine|diet|rest|energy|habit)\b/i],
+  ['health', /\b(health|healthy|body|wellness|well-being|wellbeing|vitality|fitness|stamina|immune|weight|exercise|gym|run|sleep|routine|diet|rest|energy|habit)\b/i],
 ];
 const LIMIT_WORDS: [Limit, RegExp][] = [
   ['health', /\b(sick|illness|ill|cancer|disease|diagnos\w*|surgery|pregnan\w*|baby|miscarr\w*|die|dying|death|dead|tumou?r|test results?|doctor|medication)\b/i],
@@ -142,6 +142,10 @@ export interface OracleAnswer {
   /** For subscribers: the reading behind the answer, line by line. */
   why: string[];
   limit?: Limit;
+  /** The transit behind the answer, when there is one. */
+  contact?: { mover: string; aspect: string; natal: string; date: string; house: number | null };
+  /** When the Moon is void of course, when it ends. */
+  voidUntil?: string;
 }
 
 const HARD = ['square', 'opposite'];
@@ -182,7 +186,7 @@ export function askOracle(question: string, c: NatalChart, place: { lat: number;
   if (!moon.next) {
     why.push(ORACLE_TEXT.voidOfCourse);
     if (!(top && top.score >= 2))
-      return { question: q, day, tone: 'wait', label: ORACLE_TONE.wait.label, line: `${pick('wait')} Ask again after ${when(moon.leaves)}.`, because: `The Moon is void of course in ${moon.sign} until ${when(moon.leaves)}.`, points: 'Moon', why };
+      return { question: q, day, tone: 'wait', label: ORACLE_TONE.wait.label, line: `${pick('wait')} Ask again after ${when(moon.leaves)}.`, because: `The Moon is void of course in ${moon.sign} until ${when(moon.leaves)}.`, points: 'Moon', why, voidUntil: when(moon.leaves) };
   }
   const mn = moon.next;
   if (mn) why.push(`${ORACLE_TEXT.moonNext} Here, the Moon’s next contact is a ${mn.aspect === 'opposite' ? 'opposition' : mn.aspect === 'conjunct' ? 'conjunction' : mn.aspect} with ${mn.planet}, ${when(mn.at)}.`);
@@ -190,9 +194,11 @@ export function askOracle(question: string, c: NatalChart, place: { lat: number;
   let tone: Tone;
   let because: string;
   let points: string;
+  let contact: OracleAnswer['contact'];
   if (top) {
     const { m, x } = top;
     points = m.mover;
+    contact = { mover: m.mover, aspect: x.aspect, natal: x.natal, date: x.date, house: m.house };
     const dateWord = x.date === day ? 'today' : `on ${fmtDate(x.date)}`;
     because = `${m.mover === 'Sun' ? 'The Sun' : m.mover} ${x.aspect === 'opposite' ? 'opposes' : x.aspect === 'conjunct' ? 'meets' : `${x.aspect}s`} your ${x.natal} ${dateWord}. ${firstSentence(WEEK_CONTACT[m.mover][x.aspect])}`;
     why.push(`${m.mover} ${x.aspect} your ${x.natal} (${fmtDeg(x.natalLon % 30)} ${signOf(x.natalLon)}), exact ${dateWord}${m.house ? `, moving through your ${ord(m.house)} house` : ''}.`);
@@ -215,5 +221,5 @@ export function askOracle(question: string, c: NatalChart, place: { lat: number;
     because = '';
     points = 'Moon';
   }
-  return { question: q, day, tone, label: ORACLE_TONE[tone].label, line: pick(tone), because, points, why };
+  return { question: q, day, tone, label: ORACLE_TONE[tone].label, line: pick(tone), because, points, why, contact };
 }
