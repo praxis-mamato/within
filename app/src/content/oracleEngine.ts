@@ -16,6 +16,7 @@ import { answerFor, feelingIn } from './answer';
 import { cycles } from './cycles';
 import { findPatterns } from './patternRules';
 import { relationshipReading } from './relationship';
+import { PLAIN_TEXT, plainChart, simplify } from './plain';
 import type { Area, Profile } from './mirror';
 import { askOracle, areaOf, limitOf, ORACLE_REFRAME, ORACLE_TONE, type Limit, type Tone } from './oracle';
 import { chartInBrief, todaySky, type SkyLine } from './today';
@@ -26,7 +27,7 @@ import { consulted, dayScores, oracleLayers, type Layer } from './oracleLayers';
 import * as V from './vedic';
 import * as W from './western';
 
-export type Intent = 'decision' | 'when' | 'return' | 'retro' | 'lunation' | 'together' | 'chart' | 'patterns' | 'feeling' | 'cycle' | 'week' | 'planet' | 'sky' | 'open';
+export type Intent = 'simplify' | 'decision' | 'when' | 'return' | 'retro' | 'lunation' | 'together' | 'chart' | 'patterns' | 'feeling' | 'cycle' | 'week' | 'planet' | 'sky' | 'open';
 
 export interface OracleReply {
   intent: Intent;
@@ -57,6 +58,8 @@ export interface OracleContext {
   now?: Date;
   profile?: Profile | null;
   other?: { chart: NatalChart; place: { lat: number; lon: number }; name: string } | null;
+  /** The answer before this one, for 'say it simply' and 'what does that mean'. */
+  previous?: OracleReply | null;
 }
 
 export const ORACLE_SAYS = {
@@ -114,6 +117,7 @@ const INTENTS: [Intent, RegExp][] = [
 ];
 
 export function intentOf(q: string): Intent {
+  if (/\bsimplif|\bplain (english|words|language)\b|\beli5\b|\bsimpl(y|er)\b|\bin simple terms\b|\bdon[’']?t (understand|get it)\b|\bdo not understand\b|\bconfus|\bwhat does (that|this|it) mean\b|\btl;?dr\b|\bsum (it|that) up\b|\bin short\b|\bexplain (that|this|it)\b/i.test(q)) return 'simplify';
   // A "should I" question is a decision, even when it mentions the week or the sky.
   if (/^(should|shall)\b|\bshould i\b/i.test(q) && !/^(what|where|how|who|which)\b|\bwhen\b|\b(what|which|best|good) (day|time|week|month)\b|\breturn\b|\bretrograde\b/i.test(q)) return 'decision';
   for (const [intent, re] of INTENTS) if (re.test(q)) return intent === 'feeling' || !feelingIn(q) || intent === 'retro' || intent === 'return' ? intent : 'feeling';
@@ -242,6 +246,20 @@ function natalLines(c: NatalChart, q: string, place: { lat: number; lon: number 
 }
 
 export function consultOracle(question: string, ctx: OracleContext): OracleReply {
+  // 'Say it simply': rewrite the last answer in plain words (or, with none yet, the chart in three lines).
+  if (intentOf(question.trim()) === 'simplify' && !limitOf(question.trim())?.match(/health|others|legal|gamble/)) {
+    const prev = ctx.previous && ctx.previous.intent !== 'simplify' ? ctx.previous : null;
+    return {
+      intent: 'simplify',
+      question: question.trim(),
+      day: iso(ctx.now ?? new Date()),
+      label: PLAIN_TEXT.title,
+      orb: 'IN SHORT',
+      points: prev?.points ?? 'Sun',
+      lines: prev ? simplify(prev) : [{ heading: '', text: PLAIN_TEXT.noPrevious }, ...plainChart(ctx.chart)],
+      deeper: [],
+    };
+  }
   const reply = answerOnly(question, ctx);
   if (reply.limit) return reply;
   // The full reading: the question's life area (or the one on the person's mind), or the planet it names.

@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useCharts } from '../astro/useCharts';
 import { computeNatal } from '../astro/natal';
-import { boardInfo, consultOracle, ORACLE_SAYS, skyToday, type BoardInfo, type OracleReply } from '../content/oracleEngine';
+import { boardInfo, consultOracle, intentOf, ORACLE_SAYS, skyToday, type BoardInfo, type OracleReply } from '../content/oracleEngine';
 import { ORACLE_TEXT } from '../content/oracle';
 import type { SkyLine } from '../content/today';
 import { OracleBoard, useShake } from '../components/OracleBoard';
@@ -99,6 +99,11 @@ export default function Oracle() {
       setFlagged(true);
       return;
     }
+    // Asking for it simply never uses a free question.
+    if (intentOf(question) === 'simplify') {
+      sayItSimply(question);
+      return;
+    }
     // The same question gets the same answer all day, and does not count again.
     const same = asked.find((a) => a.question.toLowerCase() === question.toLowerCase());
     if (!same && left <= 0) {
@@ -131,6 +136,15 @@ export default function Oracle() {
     window.setTimeout(() => setPhase('answered'), window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ? 0 : 2600);
   };
   const enableShake = useShake(() => ask());
+
+  /** Rewrites the current answer in plain words, in place. */
+  const sayItSimply = (question = 'Say it simply') => {
+    if (!me) return;
+    const s2 = consultOracle(question, { chart: me, place, previous: answer });
+    track('oracle_asked', { intent: 'simplify' });
+    setAnswer(s2);
+    setPhase('answered');
+  };
 
   // Arriving from the intro with a question: the Oracle answers it straight away.
   const loc = useLocation();
@@ -207,6 +221,11 @@ export default function Oracle() {
         <section className="oracle-answer" aria-live="polite" aria-labelledby="oa-h">
           <p className="small oracle-muted">“{answer.question}”</p>
           <h2 id="oa-h">{answer.label}</h2>
+          {answer.intent !== 'simplify' && (
+            <button type="button" className="chip say-simply" onClick={() => sayItSimply()}>
+              Say it simply
+            </button>
+          )}
           <Lines items={answer.lines} />
           {answer.consulted && (
             <div className="oracle-consulted">

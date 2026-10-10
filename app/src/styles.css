@@ -782,3 +782,4 @@ details > summary { cursor: pointer; margin: 8px 0; }
 .relation-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 12px; }
 .relation-chips button { background: rgb(255 255 255 / 0.06); color: var(--ink-body); border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px; font: inherit; font-size: 0.875rem; min-height: 36px; cursor: pointer; }
 .relation-chips button[aria-pressed='true'] { border-color: var(--gold); color: var(--ink-display); background: var(--accent-soft); }
+.say-simply { background: rgb(255 255 255 / 0.06); color: var(--o-ink); border: 1px solid rgb(226 194 126 / 0.55); border-radius: 999px; padding: 6px 14px; font: inherit; font-size: 0.875rem; min-height: 36px; margin: 2px 0 10px; cursor: pointer; }

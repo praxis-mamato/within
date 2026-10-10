@@ -22,6 +22,7 @@ import * as OE from './oracleEngine';
 import * as OL from './oracleLayers';
 import * as MC from './moonCalendar';
 import * as RL from './relationship';
+import * as PL from './plain';
 import committed from './approvals.json';
 import { lint } from './lint';
 
@@ -141,6 +142,7 @@ const SOURCES: [section: string, module: string, Record<string, unknown>, [name:
     ['KOOTA_TEXT', 'Vedic factors'],
     ['REL_TEXT', 'Framing'],
   ]],
+  ['Say it simply', 'plain', PL as Record<string, unknown>, [['PLAIN_TEXT', 'Plain-words answers']]],
   ['Your Moon calendar', 'moonCalendar', MC as Record<string, unknown>, [['MOON_CAL_TEXT', 'Calendar notes']]],
   ['Answers to sky and feeling questions', 'answer', AN as Record<string, unknown>, [
     ['MOON_TODAY_HOUSE', 'Today’s Moon by natal house'],
