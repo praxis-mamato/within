@@ -28,6 +28,26 @@ function personalOverride(): boolean | null {
 }
 
 /**
+ * True inside the Google Play app (a Trusted Web Activity), which opens the site with an
+ * android-app:// referrer. Play's payments policy covers in-app sales, so the Android app sells
+ * nothing: members sign in there. Kept for the session only, so the same browser on the web still
+ * shows purchases.
+ */
+export const IN_PLAY_APP = (() => {
+  try {
+    if (typeof document !== 'undefined' && document.referrer.startsWith('android-app://')) sessionStorage.setItem('within.play', '1');
+    return sessionStorage.getItem('within.play') === '1';
+  } catch {
+    return typeof document !== 'undefined' && document.referrer.startsWith('android-app://');
+  }
+})();
+
+export const PLAY_APP_TEXT = {
+  membership: 'Memberships aren’t sold in this app. If you’re already a member, sign in to unlock everything.',
+  live: 'Live readings aren’t booked in this app.',
+};
+
+/**
  * Live mode needs the Supabase settings, and either VITE_LIVE=true or a personal ?live=1.
  * The single-file artifact build can't do redirects, so it always uses demo mode.
  */

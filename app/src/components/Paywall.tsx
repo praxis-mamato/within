@@ -3,7 +3,7 @@ import { track } from '../services/telemetry';
 import { Link } from 'react-router-dom';
 import { accountService, type Plan, type Provider } from '../services/account';
 import { useAccount } from '../services/AccountContext';
-import { APPLE_SIGN_IN, CONFIG } from '../services/config';
+import { APPLE_SIGN_IN, CONFIG, IN_PLAY_APP, PLAY_APP_TEXT } from '../services/config';
 import { useStore } from '../state';
 import { MiniOrb } from './OracleBoard';
 
@@ -158,6 +158,13 @@ export function Paywall({ children, what, where }: { children: ReactNode; what: 
           ))}
         </tbody>
       </table>
+      {IN_PLAY_APP ? (
+        <>
+          <p className="small">{PLAY_APP_TEXT.membership}</p>
+          {!account && <SignInButtons />}
+        </>
+      ) : (
+        <>
       <fieldset className="plans">
         <legend className="sr-only">Choose a plan</legend>
         {(['yearly', 'monthly'] as const).map((p) => (
@@ -200,6 +207,8 @@ export function Paywall({ children, what, where }: { children: ReactNode; what: 
         </div>
       )}
       {account && <RedeemCode />}
+        </>
+      )}
       <Link to="/astrologer" className="live-cta">
         <MiniOrb />
         <span>

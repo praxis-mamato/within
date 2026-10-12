@@ -3,6 +3,7 @@ import { SignInButtons } from '../components/Paywall';
 import { MiniOrb } from '../components/OracleBoard';
 import { Back } from '../components/ui';
 import { useAccount } from '../services/AccountContext';
+import { IN_PLAY_APP, PLAY_APP_TEXT } from '../services/config';
 import { bookAstrologer, fmtUsd, myBookings, PACKAGES, packageById, type Booking } from '../services/astrologer';
 import { track } from '../services/telemetry';
 import { useStore } from '../state';
@@ -103,7 +104,11 @@ export default function Astrologer() {
         </fieldset>
       </section>
 
-      {!account ? (
+      {IN_PLAY_APP ? (
+        <div className="card">
+          <p>{PLAY_APP_TEXT.live}</p>
+        </div>
+      ) : !account ? (
         <div className="card">
           <p>Sign in to book, so your readings and receipts stay with your account.</p>
           <SignInButtons />
