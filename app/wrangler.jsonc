@@ -1,0 +1,6 @@
+// Cloudflare hosting: serves the built app (dist) as static files at a link without the GitHub address.
+{
+  "name": "within-oracle",
+  "compatibility_date": "2026-09-01",
+  "assets": { "directory": "./dist" }
+}
