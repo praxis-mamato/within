@@ -320,31 +320,55 @@ ${cta('Compare two charts')}
 }
 
 // ---------- Privacy ----------
+/** The date the privacy policy last changed in substance. Update it when the policy changes. */
+const PRIVACY_UPDATED = new Date('2026-10-12T12:00:00Z');
+
 function privacy() {
+  const ask = CONTACT ? `email <a href="mailto:${CONTACT}">${CONTACT}</a>` : 'use the contact email on our Google Play listing';
   pages.push({
     path: 'privacy/',
     title: 'Privacy policy | Within',
-    description: 'How Within handles your data: your birth details, chart and journal stay on your device.',
+    description: 'How Within handles your data: your birth details, chart, questions and journal stay on your device.',
     h1: 'Privacy policy',
-    body: `<p class="lede">Last updated ${fmt(NOW)}. Within is built so your most personal information stays with you.</p>
+    body: `<p class="lede">Effective ${fmt(PRIVACY_UPDATED)}. Within is built so your most personal information stays with you: your birth details, chart, questions and journal never leave your device.</p>
+<p>This policy covers the Within website (${esc(SITE)}) and the Within Android app. “We” means Within.</p>
 <h2>What stays on your device</h2>
-<p>Your birth date, time and place, your chart, the people you add, your questions to the Oracle, your readings, journal, milestones and reflections are stored only on your device. We do not receive them, and they are not used to train any model. You can export or erase them at any time in Settings.</p>
-<h2>What we store if you create an account</h2>
+<p>Your birth date, time and place; your chart; the people you add and their birth details; your questions to the Oracle and its answers; your readings, journal, milestones and reflections. These are stored only in your browser or app on your device. We do not receive them, and they are not used to train any model. You can export or erase them at any time in Settings.</p>
+<h2>What we collect if you create an account</h2>
+<p>You can use Within without an account. If you sign in, we store:</p>
 <ul><li><strong>Account:</strong> your email address and sign-in provider (Google or Apple), to sign you in.</li>
 <li><strong>Membership:</strong> your plan, its status and renewal date, and a Stripe customer reference.</li>
 <li><strong>Usage counts:</strong> how many connected readings you have used each month, to apply plan limits.</li>
-<li><strong>Live readings (only if you book one):</strong> your email, the package, your questions, availability, time zone, and the birth details you choose to share with the astrologer.</li></ul>
-<h2>Payments</h2>
-<p>Payments are processed by Stripe. We never see or store your card number. Stripe’s privacy policy applies to the payment itself.</p>
+<li><strong>Live readings, only if you book one:</strong> your email, the package, your questions, availability, time zone, and the birth details you choose to share with your astrologer. Your astrologer sees these to prepare your sessions.</li></ul>
 <h2>Connected readings</h2>
-<p>If you turn on connected readings, Within sends your calculated placements, never your name, birth details, journal or notes, to Anthropic’s Claude model to write the reading. Anthropic does not use this data to train its models. You can turn this off in Settings.</p>
+<p>If you turn on connected readings, Within sends your calculated placements to Anthropic’s Claude model to write the reading. Your name, birth details, journal and notes are never sent. Anthropic does not use this data to train its models. Connected readings are off until you turn them on, and you can turn them off in Settings.</p>
 <h2>Optional usage and crash reports</h2>
-<p>Off unless you turn them on. If on, we receive anonymous events (for example, “reading opened”) tied to a random install ID, never to your account or chart.</p>
+<p>Off unless you turn them on in Settings. If on, we receive anonymous events, such as “reading opened”, and crash details, tied to a random install ID and never to your account or chart.</p>
+<h2>Services we use</h2>
+<ul><li><strong>Cloudflare</strong> hosts the website and app. Like any web host, it briefly processes your IP address and browser details to deliver pages and stop abuse.</li>
+<li><strong>Supabase</strong> stores account, membership and booking records.</li>
+<li><strong>Stripe</strong> processes payments. We never see or store your card number.</li>
+<li><strong>Google and Apple</strong> handle sign-in if you choose them.</li>
+<li><strong>Anthropic</strong> writes connected readings, only if you turn them on.</li>
+<li><strong>Google Fonts</strong> serves the typefaces.</li></ul>
+<p>Each processes data only to provide its service to us, under its own privacy policy.</p>
 <h2>What we never do</h2>
-<p>No advertising, no selling or sharing data with advertisers, no tracking across other apps or sites, no access to your contacts.</p>
+<p>No advertising. No selling or sharing your data. No tracking across other apps or sites. No access to your contacts, photos, location or microphone.</p>
+<h2>How long we keep data</h2>
+<p>Account, membership and usage records are kept while your account exists. Booking records are kept while your account exists, or as long as the law requires for payment records. Optional usage events and crash reports are not linked to you, and are deleted when they are no longer needed to improve the app.</p>
 <h2>Deleting your data</h2>
-<p>Erase everything on your device in Settings. Delete your account in Settings → Account, which removes your account, membership record and usage counts from our servers. Payment records Stripe must keep by law are retained by Stripe.</p>
-<h2>Children</h2><p>Within is not for children under 13.</p>
+<ul><li><strong>On your device:</strong> Settings → Erase everything on this device.</li>
+<li><strong>Your account:</strong> Settings → Account → Delete account. This cancels any subscription and permanently removes your account, membership record, usage counts and bookings from our servers.</li>
+<li><strong>Without the app:</strong> to request deletion of your account and data, ${ask} from the address you signed in with. We act on requests within 30 days.</li></ul>
+<p>Stripe keeps payment records it is required by law to keep.</p>
+<h2>Your rights</h2>
+<p>Depending on where you live, including the EU, UK and California, you can ask to access, correct, export or delete your data, or object to how it is used. Most of this you can do yourself in Settings. For anything else, ${ask}. We do not sell personal information.</p>
+<h2>Security</h2>
+<p>Data is encrypted in transit. Account records are protected by access rules, so each person can read only their own.</p>
+<h2>Children</h2>
+<p>Within is not intended for children under 13, and we do not knowingly collect their data. If you believe a child has created an account, ${ask} and we will delete it.</p>
+<h2>Changes</h2>
+<p>If this policy changes, we will update the date at the top. Significant changes will be shown in the app.</p>
 ${CONTACT ? `<h2>Contact</h2><p>Questions or requests: <a href="mailto:${CONTACT}">${CONTACT}</a>.</p>` : ''}`,
   });
 }
