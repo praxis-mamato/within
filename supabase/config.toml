@@ -3,8 +3,8 @@
 project_id = "within"
 
 [auth]
-site_url = "https://praxis-mamato.github.io/within/"
-additional_redirect_urls = ["https://praxis-mamato.github.io/within/", "http://localhost:5173/", "http://localhost:4173/"]
+site_url = "https://within-oracle.maggie-amato.workers.dev/"
+additional_redirect_urls = ["https://within-oracle.maggie-amato.workers.dev/", "https://praxis-mamato.github.io/within/", "http://localhost:5173/", "http://localhost:4173/"]
 
 [auth.email]
 # The email link is the second sign-in step (docs/next-features.md B1).
