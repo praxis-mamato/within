@@ -1,3 +1,3 @@
 User-agent: *
 Allow: /
-Sitemap: https://within-oracle.maggie-amato.workers.dev/sitemap.xml
+Sitemap: https://within-oracle.withinoracle.workers.dev/sitemap.xml
