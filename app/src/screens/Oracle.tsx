@@ -11,6 +11,7 @@ import { chartEnergy } from '../content/energy';
 import { ascendantAndMidheaven } from '../astro/chart';
 import { Paywall } from '../components/Paywall';
 import { ReviewPrompt } from '../components/ReviewPrompt';
+import { datesIn, LiveReadingNudge, LockedSummary } from '../components/SalesCloser';
 import { Back, SafetyPanel } from '../components/ui';
 import { screen } from '../lib/screener';
 import { useAccount } from '../services/AccountContext';
@@ -253,13 +254,19 @@ export default function Oracle() {
             <div className="oracle-layers">
               <h3>The full reading</h3>
               {!entitlement.active && (
-                <ol className="oracle-locked">
-                  {answer.layers.map((l) => (
-                    <li key={l.title}>
-                      {l.title} <span>· {l.lines.length} findings</span>
-                    </li>
-                  ))}
-                </ol>
+                <>
+                  <LockedSummary layers={answer.layers} />
+                  <ol className="oracle-locked">
+                    {answer.layers.map((l) => {
+                      const d = datesIn(l.lines);
+                      return (
+                        <li key={l.title}>
+                          {l.title} <span>· {d ? `${d} of your dates` : `${l.lines.length} findings`}</span>
+                        </li>
+                      );
+                    })}
+                  </ol>
+                </>
               )}
               <Paywall where="reading" what="The Oracle’s full reading">
                 {answer.layers.map((l) => (
@@ -317,6 +324,7 @@ export default function Oracle() {
         </section>
       )}
 
+      {answer && !flagged && <LiveReadingNudge key={`${answer.day}-${answer.question}`} intent={answer.intent} />}
       {answer && <ReviewPrompt key={state.oracle.length} answers={state.oracle.length} />}
       <SkyStrip onAsk={(x) => (setQ(x), ask(x))} />
       {flagged ? (

@@ -6,6 +6,7 @@ import { useAccount } from '../services/AccountContext';
 import { APPLE_SIGN_IN, CONFIG, IN_PLAY_APP, PLAY_APP_TEXT } from '../services/config';
 import { useStore } from '../state';
 import { MiniOrb } from './OracleBoard';
+import { WorthIt } from './SalesCloser';
 
 export function SignInButtons() {
   const [busy, setBusy] = useState<Provider | null>(null);
@@ -178,7 +179,8 @@ export function Paywall({ children, what, where }: { children: ReactNode; what: 
           </label>
         ))}
       </fieldset>
-      <p className="small muted">Cancel any time in two taps. You keep access until the end of the period you paid for.</p>
+      <p className="small muted">Renews automatically at the price shown until you cancel. Cancel online any time in Account, in two taps; you keep access until the end of the period you paid for.</p>
+      <WorthIt />
       {!account ? (
         <>
           <p className="small muted">Sign in first, so your subscription follows you to your other devices.</p>

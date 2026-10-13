@@ -804,3 +804,12 @@ details > summary { cursor: pointer; margin: 8px 0; }
 
 /* The pointer stays out of the way until the Oracle is answering or something is picked. */
 .ob-planchette.ob-resting { opacity: 0; pointer-events: none; }
+
+/* In-app closer */
+.closer-summary { margin: 4px 0 10px; }
+.closer-worth { margin: 12px 0; border-top: 1px solid var(--line, rgba(0,0,0,.12)); padding-top: 10px; }
+.closer-worth summary { cursor: pointer; font-weight: 600; }
+.closer-worth dl { margin: 8px 0 0; }
+.closer-worth dt { font-weight: 600; margin-top: 10px; }
+.closer-worth dd { margin: 2px 0 0; }
+.closer-live { margin-top: 16px; }
