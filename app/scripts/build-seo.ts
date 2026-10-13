@@ -422,6 +422,26 @@ ${CONTACT ? `<h2>Contact</h2><p>Questions or requests: <a href="mailto:${CONTACT
   });
 }
 
+// Link in bio (Instagram, TikTok): one tap to each thing worth opening.
+function links() {
+  const L: [string, string][] = [
+    [SITE, 'Ask the Oracle, free'],
+    [`${SITE}retrogrades/`, 'Mercury retrograde dates'],
+    [`${SITE}moon-calendar/`, 'New and Full Moon calendar'],
+    [`${SITE}synastry/`, 'Compare two charts'],
+    [`${SITE}#/astrologer`, 'Seeking a live reading…'],
+  ];
+  pages.push({
+    path: 'links/',
+    title: 'Within · The Oracle: links',
+    description: 'Ask the Oracle anything, free. Answers from your exact birth chart, Western and Vedic.',
+    h1: 'Ask the stars anything',
+    plain: true,
+    body: `<p class="lede" style="text-align:center">Answers from your exact birth chart, Western and Vedic, in seconds.</p><div style="display:grid;gap:12px;margin:28px 0">${L.map(([h, t], i) => `<a class="btn" style="text-align:center;${i ? 'background:transparent;color:#f1e6d8;border:1px solid rgba(226,194,126,.6)' : ''}" href="${h}">${t}</a>`).join('')}</div>${proofHtml()}`,
+  });
+}
+
+links();
 moonCalendar();
 retrogrades();
 zodiac();
