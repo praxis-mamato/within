@@ -6,6 +6,7 @@ import { BirthFields } from '../components/BirthFields';
 import { useStore, type Birth } from '../state';
 import { SharingLog, SharingToggles } from '../components/Sharing';
 import { forgetInstall } from '../services/telemetry';
+import { ReviewPrompt } from '../components/ReviewPrompt';
 
 export default function Settings() {
   const { state, dispatch } = useStore();
@@ -134,6 +135,8 @@ export default function Settings() {
           />
         </div>
       </section>
+
+      <ReviewPrompt always />
 
       <section aria-labelledby="sh-h">
         <h2 id="sh-h">Help improve Within</h2>

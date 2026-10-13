@@ -18,6 +18,8 @@ const env = readFileSync(join(root, '.env.production'), 'utf8');
 const SITE = (/^VITE_SITE_URL=(.+)$/m.exec(env)?.[1] ?? '').trim().replace(/\/?$/, '/');
 /** Public contact email for the privacy page (VITE_CONTACT_EMAIL in .env.production). */
 const CONTACT = (/^VITE_CONTACT_EMAIL=(.+)$/m.exec(env)?.[1] ?? '').trim();
+const SB_URL = (/^VITE_SUPABASE_URL=(.+)$/m.exec(env)?.[1] ?? '').trim();
+const SB_ANON = (/^VITE_SUPABASE_ANON_KEY=(.+)$/m.exec(env)?.[1] ?? '').trim();
 const NOW = new Date();
 const TODAY = NOW.toISOString().slice(0, 10);
 const Y = NOW.getUTCFullYear();
@@ -30,6 +32,24 @@ const fmt = (d: Date) => d.toLocaleDateString('en-US', { weekday: 'short', month
 const fmtTime = (d: Date) => d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', timeZone: 'UTC' });
 const slug = (s: string) => s.toLowerCase();
 
+/** Reviews the owner approved and the writer agreed to show. Empty if the database can't be reached. */
+async function approvedReviews(): Promise<{ rating: number; body: string; name: string | null; free_access: boolean }[]> {
+  if (!SB_URL || !SB_ANON) return [];
+  try {
+    const res = await fetch(`${SB_URL}/rest/v1/reviews?select=rating,body,name,free_access&order=created_at.desc&limit=12`, { headers: { apikey: SB_ANON, authorization: `Bearer ${SB_ANON}` } });
+    return res.ok ? await res.json() : [];
+  } catch {
+    return [];
+  }
+}
+const REVIEWS = await approvedReviews();
+const PROOF = ['Matched against Swiss Ephemeris on 99.97% of checks', 'Western and Vedic, from your exact birth time', 'Your chart and questions stay on your phone'];
+const reviewsHtml = (style = '') =>
+  REVIEWS.length
+    ? `<section class="reviews"${style}><h2>What people say</h2>${REVIEWS.map((r) => `<blockquote><p class="stars-row" aria-label="${r.rating} of 5 stars">${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</p><p>${esc(r.body)}</p><footer>${esc(r.name || 'A Within member')}${r.free_access ? ' · received free access' : ''}</footer></blockquote>`).join('')}</section>`
+    : '';
+const proofHtml = (style = '') => `<ul class="proof"${style}>${PROOF.map((x) => `<li>${x}</li>`).join('')}</ul>`;
+
 interface Page {
   path: string;
   title: string;
@@ -37,6 +57,8 @@ interface Page {
   h1: string;
   body: string;
   ld?: object[];
+  /** Leave out reviews and the proof strip (the privacy policy). */
+  plain?: boolean;
 }
 const pages: Page[] = [];
 
@@ -97,6 +119,11 @@ h3{font-size:1.25rem;margin:1.2em 0 .3em}
 .fine{text-align:center;font-size:.85rem;color:#cdb9c6}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;padding:0;list-style:none}
 .grid a{display:block;padding:12px;border:1px solid rgba(226,194,126,.35);border-radius:12px;text-decoration:none}
+blockquote{margin:16px 0;padding:14px 16px;border-left:3px solid #e2c27e;background:rgba(255,255,255,.04);border-radius:0 12px 12px 0}
+blockquote footer{margin:6px 0 0;color:#cdb9c6;font-size:.9rem}
+.stars-row{color:#e2c27e;letter-spacing:2px;margin:0 0 4px}
+.proof{list-style:none;padding:0;margin:32px 0 0;display:grid;gap:8px;font-size:.95rem;color:#e7d8ea}
+.proof li::before{content:'✦ ';color:#e2c27e}
 footer{margin-top:48px;font-size:.85rem;color:#a99bb0}
 </style>
 ${ld}
@@ -107,6 +134,7 @@ ${ld}
 <main>
 <h1>${esc(p.h1)}</h1>
 ${p.body}
+${p.plain ? '' : reviewsHtml() + proofHtml()}
 </main>
 <footer><p>Within reads your exact birth chart, Western and Vedic, matched against Swiss Ephemeris on 99.97% of checks. Astrology for reflection, not prediction.</p><p><a href="${SITE}learn/">All guides</a> · <a href="${SITE}privacy/">Privacy</a></p></footer>
 </div>
@@ -327,6 +355,7 @@ function privacy() {
   const ask = CONTACT ? `email <a href="mailto:${CONTACT}">${CONTACT}</a>` : 'use the contact email on our Google Play listing';
   pages.push({
     path: 'privacy/',
+    plain: true,
     title: 'Privacy policy | Within',
     description: 'How Within handles your data: your birth details, chart, questions and journal stay on your device.',
     h1: 'Privacy policy',
@@ -384,9 +413,15 @@ for (const p of pages) {
   mkdirSync(dirname(file), { recursive: true });
   writeFileSync(file, render(p));
 }
+// The landing page: the proof strip and approved reviews, in the static HTML search engines read.
+const landing = join(DIST, 'index.html');
+const marker = '<p style="margin-top: 40px; font-size: 0.95rem">';
+const home = readFileSync(landing, 'utf8');
+if (home.includes(marker)) writeFileSync(landing, home.replace(marker, `${proofHtml(' style="list-style:none;padding:0;margin:32px 0 0;line-height:1.9"')}${reviewsHtml(' style="text-align:left"')}${marker}`));
+
 const urls = ['', ...pages.map((p) => p.path)];
 writeFileSync(
   join(DIST, 'sitemap.xml'),
   `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.map((u) => `  <url><loc>${SITE}${u}</loc><lastmod>${TODAY}</lastmod></url>`).join('\n')}\n</urlset>\n`,
 );
-console.log(`SEO: wrote ${pages.length} pages and a sitemap of ${urls.length} URLs for ${SITE}`);
+console.log(`SEO: ${REVIEWS.length} approved reviews; wrote ${pages.length} pages and a sitemap of ${urls.length} URLs for ${SITE}`);

@@ -788,3 +788,16 @@ details > summary { cursor: pointer; margin: 8px 0; }
 .energy-key { display: flex; justify-content: center; gap: 8px; margin-top: 6px; }
 .energy-key button { background: rgb(255 255 255 / 0.05); border: 1px solid rgb(226 194 126 / 0.35); border-radius: 999px; padding: 4px 12px; font: inherit; font-size: 0.875rem; min-height: 32px; cursor: pointer; }
 .energy-key button[aria-pressed='true'] { background: rgb(226 194 126 / 0.18); border-color: #e2c27e; }
+
+/* Review prompt */
+.review-ask { background: linear-gradient(180deg, #141b40, #2b2547); color: #f1e6d8; border: 1px solid rgba(226, 194, 126, 0.4); }
+.review-ask h2 { margin-top: 0; color: #fff6e6; }
+.review-ask .muted, .review-ask label, .review-ask legend { color: #e7d8ea; }
+.review-ask textarea, .review-ask input:not([type='radio']):not([type='checkbox']) { background: rgba(255, 255, 255, 0.08); color: #fff6e6; border-color: rgba(226, 194, 126, 0.5); }
+.review-ask textarea::placeholder { color: #b8a9bf; }
+.stars { display: flex; gap: 4px; border: 0; padding: 0; margin: 0 0 12px; }
+.stars legend { margin-bottom: 4px; }
+.stars label { cursor: pointer; font-size: 2rem; line-height: 1; color: #6f6585; }
+.stars label.on { color: #e2c27e; }
+.stars input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.stars label:focus-within { outline: 2px solid var(--gold, #e2c27e); outline-offset: 2px; border-radius: 4px; }

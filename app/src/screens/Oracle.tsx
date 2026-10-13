@@ -10,6 +10,7 @@ import { EnergyWheel } from '../components/EnergyWheel';
 import { chartEnergy } from '../content/energy';
 import { ascendantAndMidheaven } from '../astro/chart';
 import { Paywall } from '../components/Paywall';
+import { ReviewPrompt } from '../components/ReviewPrompt';
 import { Back, SafetyPanel } from '../components/ui';
 import { screen } from '../lib/screener';
 import { useAccount } from '../services/AccountContext';
@@ -316,6 +317,7 @@ export default function Oracle() {
         </section>
       )}
 
+      {answer && <ReviewPrompt key={state.oracle.length} answers={state.oracle.length} />}
       <SkyStrip onAsk={(x) => (setQ(x), ask(x))} />
       {flagged ? (
         <SafetyPanel />
