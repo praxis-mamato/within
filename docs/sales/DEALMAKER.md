@@ -51,7 +51,8 @@ report, which is the one Maggie reads. Write plainly and lead with money.
 
 ## Offers you can propose (Maggie approves the numbers)
 
-- Affiliate: a share of the first year's membership revenue for each referred member.
+- Affiliate (**approved Oct 13, 2026**): 30% of the first year's membership revenue for each referred
+  member ($30 per yearly member; $3 a month for 12 months per monthly member), paid only on real sales.
 - Live-reading supply: the astrologer delivers sessions; Within keeps a share.
 - Bundle: discounted annual memberships for a studio's members.
 - Licence: monthly fee for engine access, priced by volume.

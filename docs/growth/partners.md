@@ -8,7 +8,7 @@ site before sending. No partner is anyone from Maggie's personal network.
 
 | Offer | For | What they get | What it costs us | Needs your yes |
 |---|---|---|---|---|
-| **A. Affiliate link** | newsletters, podcasts, creators | 30% of the first year of every membership they bring ($30 per yearly, $3/month per monthly for 12 months) | 30% of first-year revenue, paid only on sales | Yes (spending) |
+| **A. Affiliate link** | newsletters, podcasts, creators | 30% of the first year of every membership they bring ($30 per yearly, $3/month per monthly for 12 months) | 30% of first-year revenue, paid only on sales | **Approved by Maggie, Oct 13, 2026** |
 | **B. Live-reading partner** | professional astrologers | They take Within live readings; Within keeps a share for the lead | Revenue share per booking (proposal: astrologer 70%, Within 30%) | Yes (packages / contractor) |
 | **C. Studio bundle** | yoga and wellness studios, coaches | A Within membership as a perk in their own membership; wholesale price per seat | Lower price per seat (proposal: $60/year per seat, minimum 10 seats) | Yes (price change) |
 | **D. Sponsored mention** | astrology newsletters, podcasts | Flat fee for one read or one placement around Mercury retrograde | Fee from their media kit (est. $50–300) | Yes (spending) |
