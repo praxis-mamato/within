@@ -64,6 +64,8 @@ You lead the sales agents; they report to you.
 - **The astrologer:** Maggie delivers the live readings herself (five years of study and readings,
   Western and Vedic). The page tells her story in the Oracle's voice, with no names. Her hours are the
   limit: price and sell live readings with that in mind, and protect her time.
+  The first reading is live and voice only, cameras off; cameras come on from the second session.
+  Never promise "face to face" or video for a first reading.
 - **Free vs paid:** see `COMPARE` in `app/src/components/Paywall.tsx`. Free: 3 Oracle questions a day,
   the core chart, top two patterns, relationship dynamics, Moon calendar preview. Paid: unlimited, 11
   depth layers per answer, all timing, full relationships, calendar sync, 30 connected readings/month.
