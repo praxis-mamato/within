@@ -29,9 +29,9 @@ export const CLOSER_TEXT = {
   ] as [string, string][],
   help: 'A billing or account problem? Write to privacy@praxisglobal.ai and a person replies.',
   liveHeading: 'A question this size deserves a person',
-  liveBody: 'Sit with an astrologer, face to face on video, and go through it together.',
+  liveBody: 'Talk it through live with an astrologer. Your first reading is voice only, cameras off.',
   selfHeading: 'Want to know yourself more deeply?',
-  selfBody: 'Go through your whole chart with an astrologer, face to face on video: who you are, what you’re here to grow, and what’s moving now.',
+  selfBody: 'Go through your whole chart live with an astrologer: who you are, what you’re here to grow, and what’s moving now. Your first reading is voice only, cameras off.',
   liveCta: 'Seeking a live reading…',
 };
 
