@@ -85,6 +85,7 @@ const NAV: [string, string][] = [
   ['birth-chart/', 'Birth chart'],
   ['synastry/', 'Synastry'],
   ['moon-calendar/', 'Moon calendar'],
+  ['mercury-retrograde/', 'Mercury retrograde'],
   ['retrogrades/', 'Retrogrades'],
   ['zodiac/', 'Zodiac signs'],
 ];
@@ -253,6 +254,7 @@ function retrogrades() {
     h1: `Retrograde dates ${yrs}`,
     body: `<p class="lede">Every planet retrograde from now through the next eighteen months: when it starts, when it turns direct, and the sign it moves through.</p>
 ${merc[0] ? `<p>${merc[0].start < NOW ? 'Mercury is retrograde now, until' : 'The next Mercury retrograde runs from'} ${merc[0].start < NOW ? `<strong>${fmt(merc[0].end)}</strong>` : `<strong>${fmt(merc[0].start)}</strong> to <strong>${fmt(merc[0].end)}</strong>`} in ${merc[0].from === merc[0].to ? merc[0].from : `${merc[0].from} and ${merc[0].to}`}.</p>` : ''}
+<p><a href="${SITE}mercury-retrograde/">The next Mercury retrograde: shadow dates and what it means for your rising sign</a></p>
 <h2>Mercury retrograde dates</h2>
 <div class="scroll"><table class="tbl"><thead><tr><th>Planet</th><th>Turns retrograde</th><th>Turns direct</th><th>Sign</th></tr></thead><tbody>${merc.map(row).join('')}</tbody></table></div>
 <h2>All retrogrades</h2>
@@ -263,6 +265,104 @@ ${RX.map((b) => `<h3>${b} retrograde</h3><p>${MEANING[b]}</p>`).join('')}
 <p>A retrograde touches each person differently, depending on which part of your birth chart the planet moves through and whether you were born with it retrograde. Within shows the retrogrades in your own chart and what to do with them.</p>
 ${cta('See retrogrades in your chart')}`,
     ld: [{ '@context': 'https://schema.org', '@type': 'Article', headline: `Retrograde dates ${yrs}`, dateModified: TODAY, author: { '@type': 'Organization', name: 'Within' } }],
+  });
+}
+
+// ---------- Mercury retrograde (the current or next one, with shadow dates and a house for each rising sign) ----------
+function mercuryRetrograde() {
+  const speed = (b: 'Mercury' | 'Venus' | 'Mars' | 'Jupiter' | 'Saturn' | 'Uranus' | 'Neptune' | 'Pluto', d: Date) => ((tropicalLongitude(b, new Date(+d + DAY / 2)) - tropicalLongitude(b, new Date(+d - DAY / 2)) + 540) % 360) - 180;
+  const HOUR = DAY / 24;
+  // Walk back if Mercury is already retrograde, so the page covers the current period.
+  let t = +NOW;
+  while (speed('Mercury', new Date(t)) < 0) t -= HOUR;
+  let start: Date | null = null;
+  let end: Date | null = null;
+  for (; t < +NOW + 200 * DAY; t += HOUR) {
+    const s = speed('Mercury', new Date(t));
+    if (!start && s < 0) start = new Date(t);
+    if (start && s >= 0) {
+      end = new Date(t);
+      break;
+    }
+  }
+  if (!start || !end) return;
+  const lonStart = tropicalLongitude('Mercury', start);
+  const lonEnd = tropicalLongitude('Mercury', end);
+  const deg = (l: number) => `${Math.floor(((l % 30) + 30) % 30)}°`;
+  const from = signOf(lonStart);
+  const to = signOf(lonEnd);
+  const where = from === to ? from : `${to} and ${from}`;
+  const ahead = (a: number, b: number) => ((a - b + 540) % 360) - 180;
+  // Shadow: Mercury first reaches the degree it later turns direct at, and later returns to the degree it turned retrograde at.
+  let pre = start;
+  for (let x = +start; x > +start - 40 * DAY; x -= HOUR) {
+    if (ahead(tropicalLongitude('Mercury', new Date(x)), lonEnd) < 0) break;
+    pre = new Date(x);
+  }
+  let post = end;
+  for (let x = +end; x < +end + 40 * DAY; x += HOUR) {
+    post = new Date(x);
+    if (ahead(tropicalLongitude('Mercury', new Date(x)), lonStart) >= 0) break;
+  }
+  const others = (['Venus', 'Mars', 'Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Pluto'] as const).filter((b) => {
+    for (let x = +start!; x <= +end!; x += DAY) if (speed(b, new Date(x)) < 0) return true;
+    return false;
+  });
+  const month = start.toLocaleDateString('en-US', { month: 'long', year: 'numeric', timeZone: 'UTC' });
+  const short = (d: Date) => d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', timeZone: 'UTC' });
+  const HOUSE: string[] = [
+    'how you come across, your body and first impressions. A time to rethink how you present yourself.',
+    'money you earn and what you value. Review budgets, prices and subscriptions before you commit.',
+    'conversations, siblings, short trips and paperwork. Reread messages before you send them.',
+    'home and family. Old family topics may resurface; repairs and moves deserve a second check.',
+    'romance, creativity and play. An old creative project or an old flame may return to be looked at.',
+    'daily work, routines and health habits. A good time to fix systems that keep slipping.',
+    'partners and close one-to-one ties. Conversations may circle back to unfinished business.',
+    'shared money, trust and intimacy. Review joint finances, debts and agreements.',
+    'study, travel and beliefs. Double-check bookings; revisit a course or idea you set aside.',
+    'career and public role. Revise plans and applications before you launch them.',
+    'friends, groups and hopes. Reconnect with people you lost touch with.',
+    'rest, the inner life and what is hidden. A time to slow down, reflect and sleep on decisions.',
+  ];
+  const idx = SIGNS.indexOf(from);
+  const faqs: [string, string][] = [
+    [`When is Mercury retrograde in ${month}?`, `Mercury turns retrograde on ${fmt(start)} at ${deg(lonStart)} ${from} and turns direct on ${fmt(end)} at ${deg(lonEnd)} ${to}. The shadow period runs from ${fmt(pre)} to ${fmt(post)}.`],
+    ['What is the Mercury retrograde shadow?', `The shadow is the stretch of sky Mercury crosses three times. It enters on ${short(pre)}, before the retrograde, and leaves on ${short(post)}, once Mercury has made up the ground it retraced. Tradition reads the pre-shadow as a preview and the post-shadow as the time to finish what the retrograde brought up.`],
+    ['Is Mercury retrograde real?', 'Mercury does not reverse. Seen from Earth, it appears to move backward for about three weeks, three or four times a year, because Earth and Mercury move at different speeds. The dates on this page are calculated from astronomical data.'],
+    ['What should I avoid during Mercury retrograde?', 'Tradition advises care rather than fear: back up your phone, reread contracts, double-check travel and messages, and give big decisions an extra day. It favors the “re-” words: review, revise, repair, reconnect.'],
+    [`What does Mercury retrograde in ${from} mean?`, `${from} is a sign of ${SIGN_KEYWORD[from]}. ${PLANET_IN_SIGN.Mercury[from]} With Mercury retrograde here, tradition reads it as a time to look again at these themes.`],
+  ];
+  pages.push({
+    path: 'mercury-retrograde/',
+    title: `Mercury retrograde ${month} in ${where}: dates, shadow and what it means | Within`,
+    description: `Mercury is retrograde from ${short(start)} to ${short(end)}, in ${where}. Exact dates, the shadow period, what it means for your rising sign, and what to do. Calculated from astronomical data.`,
+    h1: `Mercury retrograde, ${short(start)} to ${short(end)}`,
+    body: `<p class="lede">${start < NOW ? 'Mercury is retrograde now' : 'The next Mercury retrograde begins'} in ${where}. Here are the exact dates, the shadow period on either side, and what it touches in your own chart.</p>
+<div class="scroll"><table class="tbl"><tbody>
+<tr><th>Shadow begins</th><td>${fmt(pre)}</td><td>Mercury first crosses ${deg(lonEnd)} ${to}</td></tr>
+<tr><th>Turns retrograde</th><td>${fmt(start)}</td><td>${deg(lonStart)} ${from}</td></tr>
+<tr><th>Turns direct</th><td>${fmt(end)}</td><td>${deg(lonEnd)} ${to}</td></tr>
+<tr><th>Shadow ends</th><td>${fmt(post)}</td><td>Mercury returns to ${deg(lonStart)} ${from}</td></tr>
+</tbody></table></div>
+${others.length ? `<p>Also retrograde during this period: <strong>${others.join(', ')}</strong>. See <a href="${SITE}retrogrades/">every retrograde date</a>.</p>` : ''}
+<h2>What Mercury retrograde in ${from} is about</h2>
+<p>Mercury rules thinking, talking, messages, travel and technology. ${from} is a sign of ${SIGN_KEYWORD[from]}. ${PLANET_IN_SIGN.Mercury[from]} When Mercury retrogrades here, tradition reads it as a time to look again at these themes: what is under the surface, what you have not said, and what you share with others.</p>
+<h2>What to do</h2>
+<ul><li><strong>Review before you sign.</strong> Reread contracts, terms and offers; ask the extra question.</li>
+<li><strong>Back up.</strong> Phones, photos and files, before ${short(start)}.</li>
+<li><strong>Double-check travel.</strong> Times, bookings and addresses.</li>
+<li><strong>Finish, repair, return.</strong> Edit the draft, fix the system, reply to the old message.</li>
+<li><strong>Sleep on big decisions.</strong> Many astrologers prefer to launch new things after ${short(end)}, or after the shadow ends on ${short(post)}.</li></ul>
+<h2>Mercury retrograde by rising sign</h2>
+<p>Where this retrograde lands depends on your rising sign: it moves through one house of your chart. Find yours (whole-sign houses):</p>
+${SIGNS.map((r, i) => `<h3>${r} rising</h3><p>Your ${['1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th', '9th', '10th', '11th', '12th'][(idx - i + 12) % 12]} house: ${HOUSE[(idx - i + 12) % 12]}</p>`).join('')}
+<p>Don’t know your rising sign? It needs your birth time. Within works it out in seconds, then shows the exact degree this retrograde touches in your chart and the dates that matter for you.</p>
+${cta('See this retrograde in your chart')}
+<h2>Questions</h2>${faqs.map(([q, a]) => `<h3>${q}</h3><p>${a}</p>`).join('')}`,
+    ld: [
+      { '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: faqs.map(([q, a]) => ({ '@type': 'Question', name: q, acceptedAnswer: { '@type': 'Answer', text: a } })) },
+      { '@context': 'https://schema.org', '@type': 'Article', headline: `Mercury retrograde ${month}`, dateModified: TODAY, author: { '@type': 'Organization', name: 'Within' } },
+    ],
   });
 }
 
@@ -426,7 +526,7 @@ ${CONTACT ? `<h2>Contact</h2><p>Questions or requests: <a href="mailto:${CONTACT
 function links() {
   const L: [string, string][] = [
     [SITE, 'Ask the Oracle, free'],
-    [`${SITE}retrogrades/`, 'Mercury retrograde dates'],
+    [`${SITE}mercury-retrograde/`, 'Mercury retrograde: dates and your rising sign'],
     [`${SITE}moon-calendar/`, 'New and Full Moon calendar'],
     [`${SITE}synastry/`, 'Compare two charts'],
     [`${SITE}#/astrologer`, 'Seeking a live reading…'],
@@ -444,6 +544,7 @@ function links() {
 links();
 moonCalendar();
 retrogrades();
+mercuryRetrograde();
 zodiac();
 guides();
 privacy();

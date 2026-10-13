@@ -348,6 +348,12 @@ export default function Oracle() {
           {note && <p className="small oracle-note">{note}</p>}
         </form>
       )}
+      {/* Out of free questions is the moment of most intent: offer the subscription right here, not just a note. */}
+      {!flagged && note === ORACLE_TEXT.limit && !entitlement.active && (
+        <Paywall where="reading" what="Unlimited questions">
+          {null}
+        </Paywall>
+      )}
 
       {past.length > 0 && (
         <section aria-labelledby="op-h">
