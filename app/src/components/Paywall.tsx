@@ -173,21 +173,28 @@ export function Paywall({ children, what, where }: { children: ReactNode; what: 
             <input type="radio" name="plan" checked={plan === p} onChange={() => setPlan(p)} />
             <span>
               <strong>{CONFIG.plans[p].label}</strong>
-              {p === 'yearly' && <span className="hint">{CONFIG.plans.yearly.note}</span>}
+              {p === 'yearly' && (
+                <span className="hint">
+                  {CONFIG.plans.trialDays} days free for new members, then {CONFIG.plans.yearly.note}
+                </span>
+              )}
               {p === 'monthly' && <span className="hint">renews monthly</span>}
             </span>
           </label>
         ))}
       </fieldset>
-      <p className="small muted">Renews automatically at the price shown until you cancel. Cancel online any time in Account, in two taps; you keep access until the end of the period you paid for.</p>
+      <p className="small muted">
+        {plan === 'yearly'
+          ? `New members pay nothing for ${CONFIG.plans.trialDays} days. Then ${CONFIG.plans.yearly.short}, renewing every year until you cancel. Cancel online in Account before the trial ends and you aren’t charged.`
+          : 'Renews automatically every month at the price shown until you cancel.'}{' '}
+        Cancel online any time in Account; you keep access until the end of the period you paid for.
+      </p>
       <WorthIt />
       {!account ? (
         <>
           <p className="small muted">Sign in first, so your subscription follows you to your other devices.</p>
           <SignInButtons />
         </>
-      ) : !account.deviceVerified ? (
-        <VerifyDevice />
       ) : (
         <div className="btn-row">
           <button
@@ -203,7 +210,7 @@ export function Paywall({ children, what, where }: { children: ReactNode; what: 
               }
             }}
           >
-            Subscribe: {CONFIG.plans[plan].short}
+            {plan === 'yearly' ? `Start ${CONFIG.plans.trialDays} days free` : `Subscribe: ${CONFIG.plans.monthly.short}`}
           </button>
           {error && <p role="alert" className="small">{error}</p>}
         </div>

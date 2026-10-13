@@ -1,7 +1,11 @@
 // Starts a Stripe Checkout session for the signed-in user ($9.99/month or $100/year).
+// First-time members on the yearly plan get a free trial (TRIAL_DAYS, default 14); a card is collected
+// up front and Stripe charges when the trial ends unless they cancel.
 import { admin, callingUser, cors, json, SITE_URLS } from '../_shared/clients.ts';
 import { priceMonthly, priceYearly, stripe, stripeConfigured } from '../_shared/stripe.ts';
 import { safeReturnUrl } from '../_shared/entitlement.ts';
+
+const TRIAL_DAYS = Number(Deno.env.get('TRIAL_DAYS') ?? '14');
 
 /** A message the person (or the owner testing) can act on, from Stripe's error. */
 function stripeProblem(e: unknown): string {
@@ -38,12 +42,17 @@ Deno.serve(async (req) => {
       await admin.from('entitlements').upsert({ user_id: user.id, stripe_customer_id: customer, updated_at: new Date().toISOString() });
     }
 
+    // One trial per person: anyone who has had any subscription before pays from day one.
+    const hadSubscription = (await stripe.subscriptions.list({ customer, status: 'all', limit: 1 })).data.length > 0;
+    const trial = plan === 'yearly' && !hadSubscription && TRIAL_DAYS > 0 ? { trial_period_days: TRIAL_DAYS } : {};
+
     const session = await stripe.checkout.sessions.create({
       mode: 'subscription',
       customer,
       client_reference_id: user.id,
       line_items: [{ price, quantity: 1 }],
-      subscription_data: { metadata: { user_id: user.id } },
+      payment_method_collection: 'always',
+      subscription_data: { metadata: { user_id: user.id }, ...trial },
       allow_promotion_codes: true,
       success_url: `${back}?checkout=success`,
       cancel_url: back,

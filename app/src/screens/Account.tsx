@@ -68,13 +68,9 @@ export default function AccountScreen() {
               <strong>Active{entitlement.plan ? ` · ${entitlement.plan === 'yearly' ? CONFIG.plans.yearly.short : CONFIG.plans.monthly.short}` : ''}</strong>
               {entitlement.renewsAt && (entitlement.cancelAtPeriodEnd ? ` · ends ${fmt(entitlement.renewsAt)}, won’t renew` : ` · renews ${fmt(entitlement.renewsAt)}`)}
             </p>
-            {account?.deviceVerified ? (
-              <button type="button" className="btn quiet" style={{ marginTop: 10 }} onClick={run(() => accountService().manageSubscription())}>
-                {entitlement.source === 'demo' ? (entitlement.cancelAtPeriodEnd ? 'Resume subscription' : 'Cancel subscription') : 'Manage or cancel subscription'}
-              </button>
-            ) : (
-              <p className="small muted">Confirm this device to change your subscription.</p>
-            )}
+            <button type="button" className="btn quiet" style={{ marginTop: 10 }} onClick={run(() => accountService().manageSubscription())}>
+              {entitlement.source === 'demo' ? (entitlement.cancelAtPeriodEnd ? 'Resume subscription' : 'Cancel subscription') : 'Manage or cancel subscription'}
+            </button>
           </div>
         ) : (
           <Paywall where="account" what="Everything beyond your first reflection">{null}</Paywall>

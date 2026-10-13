@@ -7,7 +7,8 @@ create table if not exists public.usage_events (
   install_id uuid not null,
   event text not null check (event in (
     'app_opened', 'onboarding_step', 'onboarding_finished', 'reflection_opened', 'step_chosen',
-    'follow_up_done', 'feedback_given', 'reading_opened', 'paywall_shown', 'checkout_started', 'today_finished'
+    'follow_up_done', 'feedback_given', 'reading_opened', 'paywall_shown', 'checkout_started', 'today_finished',
+    'astrologer_checkout', 'moon_calendar', 'oracle_asked'
   )),
   props jsonb not null default '{}'::jsonb check (jsonb_typeof(props) = 'object' and octet_length(props::text) <= 256),
   app_version text not null check (app_version ~ '^[0-9]+\.[0-9]+\.[0-9]+$'),

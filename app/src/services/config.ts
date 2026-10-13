@@ -12,6 +12,8 @@ export const CONFIG = {
   plans: {
     monthly: { label: '$9.99 a month', short: '$9.99/month' },
     yearly: { label: '$100 a year', short: '$100/year', note: 'about $8.33 a month, 17% less' },
+    /** Free days on the yearly plan for first-time members (TRIAL_DAYS in the create-checkout function). */
+    trialDays: 14,
   },
 };
 
