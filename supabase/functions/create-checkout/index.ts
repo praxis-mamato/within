@@ -22,7 +22,7 @@ Deno.serve(async (req) => {
   if (!user) return json({ error: 'Sign in first.' }, 401);
   if (!stripeConfigured) return json({ error: 'Payments aren’t set up yet.' }, 503);
 
-  const { plan, returnUrl } = await req.json().catch(() => ({}));
+  const { plan, returnUrl, ref } = await req.json().catch(() => ({}));
   const price = plan === 'yearly' ? priceYearly : priceMonthly;
   if (!price) return json({ error: 'This plan isn’t set up yet.' }, 500);
   const back = safeReturnUrl(returnUrl, SITE_URLS);
@@ -46,13 +46,20 @@ Deno.serve(async (req) => {
     const hadSubscription = (await stripe.subscriptions.list({ customer, status: 'all', limit: 1 })).data.length > 0;
     const trial = plan === 'yearly' && !hadSubscription && TRIAL_DAYS > 0 ? { trial_period_days: TRIAL_DAYS } : {};
 
+    // Affiliate link: credit an active partner's code (checked here, never trusted from the browser).
+    let affiliate: Record<string, string> = {};
+    if (typeof ref === 'string' && /^[a-z0-9-]{2,32}$/.test(ref)) {
+      const { data: aff } = await admin.from('affiliates').select('code').eq('code', ref).eq('active', true).maybeSingle();
+      if (aff) affiliate = { affiliate: aff.code };
+    }
+
     const session = await stripe.checkout.sessions.create({
       mode: 'subscription',
       customer,
       client_reference_id: user.id,
       line_items: [{ price, quantity: 1 }],
       payment_method_collection: 'always',
-      subscription_data: { metadata: { user_id: user.id }, ...trial },
+      subscription_data: { metadata: { user_id: user.id, ...affiliate }, ...trial },
       allow_promotion_codes: true,
       success_url: `${back}?checkout=success`,
       cancel_url: back,

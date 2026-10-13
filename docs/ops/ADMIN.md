@@ -42,6 +42,17 @@ to do: check, fix what is yours to fix, and report in a few lines. Write plainly
    `npm run build` in `app/`, push, and say what you changed.
 8. **Report.** End with: ✅ all good, or what broke, what you fixed, and "Your yes/no list".
 
+## Affiliates (approved Oct 13, 2026: 30% of a referred member's first year)
+
+- **Add a partner** on request: insert into `affiliates` (code: lowercase letters, numbers and dashes,
+  2–32 characters, e.g. `fiona-marques`; name: the business or show name). Their link is
+  `https://within-oracle.withinoracle.workers.dev/?ref=<code>` and works for 60 days after a click.
+- **On the 1st of each month**, report each partner's commission for the previous month from
+  `affiliate_earnings` where `payout_id` is null (sum of `commission`, in cents), so Maggie can pay them.
+  After she confirms a payment, set `payout_id` (e.g. `2026-11-paypal`) on those rows.
+- If no earnings have been recorded at all while referred members exist, check that the Stripe webhook
+  sends `invoice.paid` events.
+
 ## On request
 
 Create, extend or switch off access codes; approve or hide reviews; update a booking's status

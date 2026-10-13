@@ -4,6 +4,7 @@
  */
 import { LIVE, siteUrl } from './config';
 import { supabase } from './supabase';
+import { referralCode } from '../lib/referral';
 
 export type Provider = 'google' | 'apple';
 export type Plan = 'monthly' | 'yearly';
@@ -146,7 +147,7 @@ function live(): AccountService {
       };
     },
     startCheckout: async (plan) => {
-      const { data, error } = await sb.functions.invoke('create-checkout', { body: { plan, returnUrl: siteUrl() } });
+      const { data, error } = await sb.functions.invoke('create-checkout', { body: { plan, returnUrl: siteUrl(), ref: referralCode() } });
       if (error) throw new Error(await serverMessage(error, 'Checkout couldn’t start. Try again.'));
       if (!data?.url) throw new Error('Checkout couldn’t start. Try again.');
       location.assign(data.url);
