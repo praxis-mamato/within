@@ -11,6 +11,8 @@ import { SIGNS, tropicalLongitude } from '../src/astro/chart';
 import { SIGN_ELEMENT, VEDIC_RASHI, WESTERN_SIGN } from '../src/content/templates';
 import { PLANET_IN_SIGN, RISING, RULER, SIGN_KEYWORD, SIGN_MODALITY } from '../src/content/western';
 import { PLANET_HIGH, PLANET_LOW } from '../src/content/energy';
+import { computeNatal, type BirthInput } from '../src/astro/natal';
+import { consultOracle } from '../src/content/oracleEngine';
 
 const root = join(dirname(new URL(import.meta.url).pathname), '..');
 const DIST = join(root, 'dist');
@@ -43,7 +45,24 @@ async function approvedReviews(): Promise<{ rating: number; body: string; name: 
   }
 }
 const REVIEWS = await approvedReviews();
-const PROOF = ['Matched against Swiss Ephemeris on 99.97% of checks', 'Western and Vedic, from your exact birth time', 'Your chart and questions stay on your phone'];
+/** Real Oracle answers for three example charts, computed at build time. Labelled as examples. */
+const EXAMPLES: { who: string; b: BirthInput; q: string }[] = [
+  { who: 'born 22 Mar 1990, 8:15 am, New York', b: { date: '1990-03-22', time: '08:15', timePrecision: 'exact', windowMinutes: 0, lat: 40.7128, lon: -74.006, tz: 'America/New_York' }, q: 'When should I ask for a raise?' },
+  { who: 'born 14 Jul 1985, 6:30 am, Pune', b: { date: '1985-07-14', time: '06:30', timePrecision: 'exact', windowMinutes: 0, lat: 18.5204, lon: 73.8567, tz: 'Asia/Kolkata' }, q: 'Should I start my own business?' },
+  { who: 'born 2 Nov 1996, 9:40 pm, London', b: { date: '1996-11-02', time: '21:40', timePrecision: 'exact', windowMinutes: 0, lat: 51.5074, lon: -0.1278, tz: 'Europe/London' }, q: 'What do I need in love?' },
+];
+const examplesHtml = (n: number, style = '') =>
+  `<section class="examples"${style}><h2>See what the Oracle says</h2><p class="fine" style="text-align:left">Real answers for example charts, asked ${fmt(NOW)}. Yours come from your own chart.</p>${EXAMPLES.slice(0, n)
+    .map((e) => {
+      const r = consultOracle(e.q, { chart: computeNatal(e.b), place: { lat: e.b.lat, lon: e.b.lon } });
+      return `<blockquote><p><strong>“${esc(e.q)}”</strong></p><p class="fine" style="text-align:left;margin:0 0 8px">Example chart: ${esc(e.who)}</p><p><strong>${esc(r.label)}</strong></p>${r.lines
+        .slice(0, 3)
+        .map((l) => `<p>${l.heading ? `<strong>${esc(l.heading)}:</strong> ` : ''}${esc(l.text)}</p>`)
+        .join('')}</blockquote>`;
+    })
+    .join('')}</section>`;
+
+const PROOF = ['Matched against Swiss Ephemeris on 99.97% of checks', 'Western and Vedic in one chart, from your exact birth time', '1,780 reviewed interpretations behind every answer', 'Your chart and questions stay on your phone'];
 const reviewsHtml = (style = '') =>
   REVIEWS.length
     ? `<section class="reviews"${style}><h2>What people say</h2>${REVIEWS.map((r) => `<blockquote><p class="stars-row" aria-label="${r.rating} of 5 stars">${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</p><p>${esc(r.body)}</p><footer>${esc(r.name || 'A Within member')}${r.free_access ? ' · received free access' : ''}</footer></blockquote>`).join('')}</section>`
@@ -310,6 +329,7 @@ function guides() {
 <li><strong>Aspects:</strong> where your chart holds tension (squares, oppositions) and where energy flows (trines, sextiles), and how to work with each.</li>
 <li><strong>Nakshatra and dashas (Vedic):</strong> your Moon’s lunar mansion and the planetary period you are living in now.</li>
 <li><strong>Transits and progressions:</strong> what the sky is setting off in your chart this week, this month and this year.</li></ul>
+${examplesHtml(3)}
 <h2>Ask it anything</h2>
 <p>“When should I ask for a raise?” “Why do I keep choosing the same kind of partner?” “What’s my rising sign?” The Oracle answers from your exact chart, with the dates that matter for you.</p>
 ${cta('Read my chart, free')}
@@ -417,7 +437,7 @@ for (const p of pages) {
 const landing = join(DIST, 'index.html');
 const marker = '<p style="margin-top: 40px; font-size: 0.95rem">';
 const home = readFileSync(landing, 'utf8');
-if (home.includes(marker)) writeFileSync(landing, home.replace(marker, `${proofHtml(' style="list-style:none;padding:0;margin:32px 0 0;line-height:1.9"')}${reviewsHtml(' style="text-align:left"')}${marker}`));
+if (home.includes(marker)) writeFileSync(landing, home.replace(marker, `${examplesHtml(1, ' style="text-align:left;margin-top:40px"')}${proofHtml(' style="list-style:none;padding:0;margin:32px 0 0;line-height:1.9"')}${reviewsHtml(' style="text-align:left"')}${marker}`));
 
 const urls = ['', ...pages.map((p) => p.path)];
 writeFileSync(
