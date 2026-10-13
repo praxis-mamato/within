@@ -1,0 +1,28 @@
+name: Notify search engines
+# After each update, waits for Cloudflare to publish, then tells Bing and others (IndexNow) about every
+# page and resubmits the sitemap to Google Search Console (when the GSC_SERVICE_ACCOUNT secret is set).
+on:
+  push:
+    branches: [claude/epic-gates-6t5iqb]
+    paths: ['app/**', '.github/workflows/search-notify.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: search-notify
+  cancel-in-progress: true
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node app/scripts/notify-search.mjs
+        env:
+          GSC_SERVICE_ACCOUNT: ${{ secrets.GSC_SERVICE_ACCOUNT }}
