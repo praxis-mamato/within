@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "dev.workers.withinoracle.within_oracle.twa",
+        "sha256_cert_fingerprints": ["CB:82:4B:37:95:C0:25:7E:D8:4A:40:99:C5:73:4B:B4:FD:B4:A7:63:3D:0A:AE:A1:3F:4D:5D:25:26:04:83:0A"]
+      }
+    }]
