@@ -30,6 +30,8 @@ export const CLOSER_TEXT = {
   help: 'A billing or account problem? Write to privacy@praxisglobal.ai and a person replies.',
   liveHeading: 'A question this size deserves a person',
   liveBody: 'Sit with an astrologer, face to face on video, and go through it together.',
+  selfHeading: 'Want to know yourself more deeply?',
+  selfBody: 'Go through your whole chart with an astrologer, face to face on video: who you are, what you’re here to grow, and what’s moving now.',
   liveCta: 'Seeking a live reading…',
 };
 
@@ -67,6 +69,8 @@ export function WorthIt() {
 }
 
 const BIG = new Set(['decision', 'together', 'return', 'cycle']);
+/** Questions about who someone is: an invitation to know themselves more. */
+const SELF = new Set(['chart', 'patterns', 'energy', 'feeling']);
 const KEY = 'within.liveNudge';
 function shownToday(): boolean {
   try {
@@ -76,9 +80,10 @@ function shownToday(): boolean {
   }
 }
 
-/** On big life questions, once a day: the option of a live reading. Not in the Android app (nothing is sold there). */
+/** Once a day, on big life questions or questions about who someone is: the option of a live reading. Not in the Android app (nothing is sold there). */
 export function LiveReadingNudge({ intent }: { intent: string }) {
-  const [show] = useState(() => BIG.has(intent) && !IN_PLAY_APP && !shownToday());
+  const [show] = useState(() => (BIG.has(intent) || SELF.has(intent)) && !IN_PLAY_APP && !shownToday());
+  const self = SELF.has(intent);
   useEffect(() => {
     if (!show) return;
     try {
@@ -91,8 +96,8 @@ export function LiveReadingNudge({ intent }: { intent: string }) {
   return (
     <Link to="/astrologer" className="live-cta closer-live">
       <span>
-        <span className="oracle-card-kicker">{CLOSER_TEXT.liveHeading}</span>
-        <span className="small">{CLOSER_TEXT.liveBody}</span>
+        <span className="oracle-card-kicker">{self ? CLOSER_TEXT.selfHeading : CLOSER_TEXT.liveHeading}</span>
+        <span className="small">{self ? CLOSER_TEXT.selfBody : CLOSER_TEXT.liveBody}</span>
         <strong>{CLOSER_TEXT.liveCta}</strong>
       </span>
       <span aria-hidden="true">›</span>

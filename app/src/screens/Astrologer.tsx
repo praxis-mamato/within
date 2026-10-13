@@ -14,7 +14,7 @@ const STATUS: Record<string, string> = { paid: 'Paid: your astrologer will email
 /** The astrologer behind the live readings, in the Oracle's voice. No names; only what is true. */
 export const READER = {
   intro:
-    'Five years in the old arts, the Western wheel and the Vedic sky: studying them, and sitting with people at the turning points of their lives. Love that changed shape, work that called louder, seasons that asked for something new.',
+    'Five years in the old arts, the Western wheel and the Vedic sky: studying them, and sitting with people who wanted to know themselves more deeply, and with people at the turning points of their lives: love that changed shape, work that called louder, seasons that asked for something new.',
   how: 'No scripts and no cold predictions. Your chart is opened between you, planet by planet, and read as a map of the energy within you and how it moves through your life. You leave with clarity, your own dates, and the next step that fits.',
   facts: ['Five years of astrological study and live readings', 'Western and Vedic, in one reading', 'Prepared in advance from your exact birth details, if you choose to share them', 'Private, one to one, on video'],
 };
@@ -57,7 +57,7 @@ export default function Astrologer() {
       <Back to="/oracle" label="The Oracle" />
       <p className="kicker">The Oracle · Live readings</p>
       <h1 className="oracle-welcome">Seeking a live reading…</h1>
-      <p className="sub">Face to face, on video, with a Within astrologer.</p>
+      <p className="sub">To know yourself more deeply, or to meet a turning point with clarity. Face to face, on video.</p>
       <div className="live-orb" aria-hidden="true">
         <MiniOrb />
       </div>
