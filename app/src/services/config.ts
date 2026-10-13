@@ -9,6 +9,8 @@ export const CONFIG = {
   supabaseAnonKey: (env.VITE_SUPABASE_ANON_KEY as string | undefined) || '',
   /** Where OAuth, email links, and Stripe return to. Defaults to the current page. */
   siteUrl: (env.VITE_SITE_URL as string | undefined) || '',
+  /** The astrologer's Google Calendar booking page; paid clients pick their own time there. */
+  bookingUrl: (env.VITE_BOOKING_URL as string | undefined) || '',
   plans: {
     monthly: { label: '$9.99 a month', short: '$9.99/month' },
     yearly: { label: '$100 a year', short: '$100/year', note: 'about $8.33 a month, 17% less' },

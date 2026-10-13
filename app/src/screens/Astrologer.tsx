@@ -3,7 +3,7 @@ import { SignInButtons } from '../components/Paywall';
 import { MiniOrb } from '../components/OracleBoard';
 import { Back } from '../components/ui';
 import { useAccount } from '../services/AccountContext';
-import { IN_PLAY_APP, PLAY_APP_TEXT } from '../services/config';
+import { CONFIG, IN_PLAY_APP, PLAY_APP_TEXT } from '../services/config';
 import { bookAstrologer, fmtUsd, myBookings, PACKAGES, packageById, type Booking } from '../services/astrologer';
 import { track } from '../services/telemetry';
 import { useStore } from '../state';
@@ -77,7 +77,16 @@ export default function Astrologer() {
       {justPaid && (
         <div className="card soft" role="status">
           <h2 style={{ marginTop: 0 }}>The Oracle has heard you</h2>
-          <p style={{ margin: 0 }}>Your astrologer will email you within one business day to set the time of your first reading. A receipt is on its way from Stripe.</p>
+          {CONFIG.bookingUrl ? (
+            <>
+              <p>Choose the time of your first reading now. Your calendar invite arrives straight away. A receipt is on its way from Stripe.</p>
+              <a className="btn" href={CONFIG.bookingUrl} target="_blank" rel="noopener">
+                Choose your time
+              </a>
+            </>
+          ) : (
+            <p style={{ margin: 0 }}>Your astrologer will email you within one business day to set the time of your first reading. A receipt is on its way from Stripe.</p>
+          )}
         </div>
       )}
 
@@ -91,6 +100,11 @@ export default function Astrologer() {
                 <span className="small muted" style={{ display: 'block' }}>
                   {new Date(x.created_at).toLocaleDateString()} · {STATUS[x.status] ?? x.status}
                 </span>
+                {CONFIG.bookingUrl && ['paid', 'scheduled'].includes(x.status) && (
+                  <a className="small" href={CONFIG.bookingUrl} target="_blank" rel="noopener">
+                    Choose or change a reading time ›
+                  </a>
+                )}
               </li>
             ))}
           </ul>

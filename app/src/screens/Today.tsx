@@ -50,7 +50,7 @@ export default function Today() {
         <span>
           <span className="oracle-card-kicker">Live readings</span>
           <strong>Seeking a live reading…</strong>
-          <span className="small">Know yourself more, with an astrologer. 2 × 45 min · $1,000</span>
+          <span className="small">Know yourself more, with an astrologer. Live readings from $350</span>
         </span>
         <span aria-hidden="true">›</span>
       </Link>

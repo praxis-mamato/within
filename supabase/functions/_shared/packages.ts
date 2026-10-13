@@ -14,6 +14,15 @@ export interface AstrologerPackage {
 
 export const PACKAGES: AstrologerPackage[] = [
   {
+    id: 'single',
+    name: 'One live reading',
+    sessions: 1,
+    minutes: 45,
+    amount: 35000,
+    summary: 'Your whole chart, read live with an astrologer: who you are, what you’re here to grow, and what’s moving for you now. Voice only.',
+    includes: ['Natal chart reading, Western and Vedic', 'What’s active for you now: transits and dashas', 'A written summary after the session'],
+  },
+  {
     id: 'two-sessions',
     name: 'Two live readings',
     sessions: 2,
