@@ -23,8 +23,8 @@ report, which is the one Maggie reads. Write plainly and lead with money.
 ## Who to sell to (ranked by speed to money)
 
 1. **Astrologers and tarot readers** (independent, on Instagram/TikTok/YouTube with their own sites):
-   (a) affiliate: they refer clients to Within memberships; (b) supply: they deliver Within's live
-   readings for a revenue share, so live readings can be sold at scale without Maggie's time.
+   (a) affiliate: they refer clients to Within memberships; (b) supply, later: Maggie delivers live readings herself today; recruit other astrologers only when
+   her calendar is full, so live readings can grow beyond her hours.
 2. **Wellness businesses:** yoga and meditation studios, retreat centres, coaches, breathwork and reiki
    practitioners: bundle Within memberships into their offers, or a co-branded workshop.
 3. **Creators and media:** astrology podcasts, newsletters (Substack, beehiiv), YouTube channels:
