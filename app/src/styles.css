@@ -813,3 +813,7 @@ details > summary { cursor: pointer; margin: 8px 0; }
 .closer-worth dt { font-weight: 600; margin-top: 10px; }
 .closer-worth dd { margin: 2px 0 0; }
 .closer-live { margin-top: 16px; }
+
+/* The astrologer behind live readings */
+.reader .reader-facts { list-style: none; padding: 0; margin: 12px 0 0; display: grid; gap: 6px; }
+.reader .reader-facts li::before { content: '✦ '; color: var(--gold, #e2c27e); }

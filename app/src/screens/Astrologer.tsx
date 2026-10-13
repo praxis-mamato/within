@@ -11,6 +11,14 @@ import { useStore } from '../state';
 const STATUS: Record<string, string> = { paid: 'Paid: your astrologer will email you to set a time', scheduled: 'Scheduled', completed: 'Completed', refunded: 'Refunded', cancelled: 'Cancelled' };
 
 /** Sessions with a human astrologer: packages, a short intake, and Stripe Checkout. */
+/** The astrologer behind the live readings, in the Oracle's voice. No names; only what is true. */
+export const READER = {
+  intro:
+    'Five years in the old arts, the Western wheel and the Vedic sky: studying them, and sitting with people at the turning points of their lives. Love that changed shape, work that called louder, seasons that asked for something new.',
+  how: 'No scripts and no cold predictions. Your chart is opened between you, planet by planet, and read as a map of the energy within you and how it moves through your life. You leave with clarity, your own dates, and the next step that fits.',
+  facts: ['Five years of astrological study and live readings', 'Western and Vedic, in one reading', 'Prepared in advance from your exact birth details, if you choose to share them', 'Private, one to one, on video'],
+};
+
 export default function Astrologer() {
   const { state } = useStore();
   const { account } = useAccount();
@@ -53,6 +61,18 @@ export default function Astrologer() {
       <div className="live-orb" aria-hidden="true">
         <MiniOrb />
       </div>
+
+      <section className="card reader" aria-labelledby="rd-h">
+        <p className="oracle-card-kicker">The one who reads for you</p>
+        <h2 id="rd-h" style={{ marginTop: 4 }}>Before the Oracle, there was a reader</h2>
+        <p>{READER.intro}</p>
+        <p>{READER.how}</p>
+        <ul className="reader-facts">
+          {READER.facts.map((f) => (
+            <li key={f}>{f}</li>
+          ))}
+        </ul>
+      </section>
 
       {justPaid && (
         <div className="card soft" role="status">
