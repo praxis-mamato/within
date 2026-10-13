@@ -19,12 +19,12 @@ const PLANETS = [
   ['Neptune', '♆'],
   ['Pluto', '♇'],
 ] as const;
-// Tone words sit in the four corners of the board, outside the wheel, like a talking board.
-const TONES: { tone: Tone; word: string; x: number; y: number }[] = [
-  { tone: 'go', word: 'GO GENTLY', x: 52, y: 22 },
-  { tone: 'wait', word: 'WAIT', x: 308, y: 22 },
-  { tone: 'again', word: 'ASK AGAIN', x: 52, y: 340 },
-  { tone: 'closer', word: 'LOOK CLOSER', x: 308, y: 340 },
+// The answer's word rises inside the ball, like an oracle's window.
+const TONES: { tone: Tone; word: string }[] = [
+  { tone: 'go', word: 'GO GENTLY' },
+  { tone: 'wait', word: 'WAIT' },
+  { tone: 'again', word: 'ASK AGAIN' },
+  { tone: 'closer', word: 'LOOK CLOSER' },
 ];
 /** Today's planets ride one ring just inside the zodiac. */
 const PLANET_R = 128;
@@ -94,7 +94,6 @@ export function OracleBoard({
     () => [
       ...sky.map((p) => ({ kind: 'planet' as const, name: p.body, ...at(p.lon, p.r) })),
       ...SIGN_NAMES.map((name, i) => ({ kind: 'sign' as const, name, ...at(i * 30 + 15, 158) })),
-      ...TONES.map((t) => ({ kind: 'tone' as const, name: t.tone, x: t.x, y: t.y })),
     ],
     [sky],
   );
@@ -103,7 +102,7 @@ export function OracleBoard({
     timers.current.forEach(clearTimeout);
     timers.current = [];
     setPicked(null);
-    const target = spots.find((s) => s.kind !== 'tone' && s.name === points) ?? spots.find((s) => s.kind === 'tone' && s.name === tone);
+    const target = spots.find((s) => s.name === points);
     const land = target ?? REST;
     if (phase === 'seeking' && !reduced()) {
       const hops = [0, 1, 2, 3].map(() => at(Math.random() * 360, PLANET_R));
@@ -135,7 +134,7 @@ export function OracleBoard({
   };
 
   // The ball shows the answer's own words, the tone for a decision, or an invitation before the first question.
-  const hasTarget = spots.some((s) => (s.kind !== 'tone' && s.name === points) || (s.kind === 'tone' && s.name === tone));
+  const hasTarget = spots.some((s) => s.name === points);
   const text = phase === 'answered' ? orb || (tone ? TONES.find((t) => t.tone === tone)!.word : '') : phase === 'idle' ? (holding ? 'ASK' : (prompt ?? 'WELCOME')) : '';
   const words = wrap(text);
   const lit = (kind: BoardPick['kind'], name: string) => (picked ? picked.kind === kind && picked.name === name : phase === 'answered' && (kind === 'tone' ? tone === name : points === name));
@@ -217,19 +216,6 @@ export function OracleBoard({
             </g>
           );
         })}
-        {TONES.map((t) => {
-          const p = { x: t.x, y: t.y };
-          const on = lit('tone', t.tone);
-          const pk = { kind: 'tone' as const, name: t.tone };
-          return (
-            <g key={t.tone} role="button" tabIndex={0} aria-label={`What “${t.word.toLowerCase()}” means`} className="ob-spot" onClick={() => pick(pk)} onKeyDown={key(pk)}>
-              <rect x={p.x - 36} y={p.y - 10} width="72" height="20" fill="transparent" />
-              <text x={p.x} y={p.y} textAnchor="middle" dominantBaseline="central" fontSize="9" letterSpacing="1.6" fill={on ? '#ffe7a8' : '#c9b2a0'} fontWeight={on ? 700 : 400} className={on ? 'ob-glow' : undefined}>
-                {t.word}
-              </text>
-            </g>
-          );
-        })}
         {/* A halo of light behind the ball, and its stand */}
         <circle cx={C} cy={C} r={ORB_R + 16} fill="url(#ob-halo)" className="ob-halo" />
         <ellipse cx={C} cy={C + ORB_R + 20} rx="46" ry="7" fill="#000" opacity="0.35" />
@@ -267,6 +253,7 @@ export function OracleBoard({
         {[-1, 1].map((k) => (
           <path key={k} d={`M ${C + k * 30} ${C + ORB_R + 2} C ${C + k * 34} ${C + ORB_R - 8}, ${C + k * 40} ${C + ORB_R - 16}, ${C + k * 44} ${C + ORB_R - 24}`} stroke="url(#ob-gold2)" strokeWidth="4" fill="none" strokeLinecap="round" />
         ))}
+        {words.length > 0 && <circle cx={C} cy={C + 2} r={ORB_R - 14} fill="#05081a" opacity="0.55" className="ob-window" />}
         {words.length > 0 && (
           <text key={text} x={C} y={C + 6 - (words.length - 1) * 9} textAnchor="middle" fill="#fff8e6" fontSize={words.some((w) => w.length > 9) ? 12.5 : 15} letterSpacing="1.5" fontWeight={600} className={`ob-words ${phase === 'idle' ? 'ob-breathe' : 'ob-reveal'}`}>
             {words.map((w, i) => (
