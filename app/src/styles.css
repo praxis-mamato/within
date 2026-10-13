@@ -801,3 +801,6 @@ details > summary { cursor: pointer; margin: 8px 0; }
 .stars label.on { color: #e2c27e; }
 .stars input { position: absolute; opacity: 0; width: 1px; height: 1px; }
 .stars label:focus-within { outline: 2px solid var(--gold, #e2c27e); outline-offset: 2px; border-radius: 4px; }
+
+/* The pointer stays out of the way until the Oracle is answering or something is picked. */
+.ob-planchette.ob-resting { opacity: 0; pointer-events: none; }

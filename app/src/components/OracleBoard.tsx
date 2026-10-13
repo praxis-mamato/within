@@ -19,32 +19,37 @@ const PLANETS = [
   ['Neptune', '♆'],
   ['Pluto', '♇'],
 ] as const;
-// Tone words sit on the diagonals, like the corners of a talking board.
-const TONES: { tone: Tone; word: string; deg: number }[] = [
-  { tone: 'go', word: 'GO GENTLY', deg: 135 },
-  { tone: 'wait', word: 'WAIT', deg: 45 },
-  { tone: 'closer', word: 'LOOK CLOSER', deg: 315 },
-  { tone: 'again', word: 'ASK AGAIN', deg: 225 },
+// Tone words sit in the four corners of the board, outside the wheel, like a talking board.
+const TONES: { tone: Tone; word: string; x: number; y: number }[] = [
+  { tone: 'go', word: 'GO GENTLY', x: 52, y: 22 },
+  { tone: 'wait', word: 'WAIT', x: 308, y: 22 },
+  { tone: 'again', word: 'ASK AGAIN', x: 52, y: 340 },
+  { tone: 'closer', word: 'LOOK CLOSER', x: 308, y: 340 },
 ];
+/** Today's planets ride one ring just inside the zodiac. */
+const PLANET_R = 128;
 
 // Chart-wheel orientation: 0° Aries on the left, signs running counter-clockwise.
 const at = (lon: number, r: number) => {
   const a = ((180 - lon) * Math.PI) / 180;
   return { x: C + r * Math.cos(a), y: C - r * Math.sin(a) };
 };
-const polar = (deg: number, r: number) => ({ x: C + r * Math.cos((deg * Math.PI) / 180), y: C - r * Math.sin((deg * Math.PI) / 180) });
 const ORB_R = 68;
 const REST = { x: C, y: C + 118 };
 const reduced = () => typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 
-/** Where each planet is in the sky right now, spread apart when two sit close. */
+/** Where each planet is in the sky right now, on one ring, nudged along it when two sit close. */
 function skyNow(now: Date) {
-  const placed: { body: string; glyph: string; lon: number; r: number }[] = [];
-  for (const [body, glyph] of PLANETS) {
-    const lon = tropicalLongitude(body, now);
-    const near = placed.filter((p) => Math.abs(((p.lon - lon + 540) % 360) - 180) < 9).length;
-    placed.push({ body, glyph, lon, r: 128 - near * 15 });
-  }
+  const placed = PLANETS.map(([body, glyph]) => ({ body, glyph, lon: tropicalLongitude(body, now), r: PLANET_R }))
+    .sort((a, b) => a.lon - b.lon);
+  // Spread neighbours to at least 12° apart so glyphs never touch, keeping the order of the sky.
+  for (let pass = 0; pass < 3; pass++)
+    for (let i = 0; i < placed.length; i++) {
+      const a = placed[i];
+      const b = placed[(i + 1) % placed.length];
+      const gap = (b.lon - a.lon + 360) % 360;
+      if (gap < 12) b.lon = (a.lon + 12) % 360;
+    }
   return placed;
 }
 
@@ -89,7 +94,7 @@ export function OracleBoard({
     () => [
       ...sky.map((p) => ({ kind: 'planet' as const, name: p.body, ...at(p.lon, p.r) })),
       ...SIGN_NAMES.map((name, i) => ({ kind: 'sign' as const, name, ...at(i * 30 + 15, 158) })),
-      ...TONES.map((t) => ({ kind: 'tone' as const, name: t.tone, ...polar(t.deg, 98) })),
+      ...TONES.map((t) => ({ kind: 'tone' as const, name: t.tone, x: t.x, y: t.y })),
     ],
     [sky],
   );
@@ -98,16 +103,16 @@ export function OracleBoard({
     timers.current.forEach(clearTimeout);
     timers.current = [];
     setPicked(null);
-    const target = spots.find((s) => s.kind !== 'tone' && s.name === points);
+    const target = spots.find((s) => s.kind !== 'tone' && s.name === points) ?? spots.find((s) => s.kind === 'tone' && s.name === tone);
     const land = target ?? REST;
     if (phase === 'seeking' && !reduced()) {
-      const hops = [0, 1, 2, 3].map(() => at(Math.random() * 360, 100 + Math.random() * 40));
+      const hops = [0, 1, 2, 3].map(() => at(Math.random() * 360, PLANET_R));
       hops.forEach((h, i) => timers.current.push(window.setTimeout(() => setPos(h), i * 480)));
       timers.current.push(window.setTimeout(() => setPos({ x: land.x, y: land.y }), hops.length * 480));
     } else if (phase !== 'idle') setPos({ x: land.x, y: land.y });
     else setPos(REST);
     return () => timers.current.forEach(clearTimeout);
-  }, [phase, points, spots]);
+  }, [phase, points, tone, spots]);
 
   const pick = (p: BoardPick) => {
     const s = spots.find((x) => x.kind === p.kind && x.name === p.name);
@@ -130,6 +135,7 @@ export function OracleBoard({
   };
 
   // The ball shows the answer's own words, the tone for a decision, or an invitation before the first question.
+  const hasTarget = spots.some((s) => (s.kind !== 'tone' && s.name === points) || (s.kind === 'tone' && s.name === tone));
   const text = phase === 'answered' ? orb || (tone ? TONES.find((t) => t.tone === tone)!.word : '') : phase === 'idle' ? (holding ? 'ASK' : (prompt ?? 'WELCOME')) : '';
   const words = wrap(text);
   const lit = (kind: BoardPick['kind'], name: string) => (picked ? picked.kind === kind && picked.name === name : phase === 'answered' && (kind === 'tone' ? tone === name : points === name));
@@ -177,18 +183,9 @@ export function OracleBoard({
         {Array.from({ length: 46 }, (_, i) => (
           <circle key={i} cx={(i * 97) % SIZE} cy={(i * 61 + 23) % SIZE} r={i % 7 === 0 ? 1.4 : 0.7} fill="#f7e9c8" opacity={0.35 + (i % 5) * 0.1} className={i % 6 === 0 ? 'ob-twinkle' : undefined} />
         ))}
-        {/* Sun and Moon in the top corners, as on old talking boards */}
-        <g stroke="#d9b36a" fill="none" strokeWidth="1.4">
-          <circle cx="34" cy="34" r="9" />
-          {Array.from({ length: 8 }, (_, i) => {
-            const a = (i * Math.PI) / 4;
-            return <line key={i} x1={34 + 12 * Math.cos(a)} y1={34 + 12 * Math.sin(a)} x2={34 + 17 * Math.cos(a)} y2={34 + 17 * Math.sin(a)} />;
-          })}
-          <circle cx={SIZE - 34} cy="34" r="12" fill="#d9b36a" stroke="none" />
-          <circle cx={SIZE - 28} cy="30" r="11" fill="#141c45" stroke="none" />
-        </g>
         <circle cx={C} cy={C} r="170" fill="none" stroke="#c9a15a" strokeOpacity="0.7" />
         <circle cx={C} cy={C} r="146" fill="none" stroke="#c9a15a" strokeOpacity="0.45" />
+        <circle cx={C} cy={C} r={PLANET_R} fill="none" stroke="#c9a15a" strokeOpacity="0.18" strokeDasharray="1 5" />
         {ZODIAC.map((_, i) => {
           const a = at(i * 30, 146);
           const b = at(i * 30, 170);
@@ -214,20 +211,20 @@ export function OracleBoard({
           return (
             <g key={p.body} role="button" tabIndex={0} aria-label={`${p.body} today`} className="ob-spot" onClick={() => pick(pk)} onKeyDown={key(pk)}>
               <circle cx={q.x} cy={q.y} r="13" fill="transparent" />
-              <text x={q.x} y={q.y} textAnchor="middle" dominantBaseline="central" fontSize={on ? 21 : 16} fill={on ? '#ffe7a8' : '#f2e3cf'} className={on ? 'ob-glow' : undefined}>
+              <text x={q.x} y={q.y} textAnchor="middle" dominantBaseline="central" fontSize={on ? 22 : 18} fill={on ? "#ffe7a8" : "#f2e3cf"} className={on ? 'ob-glow' : undefined}>
                 {`${p.glyph}︎`}
               </text>
             </g>
           );
         })}
         {TONES.map((t) => {
-          const p = polar(t.deg, 98);
+          const p = { x: t.x, y: t.y };
           const on = lit('tone', t.tone);
           const pk = { kind: 'tone' as const, name: t.tone };
           return (
             <g key={t.tone} role="button" tabIndex={0} aria-label={`What “${t.word.toLowerCase()}” means`} className="ob-spot" onClick={() => pick(pk)} onKeyDown={key(pk)}>
               <rect x={p.x - 36} y={p.y - 10} width="72" height="20" fill="transparent" />
-              <text x={p.x} y={p.y} textAnchor="middle" dominantBaseline="central" fontSize="9.5" letterSpacing="1.6" fill={on ? '#ffe7a8' : '#c9b2a0'} fontWeight={on ? 700 : 400} className={on ? 'ob-glow' : undefined}>
+              <text x={p.x} y={p.y} textAnchor="middle" dominantBaseline="central" fontSize="9" letterSpacing="1.6" fill={on ? '#ffe7a8' : '#c9b2a0'} fontWeight={on ? 700 : 400} className={on ? 'ob-glow' : undefined}>
                 {t.word}
               </text>
             </g>
@@ -283,7 +280,7 @@ export function OracleBoard({
 
       {/* The pointer: drag it onto anything on the board */}
       <svg
-        className="ob-planchette"
+        className={`ob-planchette${(phase === 'idle' || (phase === 'answered' && !hasTarget)) && !picked && !dragging ? ' ob-resting' : ''}`}
         viewBox="0 0 64 64"
         role="img"
         aria-label="The pointer. Drag it onto a planet, sign, or answer."
