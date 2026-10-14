@@ -22,6 +22,9 @@ describe('the Oracle', () => {
       expect(OR.limitOf(q), q).toBe(kind);
     expect(OR.limitOf('Should I text him tonight?')).toBeNull();
     expect(OR.areaOf('Should I apply for the job?')).toBe('work');
+    expect(OR.areaOf('What am I moving through this year?')).toBeNull();
+    expect(OR.areaOf('Should we move house in spring?')).toBe('family');
+    expect(OR.areaOf('Is it time to move to a new city?')).toBe('family');
   });
   it('answers every sample chart with a tone, a reason, and no gaps', () => {
     const now = new Date('2026-10-09T15:00:00Z');

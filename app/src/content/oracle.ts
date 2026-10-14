@@ -59,7 +59,7 @@ const AREA_WORDS: [Area, RegExp][] = [
   ['love', /\b(love|date|dating|partner|boyfriend|girlfriend|husband|wife|crush|relationship|marry|marriage|text (him|her|them)|reach out|ex)\b/i],
   ['work', /\b(job|work|career|boss|promotion|interview|apply|application|business|client|project|quit|raise|hire|hired)\b/i],
   ['money', /\b(money|buy|sell|spend|save|loan|rent|salary|price|invest|afford|purchase)\b/i],
-  ['family', /\b(mom|mum|dad|mother|father|family|sister|brother|home|house|move|moving|kids?|child|children|parents?)\b/i],
+  ['family', /\b(mom|mum|dad|mother|father|family|sister|brother|home|house|(?:move|moving)(?!\s+(?:through|on|forward|past|beyond|ahead|along))|kids?|child|children|parents?)\b/i],
   ['friends', /\b(friends?|group|party|community|team|neighbou?r)\b/i],
   ['creativity', /\b(create|creative|write|writing|art|music|paint|design|book|launch|post|perform)\b/i],
   ['purpose', /\b(purpose|meaning|path|direction|study|school|travel|trip|course|degree|spiritual)\b/i],
