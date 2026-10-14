@@ -134,3 +134,40 @@ You get 3 free questions a day. I'd love to hear what you ask and whether the an
 - Reply to every comment, the same day.
 - Share the launch link on your Instagram story: "We're live on Product Hunt today."
 - Don't ask anyone to upvote. It's against the rules and Product Hunt can hide the launch.
+
+---
+
+## 3. AlternativeTo (10 minutes, free)
+
+Do this **after** the new domain is live, so the listing links to it.
+
+1. Make an account at **alternativeto.net** (Sign up, top right).
+2. Go to **alternativeto.net/software/new** (or the **+ Add app** button).
+3. Fill in:
+
+**Name:** Within
+
+**Website:** the new domain
+
+**Short description:**
+Ask the Oracle anything and get an answer from your exact birth chart, Western and Vedic, with the dates that matter for you.
+
+**Description:**
+Within is an astrology app built around the Oracle: ask any question about love, work, money, family, timing or a decision, and it answers from your own birth chart, not your sun sign. Each answer comes with the reasons behind it and your dates: transits, progressions, solar return and Vedic dasha periods.
+
+Planet positions match Swiss Ephemeris on 99.97% of checks. Your birth details, chart, questions and journal stay on your device. 3 free questions a day; a membership unlocks unlimited questions and the full reading. Live one-to-one readings with an astrologer are also available.
+
+**License / pricing:** Freemium
+
+**Platforms:** Online (web), Android (add Windows once it's in the Microsoft Store)
+
+**Categories:** Lifestyle → Astrology (or Lifestyle if Astrology isn't offered)
+
+**Tags:** astrology, birth-chart, horoscope, vedic-astrology, privacy-focused
+
+**Alternative to:** Co–Star, The Pattern, CHANI, Sanctuary, TimePassages
+
+**Screenshots:** `images/ph-1.png` to `ph-4.png`
+**Logo:** `images/ph-thumb.png`
+
+Listings are checked by moderators and usually appear in a few days.
