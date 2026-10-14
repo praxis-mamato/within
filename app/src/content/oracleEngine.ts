@@ -12,6 +12,7 @@ import { houseOf, placidusCusps, SIGNS, tropicalLongitude } from '../astro/chart
 import { fmtDeg, type NatalChart } from '../astro/natal';
 import { allAspects, monthAhead } from '../astro/deep';
 import { weekAhead, MOVERS } from '../astro/week';
+import { natalPoints } from '../astro/progressions';
 import { answerFor, feelingIn } from './answer';
 import { cycles } from './cycles';
 import { findPatterns } from './patternRules';
@@ -104,6 +105,77 @@ const bodyIn = (q: string) => {
   const m = q.match(BODY_RE);
   return m ? cap(m[1].toLowerCase()) : null;
 };
+/** "Uranus opposite my Sun", "Saturn square Venus", "is Pluto transiting my Moon": a question about a contact. */
+const ASPECT_Q = /\b(opposite|opposing|opposes|opposition|squares?|squaring|conjunct(ion|s)?|trines?|trining|sextiles?|transit(ing|s)?|hitting|aspecting)\b/i;
+const SLOWEST = ['Pluto', 'Neptune', 'Uranus', 'Saturn', 'Jupiter', 'Mars', 'Sun', 'Venus', 'Mercury', 'Moon'];
+/** Every planet named in the question, slowest first (the slowest is the one doing the transiting). */
+const bodiesIn = (q: string) => SLOWEST.filter((b) => new RegExp(`\\b${b}\\b`, 'i').test(q));
+
+/** How close a transit must be to count as in effect now, by the speed of the planet. */
+const ACTIVE_ORB: Record<string, number> = { Sun: 1.5, Mercury: 1.5, Venus: 1.5, Mars: 2, Jupiter: 3, Saturn: 3, Uranus: 3, Neptune: 3, Pluto: 3 };
+const ASPECT_DEG: [keyof (typeof WEEK_CONTACT)['Sun'], number][] = [['conjunct', 0], ['sextile', 60], ['square', 90], ['trine', 120], ['opposite', 180]];
+const sepOf = (a: number, b: number) => Math.abs(signed(a, b));
+
+export interface ActiveContact {
+  natal: string;
+  aspect: keyof (typeof WEEK_CONTACT)['Sun'];
+  orb: number;
+  applying: boolean;
+  /** The whole span the transit is within orb, including retrograde passes (ISO dates). */
+  start: string;
+  end: string;
+  /** The dates it is exact (one, or three when the planet turns retrograde over the point). */
+  exact: string[];
+  /** Later passes within orb, when a retrograde brings the planet back over the point (ISO dates). */
+  again: { start: string; end: string; exact: string[] }[];
+}
+
+/** Every contact a transiting planet is making to the birth chart now, however far from exact, with its full span. */
+export function activeContacts(c: NatalChart, place: { lat: number; lon: number }, now: Date, b: (typeof MOVERS)[number]): ActiveContact[] {
+  const limit = ACTIVE_ORB[b] ?? 2;
+  const slow = ['Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Pluto'].includes(b);
+  const step = slow ? 2 : 1;
+  const reach = slow ? 600 : 60;
+  const lonAt = (d: number) => tropicalLongitude(b, new Date(now.getTime() + d * DAY));
+  const here = lonAt(0);
+  const out: ActiveContact[] = [];
+  for (const pt of natalPoints(c, place.lat, place.lon)) {
+    for (const [aspect, deg] of ASPECT_DEG) {
+      if (pt.name === b && deg === 0 && !slow) continue;
+      const orbAt = (d: number) => Math.abs(sepOf(lonAt(d), pt.lon) - deg);
+      const orb = Math.abs(sepOf(here, pt.lon) - deg);
+      if (orb > limit) continue;
+      let s = 0;
+      while (s > -reach && orbAt(s - step) <= limit) s -= step;
+      let e = 0;
+      while (e < reach && orbAt(e + step) <= limit) e += step;
+      const day = (d: number) => iso(new Date(now.getTime() + d * DAY));
+      const exactIn = (a: number, z: number) => {
+        const hits: string[] = [];
+        for (let d = a; d <= z; d += step) {
+          const o = orbAt(d);
+          if (o < 0.6 && o <= orbAt(d - step) && o < orbAt(d + step)) hits.push(day(d));
+        }
+        return hits;
+      };
+      // A retrograde can bring a slow planet back over the same point months later.
+      const again: ActiveContact['again'] = [];
+      if (slow) {
+        let d = e + step;
+        while (d < reach) {
+          if (orbAt(d) <= limit) {
+            const a = d;
+            while (d < reach && orbAt(d + step) <= limit) d += step;
+            again.push({ start: day(a), end: day(d), exact: exactIn(a, d) });
+          }
+          d += step;
+        }
+      }
+      out.push({ natal: pt.name, aspect, orb, applying: orbAt(1) < orb, start: day(s), end: day(e), exact: exactIn(s, e), again: again.slice(0, 2) });
+    }
+  }
+  return out.sort((x, y) => x.orb - y.orb);
+}
 
 // ─── Reading the question ─────────────────────────────────────────────────────
 
@@ -128,6 +200,8 @@ export function intentOf(q: string): Intent {
   if (/\bsimplif|\bplain (english|words|language)\b|\beli5\b|\bsimpl(y|er)\b|\bin simple terms\b|\bdon[’']?t (understand|get it)\b|\bdo not understand\b|\bconfus|\bwhat does (that|this|it) mean\b|\btl;?dr\b|\bsum (it|that) up\b|\bin short\b|\bexplain (that|this|it)\b/i.test(q)) return 'simplify';
   // A "should I" question is a decision, even when it mentions the week or the sky.
   if (/^(should|shall)\b|\bshould i\b/i.test(q) && !/^(what|where|how|who|which)\b|\bwhen\b|\b(what|which|best|good) (day|time|week|month)\b|\breturn\b|\bretrograde\b/i.test(q)) return 'decision';
+  // A question about a planet in aspect ("Uranus opposite my Sun") is about that transit.
+  if (BODY_RE.test(q) && ASPECT_Q.test(q) && !/\bmy (squares|oppositions|trines|sextiles|aspects)\b/i.test(q)) return 'planet';
   for (const [intent, re] of INTENTS) if (re.test(q)) return intent === 'feeling' || !feelingIn(q) || intent === 'retro' || intent === 'return' ? intent : 'feeling';
   return feelingIn(q) ? 'feeling' : 'open';
 }
@@ -518,7 +592,10 @@ function answerOnly(question: string, ctx: OracleContext): OracleReply {
       return { ...base, intent, label: 'Your week, planet by planet', orb: 'YOUR WEEK', points: secs[0]?.id.replace('w-', '').replace(/^./, (x) => x.toUpperCase()) ?? 'Moon', lines: items.slice(0, 3), deeper: items.slice(3, 12) };
     }
     case 'planet': {
-      const b = bodyIn(q)! as (typeof MOVERS)[number] | 'Moon';
+      // In "Uranus opposite my Sun", the slowest planet named is the one transiting; the other is the point it touches.
+      const named = bodiesIn(q);
+      const b = (named[0] ?? bodyIn(q)!) as (typeof MOVERS)[number] | 'Moon';
+      const target = named[1];
       if (b === 'Moon') {
         const s = todaySky(c, place, now);
         return { ...base, intent, label: s.moon.heading, orb: 'THE MOON', points: 'Moon', lines: [s.moon], deeper: [] };
@@ -526,16 +603,42 @@ function answerOnly(question: string, ctx: OracleContext): OracleReply {
       const lon = tropicalLongitude(b, now);
       const rx = speed(b, now) < 0;
       const h = cusps ? houseOf(lon, cusps) : null;
+      const verb = (a: string) => (a === 'opposite' ? 'opposite' : a === 'conjunct' ? 'conjunct' : a);
+      const yr = now.getUTCFullYear();
+      const dt = (d: string) => `${fmtDate(d)}${Number(d.slice(0, 4)) !== yr ? `, ${d.slice(0, 4)}` : ''}`;
+      const span = (x: ActiveContact) =>
+        `In effect ${dt(x.start)} to ${dt(x.end)}${x.exact.length ? `; exact ${x.exact.map(dt).join(' and ')}` : ''}.` +
+        (x.again.length
+          ? ` ${x.applying ? 'Still building now' : 'Easing for now'}, and it comes back: ${x.again.map((g) => `${dt(g.start)} to ${dt(g.end)}${g.exact.length ? ` (exact ${g.exact.map(dt).join(', ')})` : ''}`).join('; ')}.`
+          : ` ${x.applying ? 'Still building.' : 'Now easing.'}`);
+      const active = activeContacts(c, place, now, b).sort((x, y) => Number(y.natal === target) - Number(x.natal === target) || x.orb - y.orb);
+      const activeLines: SkyLine[] = active.map((x) => ({
+        heading: `Now: ${b} ${verb(x.aspect)} your ${x.natal}`,
+        text: `${WEEK_CONTACT[b][x.aspect]} Your ${x.natal} is ${WEEK_TARGET[x.natal] ?? W.PLANET_FUNCTION[x.natal] ?? x.natal}. ${span(x)}`,
+        basis: `Within ${fmtDeg(x.orb)} of exact`,
+      }));
+      // Contacts coming up in the next 30 days that are not already in effect.
       const w = weekAhead(c, place.lat, place.lon, now, 30).movers.find((m) => m.mover === b);
-      const contacts: SkyLine[] = (w?.contacts ?? []).slice(0, 4).map((x) => ({ heading: `${fmtDate(x.date)}: ${b} ${x.aspect} your ${x.natal}`, text: `${WEEK_CONTACT[b][x.aspect]} Your ${x.natal} is ${WEEK_TARGET[x.natal] ?? W.PLANET_FUNCTION[x.natal]}.`, basis: `Within ${fmtDeg(x.orb)}` }));
+      const coming: SkyLine[] = (w?.contacts ?? [])
+        .filter((x) => !active.some((a) => a.natal === x.natal && a.aspect === x.aspect))
+        .slice(0, 3)
+        .map((x) => ({ heading: `${fmtDate(x.date)}: ${b} ${x.aspect} your ${x.natal}`, text: `${WEEK_CONTACT[b][x.aspect]} Your ${x.natal} is ${WEEK_TARGET[x.natal] ?? W.PLANET_FUNCTION[x.natal]}.`, basis: `Within ${fmtDeg(x.orb)}` }));
+      // In the birth chart itself: the aspects this planet makes.
+      const natalAspects: SkyLine[] = allAspects(c)
+        .filter((x) => x.a === b || x.b === b)
+        .sort((x, y) => Number(target ? [x.a, x.b].includes(target) : 0) * -1 + Number(target ? [y.a, y.b].includes(target) : 0) || x.orb - y.orb)
+        .slice(0, 3)
+        .map((x) => ({ heading: `In your birth chart: ${x.a} ${x.aspect} ${x.b}`, text: `${W.PAIR[`${x.a}-${x.b}`] ? `This links ${W.PAIR[`${x.a}-${x.b}`]}. ` : ''}${cap(W.PLANET_FUNCTION[x.a] ?? x.a)} and ${W.PLANET_FUNCTION[x.b] ?? x.b} ${W.ASPECT_MEANING[x.aspect] ?? ''}.`, basis: `Orb ${fmtDeg(x.orb)}` }));
+      const where: SkyLine = { heading: `${b} is at ${fmtDeg(lon % 30)} ${signOf(lon)}${rx ? ', retrograde' : ''}`, text: `${cap(WEEK_MOVER[b])}.${h ? ` For you it is moving through your ${ord(h)} house, ${W.HOUSE[h].area}.` : ''}${rx && D.STATION_TEXT[b] ? ` Retrograde: ${D.STATION_TEXT[b].retrograde}.` : ''}`, basis: 'Tropical, geocentric' };
+      const top = activeLines[0];
       return {
         ...base,
         intent,
-        label: `${b} in ${signOf(lon)}${rx ? ', retrograde' : ''}`,
-        orb: `${b} IN ${signOf(lon)}`.toUpperCase(),
+        label: top ? top.heading.replace(/^Now: /, '') : `${b} in ${signOf(lon)}${rx ? ', retrograde' : ''}`,
+        orb: top ? `${b} ${verb(active[0].aspect)} ${active[0].natal}`.toUpperCase() : `${b} IN ${signOf(lon)}`.toUpperCase(),
         points: b,
-        lines: [{ heading: `${b} is at ${fmtDeg(lon % 30)} ${signOf(lon)}${rx ? ', retrograde' : ''}`, text: `${cap(WEEK_MOVER[b])}.${h ? ` For you it is moving through your ${ord(h)} house, ${W.HOUSE[h].area}.` : ''}${rx && D.STATION_TEXT[b] ? ` Retrograde: ${D.STATION_TEXT[b].retrograde}.` : ''}`, basis: 'Tropical, geocentric' }, ...contacts.slice(0, 1)],
-        deeper: contacts.slice(1),
+        lines: [...activeLines.slice(0, 2), where, ...(activeLines.length ? [] : coming.slice(0, 1))],
+        deeper: [...activeLines.slice(2), ...(activeLines.length ? coming : coming.slice(1)), ...natalAspects],
       };
     }
     case 'sky':
