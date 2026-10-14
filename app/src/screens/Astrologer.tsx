@@ -3,12 +3,76 @@ import { SignInButtons } from '../components/Paywall';
 import { MiniOrb } from '../components/OracleBoard';
 import { Back } from '../components/ui';
 import { useAccount } from '../services/AccountContext';
-import { CONFIG, IN_PLAY_APP, PLAY_APP_TEXT } from '../services/config';
-import { bookAstrologer, fmtUsd, myBookings, PACKAGES, packageById, type Booking } from '../services/astrologer';
+import { IN_PLAY_APP, PLAY_APP_TEXT } from '../services/config';
+import { bookAstrologer, fmtUsd, myBookings, PACKAGES, packageById, pickSlot, readingSlots, takenSlots, type Booking } from '../services/astrologer';
 import { track } from '../services/telemetry';
 import { useStore } from '../state';
 
-const STATUS: Record<string, string> = { paid: 'Paid: your astrologer will email you to set a time', scheduled: 'Scheduled', completed: 'Completed', refunded: 'Refunded', cancelled: 'Cancelled' };
+const STATUS: Record<string, string> = { paid: 'Paid', scheduled: 'Scheduled', completed: 'Completed', refunded: 'Refunded', cancelled: 'Cancelled' };
+
+const when = (d: Date, tz?: string) => d.toLocaleString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZone: tz });
+
+/** After paying: choose the first reading's time from the astrologer's open hours. */
+function SlotPicker({ booking, onPicked }: { booking: Booking; onPicked: () => void }) {
+  const [slots, setSlots] = useState<Date[] | null>(null);
+  const [chosen, setChosen] = useState<Date | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+  const load = () => void takenSlots().then((t) => setSlots(readingSlots(new Date(), t)));
+  useEffect(load, []);
+  if (!slots) return <p className="small muted">Finding open times…</p>;
+  const days = [...new Set(slots.map((d) => d.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })))];
+  const confirm = async () => {
+    if (!chosen) return;
+    setBusy(true);
+    setError('');
+    try {
+      await pickSlot(booking.id, chosen);
+      onPicked();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'That time couldn’t be saved.');
+      setChosen(null);
+      load();
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <div className="slot-picker">
+      <p style={{ marginTop: 8 }}>
+        <strong>Choose the time of your first reading.</strong> Times are shown in your time zone. 45 minutes, voice only.
+      </p>
+      {slots.length === 0 ? (
+        <p className="small">No open times right now. Your astrologer will email you to arrange one.</p>
+      ) : (
+        days.slice(0, 8).map((day) => (
+          <div key={day} className="slot-day">
+            <p className="small muted" style={{ margin: '10px 0 4px' }}>{day}</p>
+            <div className="btn-row">
+              {slots
+                .filter((d) => d.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' }) === day)
+                .map((d) => (
+                  <button key={d.getTime()} type="button" className={`chip${chosen?.getTime() === d.getTime() ? ' on' : ''}`} aria-pressed={chosen?.getTime() === d.getTime()} onClick={() => setChosen(d)}>
+                    {d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
+                  </button>
+                ))}
+            </div>
+          </div>
+        ))
+      )}
+      {error && (
+        <p role="alert" className="small">
+          {error}
+        </p>
+      )}
+      {chosen && (
+        <button type="button" className="btn" disabled={busy} onClick={confirm} style={{ marginTop: 12 }}>
+          {busy ? 'Saving…' : `Book ${when(chosen)}`}
+        </button>
+      )}
+    </div>
+  );
+}
 
 /** Sessions with a human astrologer: packages, a short intake, and Stripe Checkout. */
 /** The astrologer behind the live readings, in the Oracle's voice. No names; only what is true. */
@@ -34,8 +98,14 @@ export default function Astrologer() {
   const b = state.birth;
   const birth = `${b.date}${b.time && b.timePrecision !== 'unknown' ? ` at ${b.time}${b.timePrecision === 'approximate' ? ' (approximate)' : ''}` : ', birth time unknown'}, ${b.place}`;
 
+  const reload = () => void myBookings().then(setBookings);
   useEffect(() => {
-    if (account) void myBookings().then(setBookings);
+    if (!account) return;
+    reload();
+    // Back from Stripe: the payment confirmation can take a few seconds to arrive.
+    if (!justPaid) return;
+    const timers = [2, 5, 9, 15].map((s) => window.setTimeout(reload, s * 1000));
+    return () => timers.forEach(clearTimeout);
   }, [account, justPaid]);
 
   const submit = async (e: React.FormEvent) => {
@@ -77,16 +147,7 @@ export default function Astrologer() {
       {justPaid && (
         <div className="card soft" role="status">
           <h2 style={{ marginTop: 0 }}>The Oracle has heard you</h2>
-          {CONFIG.bookingUrl ? (
-            <>
-              <p>Choose the time of your first reading now. Your calendar invite arrives straight away. A receipt is on its way from Stripe.</p>
-              <a className="btn" href={CONFIG.bookingUrl} target="_blank" rel="noopener">
-                Choose your time
-              </a>
-            </>
-          ) : (
-            <p style={{ margin: 0 }}>Your astrologer will email you within one business day to set the time of your first reading. A receipt is on its way from Stripe.</p>
-          )}
+          <p style={{ margin: 0 }}>Your reading is paid. Choose the time of your first reading below; the calendar invite with your call link follows within a day. A receipt is on its way from Stripe.</p>
         </div>
       )}
 
@@ -100,11 +161,13 @@ export default function Astrologer() {
                 <span className="small muted" style={{ display: 'block' }}>
                   {new Date(x.created_at).toLocaleDateString()} · {STATUS[x.status] ?? x.status}
                 </span>
-                {CONFIG.bookingUrl && ['paid', 'scheduled'].includes(x.status) && (
-                  <a className="small" href={CONFIG.bookingUrl} target="_blank" rel="noopener">
-                    Choose or change a reading time ›
-                  </a>
-                )}
+                {x.first_slot ? (
+                  <p className="small" style={{ margin: '6px 0 0' }}>
+                    First reading: <strong>{when(new Date(x.first_slot))}</strong> (your time). {x.status === 'scheduled' ? 'Your calendar invite has the call link.' : 'Your calendar invite with the call link follows within a day.'} To change it, write to privacy@praxisglobal.ai.
+                  </p>
+                ) : x.status === 'paid' ? (
+                  <SlotPicker booking={x} onPicked={reload} />
+                ) : null}
               </li>
             ))}
           </ul>
