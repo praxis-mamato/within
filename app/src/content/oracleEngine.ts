@@ -195,6 +195,53 @@ const INTENTS: [Intent, RegExp][] = [
   ['decision', /^(should|shall|is it|will|would|can|could|do|does|am i|are|is|must)\b|^(?!what|where|how|who|which)[^?]*\bshould i\b|\byes or no\b/i],
 ];
 
+/** When a transit is in effect, when it is exact, and when a retrograde brings it back. */
+function spanText(x: ActiveContact, now: Date): string {
+  const yr = now.getUTCFullYear();
+  const dt = (d: string) => `${fmtDate(d)}${Number(d.slice(0, 4)) !== yr ? `, ${d.slice(0, 4)}` : ''}`;
+  return (
+    `In effect ${dt(x.start)} to ${dt(x.end)}${x.exact.length ? `; exact ${x.exact.map(dt).join(' and ')}` : ''}.` +
+    (x.again.length
+      ? ` ${x.applying ? 'Still building now' : 'Easing for now'}, and it comes back: ${x.again.map((g) => `${dt(g.start)} to ${dt(g.end)}${g.exact.length ? ` (exact ${g.exact.map(dt).join(', ')})` : ''}`).join('; ')}.`
+      : ` ${x.applying ? 'Still building.' : 'Now easing.'}`)
+  );
+}
+
+const OUTER = ['Pluto', 'Neptune', 'Uranus', 'Saturn'] as const;
+const PERSONAL = new Set(['Sun', 'Moon', 'Mercury', 'Venus', 'Mars', 'Ascendant', 'Midheaven']);
+const HARD = new Set(['conjunct', 'opposite', 'square']);
+
+/**
+ * The outer planets touching the personal points of the chart right now: the strongest, longest-lasting
+ * transits a person lives through. Hard contacts first, then the tightest.
+ */
+export function outerInEffect(c: NatalChart, place: { lat: number; lon: number }, now: Date): SkyLine[] {
+  return OUTER.flatMap((b) => activeContacts(c, place, now, b).filter((x) => PERSONAL.has(x.natal)).map((x) => ({ b, x })))
+    .sort((p, q) => Number(HARD.has(q.x.aspect)) - Number(HARD.has(p.x.aspect)) || p.x.orb - q.x.orb)
+    .map(({ b, x }) => ({
+      heading: `In effect now: ${b} ${x.aspect} your ${x.natal}`,
+      text: `${WEEK_CONTACT[b][x.aspect]} Your ${x.natal} is ${WEEK_TARGET[x.natal] ?? W.PLANET_FUNCTION[x.natal] ?? x.natal}. ${spanText(x, now)}`,
+      basis: `Within ${fmtDeg(x.orb)} of exact`,
+    }));
+}
+
+/** Everyday answers always name the outer-planet transits in effect, unless the answer already does. */
+const OUTER_IN_LINES = new Set<Intent>(['open', 'cycle', 'sky', 'week', 'decision', 'area', 'feeling']);
+const OUTER_IN_DEEPER = new Set<Intent>(['when']);
+function withOuter(r: OracleReply, ctx: OracleContext): OracleReply {
+  if (r.limit || !(OUTER_IN_LINES.has(r.intent) || OUTER_IN_DEEPER.has(r.intent))) return r;
+  const said = [...r.lines, ...r.deeper].map((l) => `${l.heading} ${l.text}`).join(' | ');
+  const fresh = outerInEffect(ctx.chart, ctx.place, ctx.now ?? new Date())
+    .filter((l) => {
+      const [, b, natal] = l.heading.match(/: (\w+) \w+ your (\w+)$/)!;
+      return !new RegExp(`\\b${b}\\b[^.|]{0,40}\\byour ${natal}\\b`).test(said);
+    })
+    .slice(0, 3);
+  if (!fresh.length) return r;
+  if (OUTER_IN_DEEPER.has(r.intent)) return { ...r, deeper: [...fresh, ...r.deeper] };
+  return { ...r, lines: [...r.lines.slice(0, 1), fresh[0], ...r.lines.slice(1)], deeper: [...fresh.slice(1), ...r.deeper] };
+}
+
 export function intentOf(q: string): Intent {
   if (/\btension|\btense\b|\bmy (squares|oppositions|trines|sextiles|aspects)\b|\beffortless|\bwhere (do|does) (my )?energy\b|\bhigh road\b|\blow road\b|\bshow (me )?my (birth )?chart\b|\bmy chart'?s energy\b|\bstuck energy\b|\bwhat (blocks|holds) me\b|\bmy (strengths and )?challenges\b/i.test(q)) return 'energy';
   if (/\bsimplif|\bplain (english|words|language)\b|\beli5\b|\bsimpl(y|er)\b|\bin simple terms\b|\bdon[’']?t (understand|get it)\b|\bdo not understand\b|\bconfus|\bwhat does (that|this|it) mean\b|\btl;?dr\b|\bsum (it|that) up\b|\bin short\b|\bexplain (that|this|it)\b/i.test(q)) return 'simplify';
@@ -396,7 +443,7 @@ function consultFresh(question: string, ctx: OracleContext): OracleReply {
       consulted: [`${t.length} tensions`, `${f.length} flows`, `${e.aspects.filter((x) => x.kind === 'fusion').length} fusions`, 'your progressed chart', 'a year of slow transits', `${e.natalRx.length} birth retrogrades`, 'retrogrades in the sky now'],
     };
   }
-  const reply = answerOnly(question, ctx);
+  const reply = withOuter(answerOnly(question, ctx), ctx);
   if (reply.limit) return reply;
   // The full reading: the question's life area (or the one on the person's mind), or the planet it names.
   const q = question.trim();
@@ -603,14 +650,8 @@ function answerOnly(question: string, ctx: OracleContext): OracleReply {
       const lon = tropicalLongitude(b, now);
       const rx = speed(b, now) < 0;
       const h = cusps ? houseOf(lon, cusps) : null;
-      const verb = (a: string) => (a === 'opposite' ? 'opposite' : a === 'conjunct' ? 'conjunct' : a);
-      const yr = now.getUTCFullYear();
-      const dt = (d: string) => `${fmtDate(d)}${Number(d.slice(0, 4)) !== yr ? `, ${d.slice(0, 4)}` : ''}`;
-      const span = (x: ActiveContact) =>
-        `In effect ${dt(x.start)} to ${dt(x.end)}${x.exact.length ? `; exact ${x.exact.map(dt).join(' and ')}` : ''}.` +
-        (x.again.length
-          ? ` ${x.applying ? 'Still building now' : 'Easing for now'}, and it comes back: ${x.again.map((g) => `${dt(g.start)} to ${dt(g.end)}${g.exact.length ? ` (exact ${g.exact.map(dt).join(', ')})` : ''}`).join('; ')}.`
-          : ` ${x.applying ? 'Still building.' : 'Now easing.'}`);
+      const verb = (a: string) => a;
+      const span = (x: ActiveContact) => spanText(x, now);
       const active = activeContacts(c, place, now, b).sort((x, y) => Number(y.natal === target) - Number(x.natal === target) || x.orb - y.orb);
       const activeLines: SkyLine[] = active.map((x) => ({
         heading: `Now: ${b} ${verb(x.aspect)} your ${x.natal}`,
