@@ -89,6 +89,23 @@ function ramc(date: Date, lonEast: number) {
   return norm(Astronomy.SiderealTime(Astronomy.MakeTime(date)) * 15 + lonEast);
 }
 
+/** The far ends of the angle axes: the Descendant faces the Ascendant, the IC faces the Midheaven. */
+export const FAR_END: Record<string, string> = { Ascendant: 'Descendant', Midheaven: 'IC' };
+/** Adds the Descendant and IC to a set of points that has the Ascendant and Midheaven. */
+export function withFarEnds<T extends { name: string; lon: number }>(pts: T[]): T[] {
+  return [...pts, ...pts.filter((p) => FAR_END[p.name]).map((p) => ({ ...p, name: FAR_END[p.name], lon: (p.lon + 180) % 360 }))];
+}
+/**
+ * Each axis is read once, from the end that is touched: a planet opposite the Ascendant is on the
+ * Descendant, so the Ascendant and Midheaven take every aspect but the opposition, and the Descendant
+ * and IC take only the conjunction.
+ */
+export function angleAspectOk(point: string, aspect: string): boolean {
+  if (point === 'Descendant' || point === 'IC') return aspect === 'conjunct' || aspect === 'conjunction';
+  if (point === 'Ascendant' || point === 'Midheaven') return aspect !== 'opposite' && aspect !== 'opposition';
+  return true;
+}
+
 export function ascendantAndMidheaven(date: Date, lat: number, lonEast: number) {
   const r = ramc(date, lonEast);
   const e = obliquity(date);

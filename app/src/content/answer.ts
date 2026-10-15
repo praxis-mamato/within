@@ -100,6 +100,8 @@ const FAST_TARGET: Record<string, string> = {
   Venus: 'your relationships',
   Mars: 'your energy',
   Ascendant: 'how you show up',
+  Descendant: 'your partnerships',
+  IC: 'your home and roots',
 };
 
 /** Vedic Saturn counted from the natal Moon: the gochara positions most often asked about. */

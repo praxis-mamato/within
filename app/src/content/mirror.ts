@@ -176,6 +176,8 @@ export const TARGET_AREAS: Record<string, Area[]> = {
   Saturn: ['work', 'family'],
   Ascendant: ['health', 'love'],
   Midheaven: ['work', 'purpose'],
+  Descendant: ['love', 'friends'],
+  IC: ['family'],
 };
 
 /** One specific line per slow planet and natal point, so no two cycles read alike. */
@@ -190,6 +192,8 @@ export const MOVER_TARGET: Record<string, Record<string, string>> = {
     Saturn: 'Hope meets structure: a chance to expand something you have been building slowly.',
     Ascendant: 'You may come across as warmer and more open. New people and places arrive.',
     Midheaven: 'Career doors may open: recognition, a new role, or a wider public.',
+    Descendant: 'Generous people and new partnerships come toward you; a relationship can grow.',
+    IC: 'Home and family can expand: a move, more room, or warmth at the roots.',
   },
   Saturn: {
     Sun: 'Your sense of self is tested and strengthened. What you commit to now has staying power.',
@@ -201,6 +205,8 @@ export const MOVER_TARGET: Record<string, Record<string, string>> = {
     Saturn: 'A structural checkpoint in your life: what you built is reviewed, kept, or rebuilt.',
     Ascendant: 'You may feel the weight of responsibility personally, even physically. Pace yourself.',
     Midheaven: 'Career and reputation are tested. Responsibility rises, and so can respect.',
+    Descendant: 'Relationships are tested and defined: commitments are made, or ended, and the real ones last.',
+    IC: 'Home and family ask for more of you; foundations are rebuilt to last.',
   },
   Uranus: {
     Sun: 'A wish to be more fully yourself may arrive suddenly. Old roles can stop fitting overnight.',
@@ -212,6 +218,8 @@ export const MOVER_TARGET: Record<string, Record<string, string>> = {
     Saturn: 'Old structures are shaken. Keep what holds; release what only confines.',
     Ascendant: 'You may want to change how you look, live, or show up.',
     Midheaven: 'Career surprises or a strong pull toward a different path.',
+    Descendant: 'Sudden change in partnerships: someone new arrives, or a bond needs more freedom.',
+    IC: 'Upheaval at home: a sudden move, or changes in the family.',
   },
   Neptune: {
     Sun: 'Your sense of direction may soften or blur. Imagination and compassion rise; clarity takes patience.',
@@ -223,6 +231,8 @@ export const MOVER_TARGET: Record<string, Record<string, string>> = {
     Saturn: 'Old structures may dissolve slowly. Let go of what no longer has life in it.',
     Ascendant: 'You may feel more porous to people and places. Choose your environments with care.',
     Midheaven: 'Uncertainty about your path, or a pull toward more meaningful work.',
+    Descendant: 'Partners may be hard to read, or idealized. See people as they are.',
+    IC: 'Home and family feel dreamy or unsettled; old family patterns surface to be healed.',
   },
   Pluto: {
     Sun: 'A deep reshaping of identity. Something old falls away so you can stand more fully in yourself.',
@@ -234,6 +244,8 @@ export const MOVER_TARGET: Record<string, Record<string, string>> = {
     Saturn: 'Foundations are rebuilt from the ground up.',
     Ascendant: 'Personal transformation that others may see before you name it.',
     Midheaven: 'A powerful turning point in your career or public role.',
+    Descendant: 'Deep transformation through a partner: intense bonds that change you.',
+    IC: 'Deep change at the roots: home, family, and the past are transformed.',
   },
 };
 

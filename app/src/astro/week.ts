@@ -5,7 +5,7 @@
  * Calculation only; the words live in src/content/week.ts.
  */
 import * as Astronomy from 'astronomy-engine';
-import { ascendantAndMidheaven, houseOf, norm, placidusCusps, SIGNS, tropicalLongitude } from './chart';
+import { angleAspectOk, ascendantAndMidheaven, withFarEnds, houseOf, norm, placidusCusps, SIGNS, tropicalLongitude } from './chart';
 import type { NatalChart } from './natal';
 
 const DAY = 86400000;
@@ -70,7 +70,7 @@ export function weekTargets(c: NatalChart, lat: number, lon: number): NatalPoint
     const am = ascendantAndMidheaven(c.utc, lat, lon);
     pts.push({ name: 'Ascendant', lon: am.asc }, { name: 'Midheaven', lon: am.mc });
   }
-  return pts;
+  return withFarEnds(pts);
 }
 
 // Fast planets only count close contacts; slow ones are listed when exact in the window.
@@ -90,7 +90,7 @@ export function weekAhead(c: NatalChart, lat: number, lon: number, now = new Dat
     const contacts: WeekContact[] = [];
     for (const t of targets)
       for (const a of ASPECTS) {
-        if (m === t.name && a.angle === 0) continue;
+        if ((m === t.name && a.angle === 0) || !angleAspectOk(t.name, a.name)) continue;
         const orbs = pos.map((l) => Math.abs(sep(l, t.lon) - a.angle));
         for (let i = 1; i < orbs.length - 1; i++)
           if (orbs[i] <= orbs[i - 1] && orbs[i] < orbs[i + 1] && orbs[i] < ORB[m]) contacts.push({ date: iso(samples[i]), aspect: a.name, natal: t.name, natalLon: t.lon, orb: orbs[i] });
@@ -115,7 +115,7 @@ export function weekAhead(c: NatalChart, lat: number, lon: number, now = new Dat
     while (t && t.date < end) {
       const l = tropicalLongitude('Moon', t.date);
       const aspects = targets
-        .flatMap((p) => ASPECTS.map((a) => ({ natal: p.name, natalLon: p.lon, aspect: a.name, orb: Math.abs(sep(l, p.lon) - a.angle) })))
+        .flatMap((p) => ASPECTS.filter((a) => angleAspectOk(p.name, a.name)).map((a) => ({ natal: p.name, natalLon: p.lon, aspect: a.name, orb: Math.abs(sep(l, p.lon) - a.angle) })))
         .filter((x) => x.orb < 3)
         .sort((x, y) => x.orb - y.orb);
       lunations.push({ date: iso(t.date), kind, lon: l, sign: signOf(l), house: cusps ? houseOf(l, cusps) : null, aspects });

@@ -8,15 +8,17 @@
  * Within's reviewed libraries. Questions it cannot place are answered from the sky and the chart, and
  * subscribers can ask it to consult the whole chart for a written answer.
  */
-import { houseOf, placidusCusps, SIGNS, tropicalLongitude } from '../astro/chart';
+import { angleAspectOk, houseOf, placidusCusps, SIGNS, tropicalLongitude } from '../astro/chart';
 import { fmtDeg, type NatalChart } from '../astro/natal';
 import { allAspects, monthAhead } from '../astro/deep';
 import { weekAhead, MOVERS } from '../astro/week';
-import { natalPoints } from '../astro/progressions';
+import { natalPoints, progressions, solarArc } from '../astro/progressions';
+import * as P from './progressions';
 import { answerFor, feelingIn } from './answer';
 import { cycles } from './cycles';
 import { findPatterns } from './patternRules';
 import { relationshipReading } from './relationship';
+import { composite, progressedSynastry } from '../astro/relationship';
 import { PLAIN_TEXT, plainChart, simplify } from './plain';
 import { chartEnergy, energyLayers } from './energy';
 import { healthAnswer } from './health';
@@ -95,6 +97,7 @@ const DAY = 86400000;
 const iso = (d: Date) => d.toISOString().slice(0, 10);
 const fmtDate = (s: string) => new Date(`${s}T12:00:00Z`).toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' });
 const fmtLong = (s: string) => new Date(`${s}T12:00:00Z`).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
+const fmtMonth = (s: string) => new Date(`${s.slice(0, 7)}-15T12:00:00Z`).toLocaleDateString('en-US', { month: 'long', year: 'numeric', timeZone: 'UTC' });
 const ord = (n: number) => `${n}${['th', 'st', 'nd', 'rd'][n % 10 > 3 || Math.floor(n / 10) === 1 ? 0 : n % 10]}`;
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 const signOf = (lon: number) => SIGNS[Math.floor((((lon % 360) + 360) % 360) / 30)];
@@ -132,6 +135,11 @@ export interface ActiveContact {
 
 /** Every contact a transiting planet is making to the birth chart now, however far from exact, with its full span. */
 export function activeContacts(c: NatalChart, place: { lat: number; lon: number }, now: Date, b: (typeof MOVERS)[number]): ActiveContact[] {
+  return contactsTo(natalPoints(c, place.lat, place.lon), now, b);
+}
+
+/** The same, against any set of points (a composite chart, another person's chart). */
+function contactsTo(points: { name: string; lon: number }[], now: Date, b: (typeof MOVERS)[number]): ActiveContact[] {
   const limit = ACTIVE_ORB[b] ?? 2;
   const slow = ['Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Pluto'].includes(b);
   const step = slow ? 2 : 1;
@@ -139,9 +147,9 @@ export function activeContacts(c: NatalChart, place: { lat: number; lon: number 
   const lonAt = (d: number) => tropicalLongitude(b, new Date(now.getTime() + d * DAY));
   const here = lonAt(0);
   const out: ActiveContact[] = [];
-  for (const pt of natalPoints(c, place.lat, place.lon)) {
+  for (const pt of points) {
     for (const [aspect, deg] of ASPECT_DEG) {
-      if (pt.name === b && deg === 0 && !slow) continue;
+      if ((pt.name === b && deg === 0 && !slow) || !angleAspectOk(pt.name, aspect)) continue;
       const orbAt = (d: number) => Math.abs(sepOf(lonAt(d), pt.lon) - deg);
       const orb = Math.abs(sepOf(here, pt.lon) - deg);
       if (orb > limit) continue;
@@ -208,7 +216,7 @@ function spanText(x: ActiveContact, now: Date): string {
 }
 
 const OUTER = ['Pluto', 'Neptune', 'Uranus', 'Saturn'] as const;
-const PERSONAL = new Set(['Sun', 'Moon', 'Mercury', 'Venus', 'Mars', 'Ascendant', 'Midheaven']);
+const PERSONAL = new Set(['Sun', 'Moon', 'Mercury', 'Venus', 'Mars', 'Ascendant', 'Midheaven', 'Descendant', 'IC']);
 const HARD = new Set(['conjunct', 'opposite', 'square']);
 
 /**
@@ -225,21 +233,94 @@ export function outerInEffect(c: NatalChart, place: { lat: number; lon: number }
     }));
 }
 
-/** Everyday answers always name the outer-planet transits in effect, unless the answer already does. */
-const OUTER_IN_LINES = new Set<Intent>(['open', 'cycle', 'sky', 'week', 'decision', 'area', 'feeling']);
-const OUTER_IN_DEEPER = new Set<Intent>(['when']);
+/**
+ * The progressed chart and solar arcs in effect now: progressed planets and directed points within 1° of a
+ * birth-chart point, strongest first, then the progressed Moon's chapter.
+ */
+export function progressedInEffect(c: NatalChart, place: { lat: number; lon: number }, now: Date): { contacts: SkyLine[]; moon: SkyLine } {
+  const pr = progressions(c, place.lat, place.lon, now);
+  const sa = solarArc(c, place.lat, place.lon, now);
+  const what = (x: string) => WEEK_TARGET[x] ?? W.PLANET_FUNCTION[x] ?? x;
+  const when = (exact: string | null, orb: number) => (exact ? `Exact around ${fmtMonth(exact)}; within ${fmtDeg(orb)} now` : `Within ${fmtDeg(orb)} of exact`);
+  const contacts = [
+    ...pr.contacts.filter((x) => x.orbNow <= 1).map((x) => ({
+      orb: x.orbNow,
+      line: { heading: `Progressed: your ${x.progressed} ${x.aspect} your ${x.natal}`, text: `Your progressed ${x.progressed} ${P.CONTACT_HOW[x.aspect]} your ${x.natal}. Your ${x.progressed} is ${what(x.progressed)}; your ${x.natal} is ${what(x.natal)}. Progressions move slowly, so this is a theme of the year, not the week.`, basis: when(x.exact, x.orbNow) },
+    })),
+    ...sa.contacts.filter((x) => x.orbNow <= 1).map((x) => ({
+      orb: x.orbNow,
+      line: { heading: `Solar arc: your ${x.directed} ${x.aspect} your ${x.natal}`, text: `Your directed ${x.directed} ${P.CONTACT_HOW[x.aspect]} your ${x.natal}. Your ${x.directed} is ${what(x.directed)}; your ${x.natal} is ${what(x.natal)}. A solar arc marks a turning point that builds over the year around its exact date.`, basis: when(x.exact, x.orbNow) },
+    })),
+  ]
+    .sort((a, b) => a.orb - b.orb)
+    .map((x) => x.line);
+  const pm = pr.planets.find((p) => p.body === 'Moon')!;
+  const moon: SkyLine = {
+    heading: `Your progressed Moon is in ${pm.sign}${pm.house ? `, your ${ord(pm.house)} house` : ''}`,
+    text: `${P.PROGRESSED_MOON_SIGN[pm.sign]}${pm.house ? ` ${P.PROGRESSED_MOON_HOUSE[pm.house]}` : ''}`,
+    basis: `${pr.moon.enteredOn ? `Since ${fmtMonth(pr.moon.enteredOn)}` : `${fmtDeg(pm.degree)} ${pm.sign}`}${pr.moon.nextIngress ? `; into ${pr.moon.nextSign} ${fmtMonth(pr.moon.nextIngress)}` : ''}`,
+  };
+  return { contacts, moon };
+}
+
+const REL_POINTS = new Set(['Sun', 'Moon', 'Venus', 'Mars', 'Ascendant', 'Descendant', 'Midheaven', 'IC']);
+const COMPOSITE_ROLE: Record<string, string> = { Sun: 'what the relationship is for', Moon: 'its emotional life and how safe it feels', Venus: 'its affection and pleasure', Mars: 'its desire, drive, and how it handles conflict', Ascendant: 'how the two of you meet the world', Descendant: 'how the relationship meets other people', Midheaven: 'where the relationship is going', IC: 'its home and foundations' };
+const THEIR_ROLE: Record<string, string> = { Sun: 'who they are', Moon: 'what they need to feel safe', Venus: 'how they love', Mars: 'how they act and desire', Descendant: 'what they look for in a partner' };
+
+/**
+ * What is moving the relationship now: outer planets crossing the composite chart and each person's love points,
+ * and progressed planets touching the other's chart. Hard contacts first, then the tightest.
+ */
+export function relationshipInEffect(ctx: OracleContext): SkyLine[] {
+  if (!ctx.other) return [];
+  const now = ctx.now ?? new Date();
+  const { chart: them, place: theirPlace, name } = ctx.other;
+  const comp = composite(ctx.chart, ctx.place, them, theirPlace).points.filter((p) => REL_POINTS.has(p.name));
+  const theirs = natalPoints(them, theirPlace.lat, theirPlace.lon).filter((p) => THEIR_ROLE[p.name]);
+  const mine = new Set(['Moon', 'Venus', 'Mars', 'Descendant']);
+  const rank = (aspect: string, orb: number) => (HARD.has(aspect) ? 0 : 10) + orb;
+  const live: { rank: number; line: SkyLine }[] = [];
+  for (const b of OUTER) {
+    for (const x of contactsTo(comp, now, b))
+      live.push({ rank: rank(x.aspect, x.orb) - 2, line: { heading: `In effect now for you two: ${b} ${x.aspect} the composite ${x.natal}`, text: `${WEEK_CONTACT[b][x.aspect]} In your composite chart, the relationship itself, the ${x.natal} is ${COMPOSITE_ROLE[x.natal]}. ${spanText(x, now)}`, basis: `Within ${fmtDeg(x.orb)} of exact` } });
+    for (const x of contactsTo(theirs, now, b))
+      live.push({ rank: rank(x.aspect, x.orb), line: { heading: `In effect now: ${b} ${x.aspect} ${name}’s ${x.natal}`, text: `${WEEK_CONTACT[b][x.aspect]} ${name}’s ${x.natal} is ${THEIR_ROLE[x.natal]}, so this is moving through them and into what you share. ${spanText(x, now)}`, basis: `Within ${fmtDeg(x.orb)} of exact` } });
+    for (const x of activeContacts(ctx.chart, ctx.place, now, b).filter((k) => mine.has(k.natal)))
+      live.push({ rank: rank(x.aspect, x.orb), line: { heading: `In effect now: ${b} ${x.aspect} your ${x.natal}`, text: `${WEEK_CONTACT[b][x.aspect]} Your ${x.natal} is ${WEEK_TARGET[x.natal] ?? W.PLANET_FUNCTION[x.natal]}, so you bring this into the relationship. ${spanText(x, now)}`, basis: `Within ${fmtDeg(x.orb)} of exact` } });
+  }
+  for (const x of progressedSynastry(ctx.chart, ctx.place, them, theirPlace, now).filter((k) => k.orb <= 1)) {
+    const who = x.who === 'a' ? `your progressed ${x.progressed}` : `${name}’s progressed ${x.progressed}`;
+    const to = x.who === 'a' ? `${name}’s ${x.natal}` : `your ${x.natal}`;
+    live.push({ rank: rank(x.aspect, x.orb) + 1, line: { heading: `${who.charAt(0).toUpperCase()}${who.slice(1)} ${x.aspect} ${to}`, text: `${who.charAt(0).toUpperCase()}${who.slice(1)} ${P.CONTACT_HOW[x.aspect]} ${to}. Progressions move slowly: this is how you are growing into each other this year.`, basis: `Within ${fmtDeg(x.orb)}${x.applying ? ', building' : ', easing'}` } });
+  }
+  return live.sort((a, b) => a.rank - b.rank).map((x) => x.line);
+}
+
+/**
+ * Everyday answers always name what is strongest and slowest in the chart now: the outer-planet transits
+ * and the progressions and solar arcs in effect, unless the answer already does.
+ */
+const LONG_IN_LINES = new Set<Intent>(['open', 'cycle', 'sky', 'week', 'decision', 'area', 'feeling']);
+const PROGRESSED_IN_LINES = new Set<Intent>(['open', 'cycle', 'decision', 'area', 'feeling']);
+const LONG_IN_DEEPER = new Set<Intent>(['when']);
 function withOuter(r: OracleReply, ctx: OracleContext): OracleReply {
-  if (r.limit || !(OUTER_IN_LINES.has(r.intent) || OUTER_IN_DEEPER.has(r.intent))) return r;
+  if (r.limit || !(LONG_IN_LINES.has(r.intent) || LONG_IN_DEEPER.has(r.intent))) return r;
+  const now = ctx.now ?? new Date();
   const said = [...r.lines, ...r.deeper].map((l) => `${l.heading} ${l.text}`).join(' | ');
-  const fresh = outerInEffect(ctx.chart, ctx.place, ctx.now ?? new Date())
-    .filter((l) => {
-      const [, b, natal] = l.heading.match(/: (\w+) \w+ your (\w+)$/)!;
-      return !new RegExp(`\\b${b}\\b[^.|]{0,40}\\byour ${natal}\\b`).test(said);
-    })
-    .slice(0, 3);
-  if (!fresh.length) return r;
-  if (OUTER_IN_DEEPER.has(r.intent)) return { ...r, deeper: [...fresh, ...r.deeper] };
-  return { ...r, lines: [...r.lines.slice(0, 1), fresh[0], ...r.lines.slice(1)], deeper: [...fresh.slice(1), ...r.deeper] };
+  const named = (l: SkyLine, by = '') => {
+    const [, b, natal] = l.heading.match(/: (?:your )?([\w ]+?) \w+ your (\w+)$/)!;
+    return new RegExp(`${by}\\b${b}\\b[^.|]{0,40}\\byour ${natal}\\b`, 'i').test(said);
+  };
+  const outer = outerInEffect(ctx.chart, ctx.place, now).filter((l) => !named(l)).slice(0, 3);
+  const pr = progressedInEffect(ctx.chart, ctx.place, now);
+  const prog = pr.contacts.filter((l) => !named(l, '(progressed|directed|solar arc)[^.|]{0,12}')).slice(0, 3);
+  const moon = /progressed Moon/i.test(said) ? [] : [pr.moon];
+  if (LONG_IN_DEEPER.has(r.intent)) return { ...r, deeper: [...outer, ...prog, ...r.deeper] };
+  const show = [...outer.slice(0, 1), ...(PROGRESSED_IN_LINES.has(r.intent) ? prog.slice(0, 1) : [])];
+  const rest = [...outer.slice(1), ...(PROGRESSED_IN_LINES.has(r.intent) ? prog.slice(1) : prog), ...(['open', 'cycle', 'feeling'].includes(r.intent) ? moon : [])];
+  // A love question with someone added also reads what is moving between the two of you.
+  const rel = ctx.other && r.intent === 'area' && areaOf(r.question) === 'love' ? relationshipInEffect(ctx).filter((l) => l.heading.includes('composite') || l.heading.includes(ctx.other!.name)).slice(0, 3) : [];
+  return { ...r, lines: [...r.lines.slice(0, 1), ...show, ...r.lines.slice(1)], deeper: [...rest, ...rel, ...r.deeper] };
 }
 
 export function intentOf(q: string): Intent {
@@ -594,7 +675,9 @@ function answerOnly(question: string, ctx: OracleContext): OracleReply {
       if (!ctx.other) return { ...base, intent, label: 'The two of you', orb: 'TWO CHARTS', points: 'Venus', lines: [{ heading: 'Add them first', text: ORACLE_SAYS.noPerson }], deeper: [] };
       const dyn = relationshipReading(c, place, ctx.other.chart, ctx.other.place, ctx.other.name, now)[0];
       const items = dyn.items.map((i) => ({ heading: i.heading, text: i.text, basis: i.basis }));
-      return { ...base, intent, label: `You and ${ctx.other.name}`, orb: 'TWO CHARTS', points: 'Venus', lines: items.slice(0, 2), deeper: items.slice(2) };
+      // What is moving between you now comes right after the core dynamic.
+      const live = relationshipInEffect(ctx);
+      return { ...base, intent, label: `You and ${ctx.other.name}`, orb: 'TWO CHARTS', points: 'Venus', lines: [...items.slice(0, 1), ...live.slice(0, 2), ...items.slice(1, 2)], deeper: [...live.slice(2, 8), ...items.slice(2)] };
     }
     case 'chart': {
       const r = natalLines(c, q, place);

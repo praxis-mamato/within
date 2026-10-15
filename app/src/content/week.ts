@@ -97,6 +97,8 @@ export const WEEK_TARGET: Record<string, string> = {
   'North Node': 'your direction of growth, the less familiar path that pulls you forward',
   Ascendant: 'how you meet the world, your body, and first impressions',
   Midheaven: 'your direction, career, and public life',
+  Descendant: 'your partnerships and the people you draw close',
+  IC: 'your home, family, and roots',
 };
 
 /** Short names for houses and birth points, used to name what a lunation brings together. */
@@ -128,6 +130,8 @@ export const WEEK_POINT_SHORT: Record<string, string> = {
   'North Node': 'your direction of growth',
   Ascendant: 'how you show up',
   Midheaven: 'your public direction',
+  Descendant: 'your partnerships',
+  IC: 'your home and roots',
 };
 
 /** What a New or Full Moon does to a birth point, by kind of aspect. */
