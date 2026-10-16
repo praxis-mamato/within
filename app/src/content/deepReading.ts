@@ -153,7 +153,7 @@ const TRANSIT_HOW: Record<string, string> = {
   trine: 'supports',
   opposite: 'brings, often through other people, a need for balance in',
 };
-const NATAL_THEME: Record<string, string> = { ...Object.fromEntries(Object.entries(W.PLANET_FUNCTION)), Ascendant: 'how you meet the world', Midheaven: 'your direction and public life' };
+const NATAL_THEME: Record<string, string> = { ...Object.fromEntries(Object.entries(W.PLANET_FUNCTION)), Ascendant: 'how you meet the world', Midheaven: 'your direction and public life', Descendant: 'your partnerships', IC: 'your home and roots' };
 
 export function timingReading(c: NatalChart, place: Place, now = new Date(), profile: Profile | null = null): ReadingSection[] {
   const m = monthAhead(c, now, 30, place.lat, place.lon);

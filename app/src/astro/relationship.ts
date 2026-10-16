@@ -5,7 +5,7 @@
  * composite), and the Vedic factors of compatibility read one by one. Calculation only; the words
  * live in src/content/relationship.ts.
  */
-import { ascendantAndMidheaven, houseOf, norm, placidusCusps, SIGNS, tropicalLongitude, BODIES } from './chart';
+import { angleAspectOk, ascendantAndMidheaven, withFarEnds, houseOf, norm, placidusCusps, SIGNS, tropicalLongitude, BODIES } from './chart';
 import type { NatalChart } from './natal';
 import { progressions } from './progressions';
 
@@ -38,7 +38,8 @@ const signIdx = (lon: number) => Math.floor(norm(lon) / 30);
 const DAY = 86400000;
 const iso = (d: Date) => d.toISOString().slice(0, 10);
 const LUMINARY = ['Sun', 'Moon'];
-const ANGLES = ['Ascendant', 'Midheaven'];
+const FAR_ENDS = ['Descendant', 'IC'];
+const ANGLES = ['Ascendant', 'Midheaven', 'Descendant', 'IC'];
 
 /** A chart's points: the planets, the North Node, and the angles when the birth time is exact. */
 export function pointsOf(c: NatalChart, place: Place): Point[] {
@@ -47,7 +48,7 @@ export function pointsOf(c: NatalChart, place: Place): Point[] {
     const am = ascendantAndMidheaven(c.utc, place.lat, place.lon);
     pts.push({ name: 'Ascendant', lon: am.asc }, { name: 'Midheaven', lon: am.mc });
   }
-  return pts;
+  return withFarEnds(pts);
 }
 
 /** Every major aspect between one chart's points and the other's. Tighter orbs for slow and angle pairs. */
@@ -59,6 +60,9 @@ export function crossAspects(a: Point[], b: Point[]): CrossAspect[] {
       const slow = ['Uranus', 'Neptune', 'Pluto', 'North Node'].includes(x.name) && ['Uranus', 'Neptune', 'Pluto', 'North Node'].includes(y.name);
       if (slow) continue; // generational: the same for most people of the same age
       for (const m of ASPECTS) {
+        // Angle to angle is read from the first chart's Ascendant and Midheaven only; each axis once.
+        if (FAR_ENDS.includes(x.name) && ANGLES.includes(y.name)) continue;
+        if (!angleAspectOk(y.name, m.name) || !angleAspectOk(x.name, m.name)) continue;
         const wide = LUMINARY.includes(x.name) || LUMINARY.includes(y.name) ? 1 : 0;
         const tight = ANGLES.includes(x.name) || ANGLES.includes(y.name) || x.name === 'North Node' || y.name === 'North Node' ? -2 : 0;
         const orb = Math.abs(s - m.angle);
@@ -89,7 +93,7 @@ export function composite(a: NatalChart, aPlace: Place, b: NatalChart, bPlace: P
     .map((x) => {
       const y = pb.find((p) => p.name === x.name);
       if (!y) return null;
-      const lon = x.name === 'Ascendant' && cusps ? cusps[0] : x.name === 'Midheaven' && cusps ? cusps[9] : mid(x.lon, y.lon);
+      const lon = x.name === 'Ascendant' && cusps ? cusps[0] : x.name === 'Midheaven' && cusps ? cusps[9] : x.name === 'Descendant' && cusps ? cusps[6] : x.name === 'IC' && cusps ? cusps[3] : mid(x.lon, y.lon);
       return { name: x.name, lon, sign: SIGNS[signIdx(lon)], house: cusps ? houseOf(lon, cusps) : null };
     })
     .filter((p): p is CompositePoint => !!p);
@@ -135,6 +139,7 @@ export function progressedSynastry(a: NatalChart, aPlace: Place, b: NatalChart, 
       for (const t of pointsOf(them, theirPlace)) {
         if (['Uranus', 'Neptune', 'Pluto'].includes(t.name)) continue;
         for (const m of ASPECTS) {
+          if (!angleAspectOk(t.name, m.name)) continue;
           const orb = Math.abs(sep(p.lon, t.lon) - m.angle);
           const later = Math.abs(sep(pSoon.find((x) => x.body === p.body)!.lon, t.lon) - m.angle);
           if (orb <= (p.body === 'Moon' ? 1.5 : 1)) out.push({ who, progressed: p.body, natal: t.name, aspect: m.name, orb, applying: later < orb });
@@ -155,7 +160,7 @@ export interface TimelineHit {
 
 /** The relationship's year: Jupiter to Pluto and the eclipse-season nodes crossing the composite's key points. */
 export function relationshipTimeline(comp: CompositePoint[], now = new Date(), days = 365): TimelineHit[] {
-  const targets = comp.filter((p) => ['Sun', 'Moon', 'Venus', 'Mars', 'Ascendant', 'Midheaven'].includes(p.name));
+  const targets = comp.filter((p) => ['Sun', 'Moon', 'Venus', 'Mars', 'Ascendant', 'Midheaven', 'Descendant', 'IC'].includes(p.name));
   const movers = ['Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Pluto'] as const;
   const step = 2;
   const samples = Array.from({ length: Math.floor(days / step) + 1 }, (_, i) => new Date(now.getTime() + i * step * DAY));
@@ -163,7 +168,7 @@ export function relationshipTimeline(comp: CompositePoint[], now = new Date(), d
   for (const m of movers) {
     const pos = samples.map((d) => tropicalLongitude(m, d));
     for (const t of targets)
-      for (const a of ASPECTS.filter((x) => x.name !== 'sextile')) {
+      for (const a of ASPECTS.filter((x) => x.name !== 'sextile' && angleAspectOk(t.name, x.name))) {
         const orbs = pos.map((l) => Math.abs(sep(l, t.lon) - a.angle));
         const passes: string[] = [];
         for (let i = 1; i < orbs.length - 1; i++) if (orbs[i] <= orbs[i - 1] && orbs[i] < orbs[i + 1] && orbs[i] < 1) passes.push(iso(samples[i]));

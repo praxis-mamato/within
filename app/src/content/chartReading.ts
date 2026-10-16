@@ -21,7 +21,7 @@ const fmtMonth = (iso: string) => new Date(`${iso}T12:00:00Z`).toLocaleDateStrin
 const signOf = (lon: number) => SIGNS[Math.floor((((lon % 360) + 360) % 360) / 30)];
 const at = (lon: number) => `${fmtDeg(lon % 30)} ${signOf(lon)}`;
 const GLYPH: Record<string, string> = { Sun: '☉', Moon: '☽', Mercury: '☿', Venus: '♀', Mars: '♂', Jupiter: '♃', Saturn: '♄', Uranus: '♅', Neptune: '♆', Pluto: '♇', Node: '☊', Rahu: '☊', Ketu: '☋' };
-const THEME: Record<string, string> = { ...W.PLANET_FUNCTION, Ascendant: 'how you meet the world', Midheaven: 'your direction and public life' };
+const THEME: Record<string, string> = { ...W.PLANET_FUNCTION, Ascendant: 'how you meet the world', Midheaven: 'your direction and public life', Descendant: 'your partnerships', IC: 'your home and roots' };
 
 // ─── Placement tables ─────────────────────────────────────────────────────────
 

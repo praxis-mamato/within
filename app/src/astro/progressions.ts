@@ -3,7 +3,7 @@
  * secondary progressions, solar arc directions, a 12-month outer-planet transit calendar,
  * and the solar return. Calculation only; interpretation lives in src/content/progressions.ts.
  */
-import { ascendantAndMidheaven, houseOf, norm, placidusCusps, SIGNS, tropicalLongitude, type BodyName } from './chart';
+import { angleAspectOk, ascendantAndMidheaven, withFarEnds, houseOf, norm, placidusCusps, SIGNS, tropicalLongitude, type BodyName } from './chart';
 import type { NatalChart } from './natal';
 
 const DAY = 86400000;
@@ -31,7 +31,7 @@ export function natalPoints(c: NatalChart, lat: number, lon: number): Point[] {
     const am = ascendantAndMidheaven(c.utc, lat, lon);
     pts.push({ name: 'Ascendant', lon: am.asc }, { name: 'Midheaven', lon: am.mc });
   }
-  return pts;
+  return withFarEnds(pts);
 }
 
 // ─── Western essential dignity, for the placements table ──────────────────────
@@ -168,7 +168,7 @@ export function progressions(c: NatalChart, lat: number, lon: number, now = new 
   for (const b of PROGRESSED)
     for (const t of targets)
       for (const a of ASPECTS) {
-        if (b === t.name && a.angle === 0) continue;
+        if ((b === t.name && a.angle === 0) || !angleAspectOk(t.name, a.name)) continue;
         const orbs = track[b].map((l) => Math.abs(sep(l, t.lon) - a.angle));
         const orbNow = orbs[12];
         let exactAt: string | null = null;
@@ -217,10 +217,10 @@ export function solarArc(c: NatalChart, lat: number, lon: number, now = new Date
   const contacts: ArcContact[] = [];
   // Solar arc work traditionally uses the hard aspects; sextiles and trines are left out.
   const hard = ASPECTS.filter((a) => a.name === 'conjunct' || a.name === 'square' || a.name === 'opposite');
-  for (const d of pts)
+  for (const d of pts.filter((x) => !['Descendant', 'IC'].includes(x.name)))
     for (const t of pts)
       for (const a of hard) {
-        if (d.name === t.name) continue;
+        if (d.name === t.name || !angleAspectOk(t.name, a.name)) continue;
         const orbs = arcs.map((arc) => Math.abs(sep(d.lon + arc, t.lon) - a.angle));
         const orbNow = orbs[12];
         let exactAt: string | null = null;
@@ -260,7 +260,7 @@ export function yearAhead(c: NatalChart, lat: number, lon: number, now = new Dat
   for (const m of SLOW)
     for (const t of targets)
       for (const a of ASPECTS) {
-        if (m === t.name && a.angle === 0) continue;
+        if ((m === t.name && a.angle === 0) || !angleAspectOk(t.name, a.name)) continue;
         const orbs = pos[m].map((l) => Math.abs(sep(l, t.lon) - a.angle));
         let i = 0;
         while (i < orbs.length) {

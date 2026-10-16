@@ -31,6 +31,8 @@ export interface Layer {
 export const AREA_HOUSES: Record<Area, number[]> = { love: [7, 5], work: [10, 6], money: [2, 8], family: [4], health: [6, 1], creativity: [5], friends: [11, 3], purpose: [9, 12] };
 /** The planet traditionally read for each area, whatever the chart. */
 export const AREA_SIGNIFICATOR: Record<Area, string> = { love: 'Venus', work: 'Saturn', money: 'Jupiter', family: 'Moon', health: 'Mars', creativity: 'Sun', friends: 'Mercury', purpose: 'Jupiter' };
+/** The angle that opens each area's house: the Descendant opens the 7th, the IC the 4th, the Midheaven the 10th. */
+const AREA_ANGLE: Partial<Record<Area, string>> = { love: 'Descendant', work: 'Midheaven', family: 'IC', health: 'Ascendant' };
 const AREA_NAME: Record<Area, string> = { love: 'love and partnership', work: 'work and career', money: 'money and security', family: 'home and family', health: 'body and energy', creativity: 'creativity and joy', friends: 'friends and community', purpose: 'meaning and direction' };
 
 export const LAYER_TEXT = {
@@ -105,7 +107,7 @@ function focusPoints(c: NatalChart, place: { lat: number; lon: number }, area: A
   const house = AREA_HOUSES[area][0];
   const ruler = rulers.find((r) => r.house === house)?.ruler ?? null;
   const inHouse = c.western.planets.filter((p) => p.house && AREA_HOUSES[area].includes(p.house)).map((p) => p.body);
-  const points = [...new Set([...(ruler ? [ruler] : []), AREA_SIGNIFICATOR[area], ...inHouse])].filter((b) => b !== 'Node');
+  const points = [...new Set([...(ruler ? [ruler] : []), AREA_SIGNIFICATOR[area], ...inHouse, ...(AREA_ANGLE[area] ? [AREA_ANGLE[area]!] : [])])].filter((b) => b !== 'Node');
   return { points, house: rulers.length ? house : null, ruler };
 }
 

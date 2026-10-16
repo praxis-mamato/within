@@ -25,8 +25,8 @@ export function SynastryWheel({ mine, theirs, aspects, asc, name }: { mine: Poin
     }
     return placed;
   };
-  const inner = spread(mine.filter((p) => p.name !== 'Midheaven'), 86);
-  const outer = spread(theirs.filter((p) => p.name !== 'Midheaven'), 124);
+  const inner = spread(mine.filter((p) => !['Midheaven', 'Descendant', 'IC'].includes(p.name)), 86);
+  const outer = spread(theirs.filter((p) => !['Midheaven', 'Descendant', 'IC'].includes(p.name)), 124);
   const lineR = 58;
   return (
     <figure className="syn-wheel">

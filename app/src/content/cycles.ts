@@ -65,6 +65,8 @@ export const TOUCHES: Record<string, { label: string; area: string }> = {
   Saturn: { label: 'your structures and responsibilities', area: 'It touches commitments, work, and the long-term shape of your life.' },
   Ascendant: { label: 'how you show up', area: 'It touches your body, your presence, and how you meet the world.' },
   Midheaven: { label: 'your path and public life', area: 'It touches career, reputation, and your direction in the world.' },
+  Descendant: { label: 'your partnerships', area: 'It touches your closest relationships: partners, and the people who mirror you.' },
+  IC: { label: 'your home and roots', area: 'It touches home, family, and your private foundations.' },
 };
 
 export const RETURNS: Record<string, { title: string; feel: string; helps: string }> = {

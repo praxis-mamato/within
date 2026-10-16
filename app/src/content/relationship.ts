@@ -112,7 +112,7 @@ const fmtDate = (s: string) => new Date(`${s}T12:00:00Z`).toLocaleDateString('en
 const HARD: Aspect[] = ['square', 'opposite'];
 const PERSONAL = ['Sun', 'Moon', 'Mercury', 'Venus', 'Mars'];
 const ROLE: Record<string, string> = {
-  Sun: 'sense of self', Moon: 'emotional needs', Mercury: 'way of talking', Venus: 'way of loving', Mars: 'drive', Jupiter: 'optimism', Saturn: 'sense of responsibility', Uranus: 'need for freedom', Neptune: 'ideals', Pluto: 'intensity', 'North Node': 'direction of growth', Ascendant: 'way of meeting the world', Midheaven: 'public direction',
+  Sun: 'sense of self', Moon: 'emotional needs', Mercury: 'way of talking', Venus: 'way of loving', Mars: 'drive', Jupiter: 'optimism', Saturn: 'sense of responsibility', Uranus: 'need for freedom', Neptune: 'ideals', Pluto: 'intensity', 'North Node': 'direction of growth', Ascendant: 'way of meeting the world', Midheaven: 'public direction', Descendant: 'idea of a partner', IC: 'sense of home',
 };
 
 /** Which dynamic a cross-chart contact feeds. */
@@ -121,7 +121,7 @@ function dynamicOf(x: CrossAspect): Dynamic | null {
   const has = (p: string) => pair.has(p);
   const other = (p: string) => (x.a === p ? x.b : x.a);
   if (has('Venus') && has('Mars')) return 'attraction';
-  if ((has('Sun') && has('Venus')) || (has('Venus') && has('Ascendant')) || (has('Mars') && has('Ascendant'))) return 'attraction';
+  if ((has('Sun') && has('Venus')) || (has('Venus') && (has('Ascendant') || has('Descendant'))) || (has('Mars') && (has('Ascendant') || has('Descendant')))) return 'attraction';
   if (has('Mars') && (has('Sun') || has('Moon') || x.a === x.b) && HARD.includes(x.aspect)) return 'friction';
   if (has('Moon') && (has('Sun') || has('Venus') || x.a === x.b)) return 'emotional';
   if (has('Mercury')) return PERSONAL.includes(other('Mercury')) || other('Mercury') === 'Mercury' ? 'communication' : null;

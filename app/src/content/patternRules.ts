@@ -26,7 +26,7 @@ const ord = (n: number) => `${n}${['th', 'st', 'nd', 'rd'][n % 10 > 3 || Math.fl
 
 type Rule = (s: Signals) => (Evidence | null)[];
 
-const FN: Record<string, string> = { ...W.PLANET_FUNCTION, Ascendant: 'how you meet the world', Midheaven: 'your direction and public life' };
+const FN: Record<string, string> = { ...W.PLANET_FUNCTION, Ascendant: 'how you meet the world', Midheaven: 'your direction and public life', Descendant: 'your partnerships', IC: 'your home and roots' };
 const KIND: Record<AspectKind, string> = {
   conjunction: 'are fused, so one rarely acts without the other',
   opposition: 'pull in opposite directions and ask to be balanced',
