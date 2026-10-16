@@ -469,7 +469,7 @@ ${cta('Compare two charts')}
 
 // ---------- Privacy ----------
 /** The date the privacy policy last changed in substance. Update it when the policy changes. */
-const PRIVACY_UPDATED = new Date('2026-10-12T12:00:00Z');
+const PRIVACY_UPDATED = new Date('2026-10-14T12:00:00Z');
 
 function privacy() {
   const ask = CONTACT ? `email <a href="mailto:${CONTACT}">${CONTACT}</a>` : 'use the contact email on our Google Play listing';
@@ -491,6 +491,8 @@ function privacy() {
 <li><strong>Live readings, only if you book one:</strong> your email, the package, your questions, availability, time zone, and the birth details you choose to share with your astrologer. Your astrologer sees these to prepare your sessions.</li></ul>
 <h2>Connected readings</h2>
 <p>If you turn on connected readings, Within sends your calculated placements to Anthropic’s Claude model to write the reading. Your name, birth details, journal and notes are never sent. Anthropic does not use this data to train its models. Connected readings are off until you turn them on, and you can turn them off in Settings.</p>
+<h2>Within in Claude</h2>
+<p>If you add the Within plugin to Claude and connect your Within account, the birth details you give Claude (date, time, and town or coordinates) and your questions are sent to Within’s server to calculate the chart and return the reading. They are used only for that request and are not stored or logged. The connection lets Claude see whether you have a membership, and nothing else in your account. Your conversation stays with Claude under Anthropic’s terms and your Claude settings. You can disconnect Within at any time in Claude’s connector settings.</p>
 <h2>Optional usage and crash reports</h2>
 <p>Off unless you turn them on in Settings. If on, we receive anonymous events, such as “reading opened”, and crash details, tied to a random install ID and never to your account or chart.</p>
 <h2>Services we use</h2>
@@ -499,6 +501,7 @@ function privacy() {
 <li><strong>Stripe</strong> processes payments. We never see or store your card number.</li>
 <li><strong>Google and Apple</strong> handle sign-in if you choose them.</li>
 <li><strong>Anthropic</strong> writes connected readings, only if you turn them on.</li>
+<li><strong>Cloudflare</strong> also runs the Within connector for Claude, which calculates charts for requests from Claude and keeps nothing.</li>
 <li><strong>Google Fonts</strong> serves the typefaces.</li></ul>
 <p>Each processes data only to provide its service to us, under its own privacy policy.</p>
 <h2>What we never do</h2>

@@ -24,3 +24,11 @@ secret = "env(SUPABASE_AUTH_EXTERNAL_APPLE_SECRET)"
 # Stripe calls this without a Supabase session; the function checks Stripe's signature instead.
 [functions.stripe-webhook]
 verify_jwt = false
+
+# Supabase Auth as an OAuth 2.1 server, so people can connect their Within account to Claude
+# (the plugin in plugin/, the connector in mcp/). Claude registers itself (dynamic registration);
+# people approve each connection on the consent page (app/src/screens/ConnectClaude.tsx).
+[auth.oauth_server]
+enabled = true
+authorization_url_path = "/oauth/consent"
+allow_dynamic_registration = true

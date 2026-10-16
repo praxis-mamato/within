@@ -1,0 +1,35 @@
+name: Deploy Claude connector
+# Deploys the Within connector for Claude (mcp/) to Cloudflare as the `within-mcp` worker whenever
+# it or the chart engine it runs changes on the live branch. Needs the CLOUDFLARE_API_TOKEN repo
+# secret (a token with "Edit Cloudflare Workers" permission); without it the job skips.
+on:
+  push:
+    branches: [claude/epic-gates-6t5iqb]
+    paths: ['mcp/**', 'app/src/astro/**', 'app/src/content/**', 'app/src/geo/**', 'app/src/lib/**', 'app/src/safety/**', '.github/workflows/mcp-deploy.yml']
+  workflow_dispatch:
+
+concurrency:
+  group: mcp-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: 460b61ab138ea2118ce2b90dad474bce
+    steps:
+      - if: env.CLOUDFLARE_API_TOKEN == ''
+        run: echo "::notice::CLOUDFLARE_API_TOKEN is not set, so the connector was not deployed."
+      - if: env.CLOUDFLARE_API_TOKEN != ''
+        uses: actions/checkout@v4
+      - if: env.CLOUDFLARE_API_TOKEN != ''
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - if: env.CLOUDFLARE_API_TOKEN != ''
+        run: npm ci
+        working-directory: app
+      - if: env.CLOUDFLARE_API_TOKEN != ''
+        run: npm ci && npm test && npx wrangler deploy
+        working-directory: mcp

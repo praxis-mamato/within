@@ -24,10 +24,36 @@ import { interviewRequested, load as loadInterview } from './interview/session';
 
 // The template review console is for the approver only: not linked anywhere, loaded on demand.
 const ReviewConsole = lazy(() => import('./screens/Review'));
+// Connecting Within to Claude (the plugin's sign-in); public/oauth/consent/ forwards here.
+const ConnectClaude = lazy(() => import('./screens/ConnectClaude'));
+
+/** Back from Google or Apple sign-in partway through connecting Claude: return to the consent page. */
+function useResumeConsent() {
+  const nav = useNavigate();
+  const loc = useLocation();
+  useEffect(() => {
+    let pending = false;
+    try {
+      pending = !!sessionStorage.getItem('within.oauthConsent');
+    } catch {
+      /* storage blocked */
+    }
+    if (pending && loc.pathname !== '/oauth/consent') nav('/oauth/consent', { replace: true });
+  }, [nav, loc.pathname]);
+}
 
 function Routed() {
+  useResumeConsent();
   return (
     <Routes>
+      <Route
+        path="/oauth/consent"
+        element={
+          <Suspense fallback={<p>Loading…</p>}>
+            <ConnectClaude />
+          </Suspense>
+        }
+      />
       <Route
         path="/review/*"
         element={
