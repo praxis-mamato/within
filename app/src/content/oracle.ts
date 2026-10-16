@@ -20,11 +20,11 @@ export type Limit = 'health' | 'others' | 'legal' | 'gamble' | 'unclear';
 
 export const ORACLE_TONE: Record<Tone, { label: string; lines: string[] }> = {
   go: {
-    label: 'Go gently ahead',
+    label: 'Yes, go gently',
     lines: ['The sky leans your way here. Take the next small step, and keep it kind.', 'Open the door a little and see what comes through.', 'There is support around this. Move at a pace that feels like yours.'],
   },
   wait: {
-    label: 'Wait a little',
+    label: 'Not yet',
     lines: ['Not yet. Give it a few days, then ask again.', 'Hold steady; the timing looks better soon.', 'Let this rest for now. A clearer moment is close.'],
   },
   closer: {
@@ -52,7 +52,7 @@ export const ORACLE_TEXT = {
   moonNext: 'In horary tradition, the Moon’s next contact shows how a question tends to unfold.',
   sameDay: 'The sky gives one answer to a question each day. Ask again tomorrow, or ask something new.',
   limit: 'You have asked the Oracle three questions today. The sky resets at midnight, or subscribe for unlimited questions and the full reading behind each answer.',
-  intro: 'Ask one question. The Oracle reads the sky at this moment against your chart, the way horary astrologers have for centuries, and answers in one of four ways.',
+  intro: 'Ask one question. The Oracle reads the sky at this moment against your chart, the way horary astrologers have for centuries, and answers yes, not yet, or ask it another way, with a day when there is one.',
 };
 
 const AREA_WORDS: [Area, RegExp][] = [

@@ -91,4 +91,16 @@ describe('slow transits in effect', () => {
     expect(r.lines.some((l) => /progressed New Moon/.test(l.heading))).toBe(true);
     expect(progressedInEffect(chart, place, now).phase.heading).toMatch(/progressed lunar phase: Full Moon/);
   });
+  it('answers every yes-or-no question with yes or not yet, never "look closer"', () => {
+    const births = [['1990-07-15', '09:30', 34.05, -118.24], ['1987-11-28', '12:00', 39.74, -104.99], ['1979-02-02', '23:10', 51.5, -0.12], ['1995-04-03', '06:15', 40.71, -74.0], ['2001-09-21', '17:45', 41.88, -87.63]] as const;
+    for (const [date, time, lat, lon] of births)
+      for (const day of ['2026-10-16', '2026-11-02', '2026-12-09'])
+        for (const q of ['Should I reach out to them?', 'Should I quit my job?', 'Should I text him tonight?']) {
+          const c = computeNatal({ date, time, timePrecision: 'exact', windowMinutes: 0, lat, lon, tz: 'UTC' });
+          const r = consultOracle(q, { chart: c, place: { lat, lon }, now: new Date(`${day}T15:00:00Z`) });
+          expect(r.label, q).not.toMatch(/look closer/i);
+          expect(r.orb, `${q} ${date} ${day}`).toMatch(/^(YES|YES, WITH CARE|NOT YET|WAIT FOR [A-Z]{3} \d{1,2}|ASK AGAIN)$/);
+          expect(r.lines[0].text, q).toMatch(/^(Yes|Not yet|Ask)/);
+        }
+  });
 });

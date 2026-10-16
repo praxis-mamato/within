@@ -572,14 +572,38 @@ function consultFresh(question: string, ctx: OracleContext): OracleReply {
   return layers.length ? { ...reply, layers, consulted: read } : reply;
 }
 
-const TONE_LEAD: Record<Tone, string> = { go: 'Yes, gently.', wait: 'Not yet.', closer: 'Look closer first.', again: 'Ask it another way.' };
+const TONE_LEAD: Record<Tone, string> = { go: 'Yes.', wait: 'Not yet.', closer: 'Yes, with care.', again: 'Ask it another way.' };
 const AREA_WORD: Record<Area, string> = { love: 'love', work: 'your work', money: 'money', family: 'home and family', health: 'your body and energy', creativity: 'what you make', friends: 'your friendships', purpose: 'your direction' };
 
 /** A decision answered from this chart and this question: the tone, the planets behind it, and a date to act on. */
-function decisionLines(a: ReturnType<typeof askOracle>, area: Area | null, ctx: OracleContext): SkyLine[] {
+type Settled = ReturnType<typeof askOracle> & { orb: string; careful?: boolean; best?: ReturnType<typeof dayScores>[number] };
+
+/**
+ * A yes-or-no question always gets a yes or a not-yet, with a day when there is one. A hard contact
+ * now becomes "not yet, wait for" the next clear day in the month, or, with no clearer day ahead,
+ * "yes, with care".
+ */
+function settle(a: ReturnType<typeof askOracle>, area: Area | null, ctx: OracleContext): Settled {
+  if (a.limit || a.tone === 'again') return { ...a, orb: 'ASK AGAIN' };
+  const now = ctx.now ?? new Date();
+  const today = iso(now);
+  const best = dayScores(ctx.chart, ctx.place, now, area, a.question, 30)
+    .filter((d) => d.score > 1 && d.reasons.length)
+    .sort((x, y) => y.score - x.score)[0];
+  const later = best && best.date > today ? best : undefined;
+  const short = (d: string) => fmtDate(d);
+  if (a.tone === 'go') return { ...a, label: 'Yes, go gently', orb: 'YES', best };
+  if (a.tone === 'wait' || (a.tone === 'closer' && later))
+    return later
+      ? { ...a, tone: 'wait', label: `Not yet: wait for ${short(later.date)}`, orb: `WAIT FOR ${short(later.date).toUpperCase()}`, best: later }
+      : { ...a, tone: 'wait', label: 'Not yet', orb: 'NOT YET', best };
+  return { ...a, tone: 'go', careful: true, label: 'Yes, with care', orb: 'YES, WITH CARE', best };
+}
+
+function decisionLines(a: Settled, area: Area | null, ctx: OracleContext): SkyLine[] {
   const now = ctx.now ?? new Date();
   const fmt = (s: string) => new Date(`${s}T12:00:00Z`).toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric', timeZone: 'UTC' });
-  const lead = TONE_LEAD[a.tone];
+  const lead = a.careful ? 'Yes, with care.' : TONE_LEAD[a.tone];
   const k = a.contact;
   const out: SkyLine[] = [];
   if (k) {
@@ -595,10 +619,15 @@ function decisionLines(a: ReturnType<typeof askOracle>, area: Area | null, ctx: 
     });
   } else out.push({ heading: '', text: `${lead} ${a.because}` });
   // A date to act on, from this chart's best days for the question.
-  const days = dayScores(ctx.chart, ctx.place, now, area, a.question, 30);
-  const best = days.filter((d) => d.score > 1 && d.reasons.length).sort((x, y) => y.score - x.score)[0];
-  if (a.tone === 'wait') out.push({ heading: 'When', text: a.voidUntil ? `Ask again after ${a.voidUntil}.` : k ? `Let ${fmt(k.date)} pass, then ask again${best && best.date > k.date ? `; ${fmt(best.date)} looks clearer` : ''}.` : best ? `${fmt(best.date)} looks clearer.` : 'Ask again in a few days.' });
-  else if (best) out.push({ heading: a.tone === 'go' ? 'Best day to act' : 'A clearer day', text: `${fmt(best.date)}: ${best.reasons[0]}.` });
+  const best = a.best;
+  if (a.tone === 'wait')
+    out.push(
+      best && best.date > iso(now)
+        ? { heading: `Wait for ${fmt(best.date)}`, text: `${best.reasons[0]}.${a.voidUntil ? ` The Moon is void of course until ${a.voidUntil}, so let that pass first.` : ''}` }
+        : { heading: 'When', text: a.voidUntil ? `Ask again after ${a.voidUntil}.` : k ? `Let ${fmt(k.date)} pass, then ask again.` : 'Ask again in a few days.' },
+    );
+  else if (a.careful) out.push({ heading: 'How', text: `Go ahead, but slowly: say exactly what you mean, and give the answer time to come.${best ? ` The easiest day this month is ${fmt(best.date)}: ${best.reasons[0]}.` : ''}` });
+  else if (best) out.push({ heading: 'Best day to act', text: `${fmt(best.date)}: ${best.reasons[0]}.` });
   return out;
 }
 
@@ -650,8 +679,8 @@ function answerOnly(question: string, ctx: OracleContext): OracleReply {
 
   switch (intent) {
     case 'decision': {
-      const a = askOracle(q, c, place, now);
-      return { ...base, intent, label: a.label, orb: '', tone: a.tone, points: a.points, lines: decisionLines(a, area, ctx), deeper: a.why.map((w) => ({ heading: '', text: w })), limit: a.limit };
+      const a = settle(askOracle(q, c, place, now), area, ctx);
+      return { ...base, intent, label: a.label, orb: a.orb, tone: a.tone, points: a.points, lines: decisionLines(a, area, ctx), deeper: a.why.map((w) => ({ heading: '', text: w })), limit: a.limit };
     }
     case 'when': {
       if (/\b(saturn|jupiter)\b/i.test(q) && /\breturn\b/i.test(q)) break;

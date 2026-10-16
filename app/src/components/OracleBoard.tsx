@@ -21,10 +21,9 @@ const PLANETS = [
 ] as const;
 // The answer's word rises inside the ball, like an oracle's window.
 const TONES: { tone: Tone; word: string }[] = [
-  { tone: 'go', word: 'GO GENTLY' },
-  { tone: 'wait', word: 'WAIT' },
+  { tone: 'go', word: 'YES' },
+  { tone: 'wait', word: 'NOT YET' },
   { tone: 'again', word: 'ASK AGAIN' },
-  { tone: 'closer', word: 'LOOK CLOSER' },
 ];
 /** Today's planets ride one ring just inside the zodiac. */
 const PLANET_R = 128;
@@ -135,7 +134,7 @@ export function OracleBoard({
 
   // The ball shows the answer's own words, the tone for a decision, or an invitation before the first question.
   const hasTarget = spots.some((s) => s.name === points);
-  const text = phase === 'answered' ? orb || (tone ? TONES.find((t) => t.tone === tone)!.word : '') : phase === 'idle' ? (holding ? 'ASK' : (prompt ?? 'WELCOME')) : '';
+  const text = phase === 'answered' ? orb || (tone ? (TONES.find((t) => t.tone === tone)?.word ?? '') : '') : phase === 'idle' ? (holding ? 'ASK' : (prompt ?? 'WELCOME')) : '';
   const words = wrap(text);
   const lit = (kind: BoardPick['kind'], name: string) => (picked ? picked.kind === kind && picked.name === name : phase === 'answered' && (kind === 'tone' ? tone === name : points === name));
   const key = (p: BoardPick) => (e: React.KeyboardEvent) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), pick(p));
