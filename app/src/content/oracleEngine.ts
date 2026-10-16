@@ -18,6 +18,9 @@ import { answerFor, feelingIn } from './answer';
 import { cycles } from './cycles';
 import { findPatterns } from './patternRules';
 import { relationshipReading } from './relationship';
+import { subjectIn, windowIn } from './askedAbout';
+import { computeNatal } from '../astro/natal';
+import { placeLabel, type Place } from '../geo/places';
 import { composite, progressedSynastry } from '../astro/relationship';
 import { PLAIN_TEXT, plainChart, simplify } from './plain';
 import { chartEnergy, energyLayers } from './energy';
@@ -70,6 +73,8 @@ export interface OracleContext {
   previous?: OracleReply | null;
   /** Earlier questions and answers, kept only on this device, so the Oracle does not repeat itself. */
   history?: OracleReply[];
+  /** The town list, when loaded, so birth details typed into a question can be read. */
+  places?: Place[] | null;
 }
 
 export const ORACLE_SAYS = {
@@ -517,7 +522,97 @@ function remember(question: string, ctx: OracleContext, r: OracleReply): OracleR
   return { ...r, lines };
 }
 
+/** Performing, competing, showing: read through the 5th house (play and performance), the Sun, and Mars. */
+const EVENT_WORDS = /\b(ride|riding|rodeo|show|horse|compet\w*|race|match|game|tournament|perform\w*|audition|recital|concert|gig|play(?:ing)?|pageant|exhibit\w*|meet)\b/i;
+
+/**
+ * "Will my friend Mariya 6/6/86 17:40 Billings MT ride in the Vegas show Nov 9-15?": read the sky over those
+ * dates against the chart of the person it is about (theirs from the details given, someone added in the
+ * app and named, or the asker's own), and say how the stretch looks, its best day, and what to watch.
+ */
+function eventReply(question: string, ctx: OracleContext): OracleReply | null {
+  const now = ctx.now ?? new Date();
+  const q = question.trim();
+  const subj = subjectIn(q, ctx.places ?? null, now);
+  const text = subj?.rest ?? q;
+  const win = windowIn(text, now);
+  if (!win || win.end < iso(now) || limitOf(text)) return null;
+  const base = { question: q, day: iso(now), intent: 'when' as Intent };
+
+  let chart = ctx.chart;
+  let place = ctx.place;
+  let who: string | null = null;
+  let basis = '';
+  if (subj) {
+    who = subj.name ?? 'them';
+    if (!subj.place)
+      return { ...base, label: `${who}’s chart`, orb: 'WHERE?', points: 'Moon', lines: [{ heading: 'Add the town', text: `To read ${who}’s sky the Oracle needs the town they were born in, after the date and time, for example “${subj.name ?? 'Sam'} 6/6/86 5:40pm Billings MT”.` }], deeper: [] };
+    try {
+      chart = computeNatal({ date: subj.date, time: subj.time ?? '12:00', timePrecision: subj.time ? 'exact' : 'unknown', windowMinutes: 0, lat: subj.place.lat, lon: subj.place.lon, tz: subj.place.tz });
+    } catch {
+      return null;
+    }
+    place = { lat: subj.place.lat, lon: subj.place.lon };
+    basis = `Read from ${who}’s chart: ${fmtDate(subj.date)}, ${subj.date.slice(0, 4)}, ${subj.time ?? 'no birth time (noon used, so no houses or rising sign)'}, ${placeLabel(subj.place)}. Kept on this device only.`;
+  } else if (ctx.other && new RegExp(`\\b${ctx.other.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i').test(q)) {
+    who = ctx.other.name;
+    chart = ctx.other.chart;
+    place = ctx.other.place;
+  }
+  const forWho = who ?? 'you';
+  const mine = (x: string) => (who ? x.replace(/\byour\b/g, `${who}’s`) : x);
+
+  const performing = EVENT_WORDS.test(text);
+  const area = performing ? 'creativity' : (areaOf(text.replace(/\bfriends?\b/gi, '')) ?? null);
+  const span = Math.round((new Date(`${win.end}T12:00:00Z`).getTime() - new Date(`${win.start}T12:00:00Z`).getTime()) / DAY) + 1;
+  const from = new Date(new Date(`${win.start}T12:00:00Z`).getTime() - DAY);
+  const days = dayScores(chart, place, from, area, text, span);
+  // A performance also leans on the Sun (confidence) and Mars (drive, the body).
+  const extra = performing ? dayScores(chart, place, from, 'health', text, span) : [];
+  const scored = days.map((d, i) => ({ ...d, score: d.score + Math.max(0, (extra[i]?.score ?? 0) - 1) / 2, reasons: [...new Set([...d.reasons, ...(extra[i]?.reasons ?? [])])], hard: [...new Set([...d.hard, ...(extra[i]?.hard ?? [])])] }));
+  // A contact counts for the day it is exact, so the best day is the day itself, not the day either side.
+  const onDay = (d: { date: string; reasons: string[] }) => d.reasons.filter((r) => r.endsWith(`(${fmtDate(d.date)})`)).length;
+  const best = [...scored].sort((a, b) => b.score + onDay(b) - (a.score + onDay(a)) || a.date.localeCompare(b.date))[0];
+  const at = new Date(`${win.start}T12:00:00Z`);
+  const background = outerInEffect(chart, place, at);
+  // For a performance, a slow hard contact to the Sun, Mars, or Ascendant on those dates is friction too.
+  const slowHard = performing ? background.filter((l) => /: (Saturn|Uranus|Neptune|Pluto) (square|opposite|conjunct) your (Sun|Mars|Ascendant)$/.test(l.heading)).map((l) => `${l.heading.replace('In effect now: ', '')} (all these dates)`) : [];
+  const hard = [...new Set([...scored.flatMap((d) => d.hard), ...slowHard])];
+  const good = [...new Set(scored.flatMap((d) => d.reasons))];
+  // Strong: two or more supportive contacts and little friction. Steady: nothing either way. Testing: friction only.
+  const level = good.length >= 2 && hard.length <= good.length / 2 ? 'strong' : good.length >= 1 && hard.length === 0 ? 'good' : !good.length && !hard.length ? 'steady' : good.length >= hard.length ? 'care' : 'testing';
+  const tone: Tone = level === 'testing' ? 'wait' : level === 'care' ? 'closer' : 'go';
+  const range = span === 1 ? fmtDate(win.start) : `${fmtDate(win.start)}${win.start.slice(5, 7) === win.end.slice(5, 7) ? `–${Number(win.end.slice(8))}` : ` to ${fmtDate(win.end)}`}`;
+  const stretch = span === 1 ? 'DAY' : span <= 9 ? 'WEEK' : 'STRETCH';
+  const focus = performing ? 'performing and competing' : area ? AREA_WORD[area] : 'what is planned';
+  const word = level === 'care' ? 'good, with care' : `a ${level} ${stretch.toLowerCase()}`;
+  const orb = word.toUpperCase();
+  const label = `${who ? `${who}, ` : ''}${range}: ${word}`;
+  const lead =
+    level === 'strong' || level === 'good'
+      ? `Yes, the sky backs ${forWho} here. ${range} is ${level === 'strong' ? 'a strong' : 'a good'} stretch for ${focus}: ${mine(good.slice(0, 3).join('; '))}${level === 'good' ? ', with nothing pulling against it' : ''}.`
+      : level === 'steady'
+        ? `Yes, steadily. Nothing in the sky pulls against ${forWho} on these dates, and nothing stands out either: preparation and nerve will carry it.`
+        : tone === 'wait'
+        ? `It is a testing stretch for ${forWho}${hard.length ? `: ${mine(hard.slice(0, 3).join('; '))}` : ''}. It can still go well; it will take more effort and a steady pace.`
+        : `Mostly yes, with care. ${range} has real support for ${focus}${good.length ? ` (${mine(good.slice(0, 2).join('; '))})` : ''}${hard.length ? `, and some friction to manage: ${mine(hard.slice(0, 2).join('; '))}` : ''}.`;
+  const lines: SkyLine[] = [{ heading: '', text: lead, basis: basis || undefined }];
+  if (best.score > 0 && span > 1) lines.push({ heading: `Best day: ${fmtDate(best.date)}`, text: best.reasons.length ? `${mine(best.reasons.join('; '))}.` : 'The steadiest day of the stretch.' });
+  // The slow background on those dates: for someone else, said plainly, without the second-person meanings.
+  const slow = background
+    .slice(0, 3)
+    .map((l) => {
+      const heading = mine(l.heading.replace('In effect now', 'Underneath it'));
+      return who ? { heading, text: `A slow influence in the background for ${who} on these dates. ${l.text.slice(l.text.indexOf('In effect'))}`, basis: l.basis } : { ...l, heading };
+    });
+  const deeper: SkyLine[] = [...slow.slice(1), ...good.slice(3).map((g) => ({ heading: mine(g), text: 'Support on these dates.' })), ...hard.map((h) => ({ heading: mine(h), text: 'Friction to plan around: allow extra time, and keep the body warm and steady.' }))];
+  return { ...base, label, orb, tone, points: best.reasons[0]?.split(' ')[0] ?? 'Sun', lines: [...lines, ...slow.slice(0, 1)], deeper };
+}
+
 function consultFresh(question: string, ctx: OracleContext): OracleReply {
+  // A question about an event on given dates, for the person asking or for someone whose birth details it includes.
+  const ev = eventReply(question, ctx);
+  if (ev) return ev;
   // 'Say it simply': rewrite the last answer in plain words (or, with none yet, the chart in three lines).
   if (intentOf(question.trim()) === 'simplify' && !limitOf(question.trim())?.match(/health|others|legal|gamble/)) {
     const prev = ctx.previous && ctx.previous.intent !== 'simplify' ? ctx.previous : null;
@@ -615,7 +710,7 @@ function decisionLines(a: Settled, area: Area | null, ctx: OracleContext): SkyLi
     const ties = area && ((TARGET_AREAS[k.natal] ?? []).includes(area) || (k.house && HOUSE_AREA[k.house] === area));
     out.push({
       heading: '',
-      text: `${lead} ${k.mover === 'Sun' ? 'The Sun' : k.mover} ${verb} your ${k.natal} ${k.date === iso(now) ? 'today' : `on ${fmt(k.date)}`}${where}. Your ${k.natal} is ${WEEK_TARGET[k.natal] ?? W.PLANET_FUNCTION[k.natal]}${ties ? `, and this is the part of your chart ${AREA_WORD[area!]} runs through` : ''}. ${forArea ?? WEEK_CONTACT[k.mover][k.aspect as keyof (typeof WEEK_CONTACT)[string]]}`,
+      text: `${lead} ${k.mover === 'Sun' ? 'The Sun' : k.mover} ${verb} your ${k.natal} ${k.date === iso(now) ? 'today' : `on ${fmt(k.date)}`}${where}. Your ${k.natal} is ${WEEK_TARGET[k.natal] ?? W.PLANET_FUNCTION[k.natal]}${ties ? `, and this is the part of your chart that holds ${AREA_WORD[area!]}` : ''}. ${forArea ?? WEEK_CONTACT[k.mover][k.aspect as keyof (typeof WEEK_CONTACT)[string]]}`,
     });
   } else out.push({ heading: '', text: `${lead} ${a.because}` });
   // A date to act on, from this chart's best days for the question.

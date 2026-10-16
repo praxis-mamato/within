@@ -14,6 +14,8 @@ import { ReviewPrompt } from '../components/ReviewPrompt';
 import { datesIn, LiveReadingNudge, LockedSummary } from '../components/SalesCloser';
 import { Back, SafetyPanel } from '../components/ui';
 import { screen } from '../lib/screener';
+import { hasBirthDate } from '../content/askedAbout';
+import { loadPlaces, type Place } from '../geo/places';
 import { useAccount } from '../services/AccountContext';
 import { factSheet, requestDeepReading, type DeepResult } from '../services/aiReading';
 import { track } from '../services/telemetry';
@@ -95,9 +97,20 @@ export default function Oracle() {
   const left = entitlement.active ? Infinity : Math.max(0, FREE_PER_DAY - asked.filter((a) => !a.limit).length);
   const welcome = useMemo(() => [...ORACLE_SAYS.welcome].map((ch, i) => <span key={i} style={{ animationDelay: `${i * 0.07}s` }}>{ch}</span>), []);
 
+  // The town list loads only when a question carries someone's birth date ("Mariya 6/6/86 17:40 Billings MT").
+  const places = useRef<Place[] | null>(null);
   const ask = (text = q) => {
     const question = text.trim();
     if (!me || !question || phase === 'seeking') return;
+    if (hasBirthDate(question) && !places.current) {
+      void loadPlaces()
+        .catch(() => [] as Place[])
+        .then((p) => {
+          places.current = p;
+          ask(text);
+        });
+      return;
+    }
     setNote('');
     setConsult(null);
     if (screen(question).flagged) {
@@ -128,7 +141,7 @@ export default function Oracle() {
         theirChart = null;
       }
     }
-    const a = consultOracle(question, { chart: me, place, profile: state.profile, history: state.oracle, other: who?.birth && theirChart ? { chart: theirChart, place: { lat: who.birth.lat, lon: who.birth.lon }, name: who.nickname } : null });
+    const a = consultOracle(question, { chart: me, place, profile: state.profile, history: state.oracle, places: places.current, other: who?.birth && theirChart ? { chart: theirChart, place: { lat: who.birth.lat, lon: who.birth.lon }, name: who.nickname } : null });
     if (same) setNote(ORACLE_TEXT.sameDay);
     else {
       // History keeps the answer itself; the full reading is recalculated when asked again.
