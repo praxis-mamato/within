@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { computeNatal } from '../astro/natal';
 import { activeContacts, consultOracle, intentOf, outerInEffect, progressedInEffect } from './oracleEngine';
 import { angleAspectOk } from '../astro/chart';
-import { natalPoints } from '../astro/progressions';
+import { natalPoints, progressions } from '../astro/progressions';
 
 // Sun at 6° Sagittarius; in Oct 2026 Uranus sits at 5° Gemini, opposite it, but turns retrograde,
 // so no exact hit falls in the next 30 days. The Oracle must still name it.
@@ -68,5 +68,27 @@ describe('slow transits in effect', () => {
     const all = [...r.lines, ...r.deeper].map((l) => l.heading).join(' | ');
     expect(all).toMatch(/composite|Sam’s/);
     expect(all).toMatch(/progressed/);
+  });
+  it('gives the same span for a transit in every answer', () => {
+    const planet = consultOracle('What is going on with Uranus?', { chart, place, now });
+    const feel = consultOracle('Why do I feel so restless?', { chart, place, now });
+    expect(JSON.stringify(planet)).toMatch(/In effect Jun 18 to Dec 11/);
+    expect(JSON.stringify(feel)).toMatch(/Uranus opposes your Sun \(Jun 18, 2026 to Dec 11, 2026/);
+  });
+  it('includes Jupiter among the slow transits in effect', () => {
+    expect(outerInEffect(chart, place, now).some((l) => /: Jupiter /.test(l.heading))).toBe(true);
+  });
+  it('finds the progressed angles and the progressed New and Full Moons', () => {
+    const p = progressions(chart, place.lat, place.lon, now);
+    expect(p.angles?.ingresses.some((x) => x.point === 'Ascendant' && x.sign === 'Taurus')).toBe(true);
+    expect(p.phase.name).toBe('Full Moon');
+    expect(p.phase.lastFullMoon! < '2026-10-14').toBe(true);
+    const b2 = { date: '1990-07-15', time: '09:30', timePrecision: 'exact', windowMinutes: 0, lat: 34.05, lon: -118.24, tz: 'America/Los_Angeles' } as const;
+    const c2 = computeNatal(b2);
+    const pl2 = { lat: b2.lat, lon: b2.lon };
+    expect(progressions(c2, pl2.lat, pl2.lon, now).phase.lastNewMoon?.slice(0, 7)).toBe('2026-05');
+    const r = consultOracle('What am I moving through this year?', { chart: c2, place: pl2, now });
+    expect(r.lines.some((l) => /progressed New Moon/.test(l.heading))).toBe(true);
+    expect(progressedInEffect(chart, place, now).phase.heading).toMatch(/progressed lunar phase: Full Moon/);
   });
 });

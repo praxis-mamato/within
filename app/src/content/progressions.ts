@@ -163,3 +163,35 @@ export const SR_SUN_HOUSE: Record<number, string> = {
   11: 'Focus may be on friendships, community, and future hopes.',
   12: 'Focus may be on rest, reflection, and what happens behind the scenes.',
 };
+
+/** The progressed Ascendant entering a sign: how you meet the world shifts, over years. */
+export const PROGRESSED_ASC_SIGN: Record<string, string> = {
+  Aries: 'You meet the world more directly: braver, quicker to start, less willing to wait for permission.',
+  Taurus: 'You meet the world more steadily: slower, calmer, more rooted in your body and what you value.',
+  Gemini: 'You meet the world with more curiosity: talking, learning, and trying more than one path.',
+  Cancer: 'You meet the world more softly: protective of home and family, and led more by feeling.',
+  Leo: 'You meet the world more visibly: warmer, more expressive, and more willing to be seen.',
+  Virgo: 'You meet the world more carefully: practical, useful, and focused on getting things right.',
+  Libra: 'You meet the world through others: partnership, fairness, and grace come forward.',
+  Scorpio: 'You meet the world more intensely: private, perceptive, and drawn to what lies beneath.',
+  Sagittarius: 'You meet the world more openly: seeking meaning, travel, and room to grow.',
+  Capricorn: 'You meet the world with more purpose: serious, ambitious, and building for the long term.',
+  Aquarius: 'You meet the world more independently: original, future-minded, and less bound by convention.',
+  Pisces: 'You meet the world more gently: intuitive, compassionate, and open to what you cannot see.',
+};
+
+/** The progressed Midheaven entering a sign: your direction and public life take on a new tone, over years. */
+export const PROGRESSED_MC_SIGN: Record<string, string> = {
+  Aries: 'Your direction asks for initiative: starting something of your own and leading it.',
+  Taurus: 'Your direction asks for steadiness: building something lasting, with real value.',
+  Gemini: 'Your direction asks for range: communicating, teaching, connecting ideas and people.',
+  Cancer: 'Your direction turns toward care: work that nurtures, and a life that makes room for home.',
+  Leo: 'Your direction asks to be seen: creative work, leadership, and recognition for who you are.',
+  Virgo: 'Your direction asks for skill and service: mastery, health, and work that helps.',
+  Libra: 'Your direction runs through partnership: collaboration, fairness, beauty, and balance.',
+  Scorpio: 'Your direction deepens: work with power, shared resources, or transformation.',
+  Sagittarius: 'Your direction widens: teaching, travel, publishing, and work with meaning.',
+  Capricorn: 'Your direction asks for authority: responsibility, structure, and long-term achievement.',
+  Aquarius: 'Your direction asks for originality: community, innovation, and a life on your own terms.',
+  Pisces: 'Your direction turns inward and creative: art, healing, spirit, and quiet service.',
+};

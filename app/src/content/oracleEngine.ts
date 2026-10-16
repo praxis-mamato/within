@@ -12,7 +12,7 @@ import { angleAspectOk, houseOf, placidusCusps, SIGNS, tropicalLongitude } from 
 import { fmtDeg, type NatalChart } from '../astro/natal';
 import { allAspects, monthAhead } from '../astro/deep';
 import { weekAhead, MOVERS } from '../astro/week';
-import { natalPoints, progressions, solarArc } from '../astro/progressions';
+import { IN_EFFECT, natalPoints, progressions, solarArc } from '../astro/progressions';
 import * as P from './progressions';
 import { answerFor, feelingIn } from './answer';
 import { cycles } from './cycles';
@@ -115,7 +115,7 @@ const SLOWEST = ['Pluto', 'Neptune', 'Uranus', 'Saturn', 'Jupiter', 'Mars', 'Sun
 const bodiesIn = (q: string) => SLOWEST.filter((b) => new RegExp(`\\b${b}\\b`, 'i').test(q));
 
 /** How close a transit must be to count as in effect now, by the speed of the planet. */
-const ACTIVE_ORB: Record<string, number> = { Sun: 1.5, Mercury: 1.5, Venus: 1.5, Mars: 2, Jupiter: 3, Saturn: 3, Uranus: 3, Neptune: 3, Pluto: 3 };
+const ACTIVE_ORB: Record<string, number> = { Sun: 1.5, Mercury: 1.5, Venus: 1.5, Mars: 2, Jupiter: IN_EFFECT, Saturn: IN_EFFECT, Uranus: IN_EFFECT, Neptune: IN_EFFECT, Pluto: IN_EFFECT };
 const ASPECT_DEG: [keyof (typeof WEEK_CONTACT)['Sun'], number][] = [['conjunct', 0], ['sextile', 60], ['square', 90], ['trine', 120], ['opposite', 180]];
 const sepOf = (a: number, b: number) => Math.abs(signed(a, b));
 
@@ -215,7 +215,10 @@ function spanText(x: ActiveContact, now: Date): string {
   );
 }
 
-const OUTER = ['Pluto', 'Neptune', 'Uranus', 'Saturn'] as const;
+/** The slow planets read as long transits: the four outer planets, and Jupiter. */
+const OUTER = ['Pluto', 'Neptune', 'Uranus', 'Saturn', 'Jupiter'] as const;
+/** Jupiter moves faster and acts more gently, so at an equal orb the outer planets come first. */
+const SLOW_RANK: Record<string, number> = { Jupiter: 1 };
 const PERSONAL = new Set(['Sun', 'Moon', 'Mercury', 'Venus', 'Mars', 'Ascendant', 'Midheaven', 'Descendant', 'IC']);
 const HARD = new Set(['conjunct', 'opposite', 'square']);
 
@@ -225,7 +228,7 @@ const HARD = new Set(['conjunct', 'opposite', 'square']);
  */
 export function outerInEffect(c: NatalChart, place: { lat: number; lon: number }, now: Date): SkyLine[] {
   return OUTER.flatMap((b) => activeContacts(c, place, now, b).filter((x) => PERSONAL.has(x.natal)).map((x) => ({ b, x })))
-    .sort((p, q) => Number(HARD.has(q.x.aspect)) - Number(HARD.has(p.x.aspect)) || p.x.orb - q.x.orb)
+    .sort((p, q) => Number(HARD.has(q.x.aspect)) - Number(HARD.has(p.x.aspect)) || p.x.orb + (SLOW_RANK[p.b] ?? 0) - (q.x.orb + (SLOW_RANK[q.b] ?? 0)))
     .map(({ b, x }) => ({
       heading: `In effect now: ${b} ${x.aspect} your ${x.natal}`,
       text: `${WEEK_CONTACT[b][x.aspect]} Your ${x.natal} is ${WEEK_TARGET[x.natal] ?? W.PLANET_FUNCTION[x.natal] ?? x.natal}. ${spanText(x, now)}`,
@@ -237,12 +240,36 @@ export function outerInEffect(c: NatalChart, place: { lat: number; lon: number }
  * The progressed chart and solar arcs in effect now: progressed planets and directed points within 1° of a
  * birth-chart point, strongest first, then the progressed Moon's chapter.
  */
-export function progressedInEffect(c: NatalChart, place: { lat: number; lon: number }, now: Date): { contacts: SkyLine[]; moon: SkyLine } {
+export function progressedInEffect(c: NatalChart, place: { lat: number; lon: number }, now: Date): { contacts: SkyLine[]; moon: SkyLine; phase: SkyLine } {
   const pr = progressions(c, place.lat, place.lon, now);
   const sa = solarArc(c, place.lat, place.lon, now);
   const what = (x: string) => WEEK_TARGET[x] ?? W.PLANET_FUNCTION[x] ?? x;
   const when = (exact: string | null, orb: number) => (exact ? `Exact around ${fmtMonth(exact)}; within ${fmtDeg(orb)} now` : `Within ${fmtDeg(orb)} of exact`);
+  // Within a year either side: a progressed angle changing sign, or a progressed New or Full Moon.
+  const near = (d: string | null) => !!d && Math.abs(new Date(`${d}T12:00:00Z`).getTime() - now.getTime()) <= 365 * DAY;
+  const past = (d: string) => new Date(`${d}T12:00:00Z`).getTime() < now.getTime();
+  const events: SkyLine[] = [];
+  for (const x of pr.angles?.ingresses.filter((k) => near(k.date)) ?? [])
+    events.push({
+      heading: `Progressed: your ${x.point} ${past(x.date) ? 'has moved' : 'moves'} into ${x.sign}`,
+      text: `${(x.point === 'Ascendant' ? P.PROGRESSED_ASC_SIGN : P.PROGRESSED_MC_SIGN)[x.sign]} A progressed angle changes sign only every few decades, so this is a chapter, not a moment.`,
+      basis: `Around ${fmtMonth(x.date)}`,
+    });
+  for (const [kind, d] of [
+    ['New Moon', pr.phase.lastNewMoon],
+    ['New Moon', pr.phase.nextNewMoon],
+    ['Full Moon', pr.phase.lastFullMoon],
+    ['Full Moon', pr.phase.nextFullMoon],
+  ] as const)
+    if (near(d))
+      events.push({
+        heading: `Your progressed ${kind}${past(d!) ? '' : ' is coming'}`,
+        text: `${P.PROGRESSED_PHASE[kind]} It comes once in about thirty years.`,
+        basis: `${past(d!) ? 'Was' : 'Due'} around ${fmtMonth(d!)}`,
+      });
+  const phase: SkyLine = { heading: `Your progressed lunar phase: ${pr.phase.name}`, text: P.PROGRESSED_PHASE[pr.phase.name], basis: `Progressed Moon ${Math.round(pr.phase.angle)}° from the progressed Sun${pr.phase.nextNewMoon ? `; next progressed New Moon ${fmtMonth(pr.phase.nextNewMoon)}` : ''}` };
   const contacts = [
+    ...events.map((line) => ({ orb: -1, line })),
     ...pr.contacts.filter((x) => x.orbNow <= 1).map((x) => ({
       orb: x.orbNow,
       line: { heading: `Progressed: your ${x.progressed} ${x.aspect} your ${x.natal}`, text: `Your progressed ${x.progressed} ${P.CONTACT_HOW[x.aspect]} your ${x.natal}. Your ${x.progressed} is ${what(x.progressed)}; your ${x.natal} is ${what(x.natal)}. Progressions move slowly, so this is a theme of the year, not the week.`, basis: when(x.exact, x.orbNow) },
@@ -260,7 +287,7 @@ export function progressedInEffect(c: NatalChart, place: { lat: number; lon: num
     text: `${P.PROGRESSED_MOON_SIGN[pm.sign]}${pm.house ? ` ${P.PROGRESSED_MOON_HOUSE[pm.house]}` : ''}`,
     basis: `${pr.moon.enteredOn ? `Since ${fmtMonth(pr.moon.enteredOn)}` : `${fmtDeg(pm.degree)} ${pm.sign}`}${pr.moon.nextIngress ? `; into ${pr.moon.nextSign} ${fmtMonth(pr.moon.nextIngress)}` : ''}`,
   };
-  return { contacts, moon };
+  return { contacts, moon, phase };
 }
 
 const REL_POINTS = new Set(['Sun', 'Moon', 'Venus', 'Mars', 'Ascendant', 'Descendant', 'Midheaven', 'IC']);
@@ -308,13 +335,15 @@ function withOuter(r: OracleReply, ctx: OracleContext): OracleReply {
   const now = ctx.now ?? new Date();
   const said = [...r.lines, ...r.deeper].map((l) => `${l.heading} ${l.text}`).join(' | ');
   const named = (l: SkyLine, by = '') => {
-    const [, b, natal] = l.heading.match(/: (?:your )?([\w ]+?) \w+ your (\w+)$/)!;
+    const m = l.heading.match(/: (?:your )?([\w ]+?) \w+ your (\w+)$/);
+    if (!m) return said.includes(l.heading);
+    const [, b, natal] = m;
     return new RegExp(`${by}\\b${b}\\b[^.|]{0,40}\\byour ${natal}\\b`, 'i').test(said);
   };
   const outer = outerInEffect(ctx.chart, ctx.place, now).filter((l) => !named(l)).slice(0, 3);
   const pr = progressedInEffect(ctx.chart, ctx.place, now);
   const prog = pr.contacts.filter((l) => !named(l, '(progressed|directed|solar arc)[^.|]{0,12}')).slice(0, 3);
-  const moon = /progressed Moon/i.test(said) ? [] : [pr.moon];
+  const moon = [...(/progressed Moon/i.test(said) ? [] : [pr.moon]), ...(/progressed lunar phase/i.test(said) || prog.some((l) => /progressed (New|Full) Moon/.test(l.heading)) ? [] : [pr.phase])];
   if (LONG_IN_DEEPER.has(r.intent)) return { ...r, deeper: [...outer, ...prog, ...r.deeper] };
   const show = [...outer.slice(0, 1), ...(PROGRESSED_IN_LINES.has(r.intent) ? prog.slice(0, 1) : [])];
   const rest = [...outer.slice(1), ...(PROGRESSED_IN_LINES.has(r.intent) ? prog.slice(1) : prog), ...(['open', 'cycle', 'feeling'].includes(r.intent) ? moon : [])];

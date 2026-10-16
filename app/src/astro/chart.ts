@@ -114,6 +114,16 @@ export function ascendantAndMidheaven(date: Date, lat: number, lonEast: number) 
   return { asc, mc, ramc: r, obliquity: e };
 }
 
+/**
+ * The Ascendant that goes with a given Midheaven at a latitude: used for the progressed angles, where the
+ * Midheaven is moved by the solar arc and the Ascendant follows from it.
+ */
+export function ascendantFromMidheaven(mc: number, lat: number, date: Date): number {
+  const e = obliquity(date);
+  const r = norm(atan2(sin(mc) * cos(e), cos(mc)));
+  return norm(atan2(cos(r), -(sin(r) * cos(e) + tan(lat) * sin(e))));
+}
+
 /** Ecliptic longitude of the point with right ascension `ra`. */
 const lonFromRa = (ra: number, e: number) => norm(atan2(sin(ra), cos(ra) * cos(e)));
 

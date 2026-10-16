@@ -141,8 +141,8 @@ function phaseOf(start: string, peaks: string[], today: string): Cycle['phase'] 
 export function cycles(c: NatalChart, lat: number, lon: number, now = new Date(), profile: Profile | null = null): { now: Cycle[]; next: Contact[] } {
   const today = iso(now);
   const onMind = new Set<Area>(profile?.onMind ?? []);
-  // Look back 10 months so a contact already under way shows its real start.
-  const windows = yearAhead(c, lat, lon, new Date(now.getTime() - 300 * DAY), 300 + 366).filter((w) => w.end >= today && TOUCHES[w.natal]);
+  // Look back as far as the Oracle does (600 days) so a contact already under way shows its real start.
+  const windows = yearAhead(c, lat, lon, new Date(now.getTime() - 600 * DAY), 600 + 366).filter((w) => w.end >= today && TOUCHES[w.natal]);
   const contact = (w: (typeof windows)[number]): Contact => ({
     transiting: w.transiting,
     aspect: w.aspect,

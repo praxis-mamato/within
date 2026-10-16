@@ -3,7 +3,7 @@
  * secondary progressions, solar arc directions, a 12-month outer-planet transit calendar,
  * and the solar return. Calculation only; interpretation lives in src/content/progressions.ts.
  */
-import { angleAspectOk, ascendantAndMidheaven, withFarEnds, houseOf, norm, placidusCusps, SIGNS, tropicalLongitude, type BodyName } from './chart';
+import { angleAspectOk, ascendantAndMidheaven, ascendantFromMidheaven, withFarEnds, houseOf, norm, placidusCusps, SIGNS, tropicalLongitude, type BodyName } from './chart';
 import type { NatalChart } from './natal';
 
 const DAY = 86400000;
@@ -86,7 +86,9 @@ export interface Progressions {
   planets: ProgressedPlanet[];
   moon: { sign: string; house: number | null; nextSign: string; nextIngress: string | null; enteredOn: string | null };
   /** Angle from progressed Sun to progressed Moon, 0–360, and the date of the last progressed New Moon. */
-  phase: { angle: number; lastNewMoon: string | null; nextNewMoon: string | null };
+  phase: { angle: number; name: string; lastNewMoon: string | null; nextNewMoon: string | null; lastFullMoon: string | null; nextFullMoon: string | null };
+  /** The progressed Ascendant and Midheaven (Midheaven by solar arc, Ascendant from it), and their sign changes within ±5 years. Null without an exact birth time. */
+  angles: { asc: { lon: number; sign: string; degree: number }; mc: { lon: number; sign: string; degree: number }; ingresses: { point: 'Ascendant' | 'Midheaven'; sign: string; date: string }[] } | null;
   /** Sign changes of progressed Sun, Mercury, Venus, Mars within ±5 years. */
   ingresses: { body: string; sign: string; date: string }[];
   contacts: ProgressedContact[];
@@ -143,17 +145,39 @@ export function progressions(c: NatalChart, lat: number, lon: number, now = new 
   // Progressed lunation cycle: the Moon–Sun angle grows about 12° a year (about 29.5 years a cycle).
   const angleF = (t: Date) => norm(progressedLon(c, 'Moon', t) - progressedLon(c, 'Sun', t));
   const angle = angleF(now);
-  const findNewMoon = (dir: 1 | -1): string | null => {
-    let prevA = angle;
+  // Shifting the angle by 180° turns a progressed Full Moon into the same wrap from ~360 to ~0.
+  const findNewMoon = (dir: 1 | -1, shift = 0): string | null => {
+    const at = (t: Date) => norm(angleF(t) - shift);
+    let prevA = at(now);
     for (let m = 1; m <= 32 * 12; m++) {
       const t = addMonths(now, dir * m);
-      const a = angleF(t);
+      const a = at(t);
       // The angle wraps from ~360 to ~0 going forward (or ~0 to ~360 going back) at a progressed New Moon.
       if (dir === 1 ? a < prevA - 180 : a > prevA + 180) return iso(t);
       prevA = a;
     }
     return null;
   };
+  const PHASES = ['New Moon', 'Crescent', 'First Quarter', 'Gibbous', 'Full Moon', 'Disseminating', 'Last Quarter', 'Balsamic'];
+
+  // Progressed angles: the Midheaven moves by the solar arc, and the Ascendant follows from it.
+  const natalSun = c.western.planets.find((p) => p.body === 'Sun')!.longitude;
+  let angles: Progressions['angles'] = null;
+  if (exact) {
+    const am = ascendantAndMidheaven(c.utc, lat, lon);
+    const mcAt = (t: Date) => norm(am.mc + progressedLon(c, 'Sun', t) - natalSun);
+    const ascAt = (t: Date) => ascendantFromMidheaven(mcAt(t), lat, c.utc);
+    const pos = (l: number) => ({ lon: l, sign: signOf(l), degree: l % 30 });
+    const ingresses = (
+      [
+        ['Midheaven', mcAt],
+        ['Ascendant', ascAt],
+      ] as const
+    )
+      .flatMap(([point, f]) => ingressDates(f, addMonths(now, -60), addMonths(now, 60), 1).map((x) => ({ point, sign: x.sign, date: iso(x.date) })))
+      .sort((a, b) => a.date.localeCompare(b.date));
+    angles = { asc: pos(ascAt(now)), mc: pos(mcAt(now)), ingresses };
+  }
 
   const ingresses = (['Sun', 'Mercury', 'Venus', 'Mars'] as const)
     .flatMap((b) => ingressDates((t) => progressedLon(c, b, t), addMonths(now, -60), addMonths(now, 60), 3).map((x) => ({ body: b, sign: x.sign, date: iso(x.date) })))
@@ -179,6 +203,20 @@ export function progressions(c: NatalChart, lat: number, lon: number, now = new 
         } else if (orbNow > 1 && !exactAt) continue;
         contacts.push({ progressed: b, aspect: a.name, natal: t.name, exact: exactAt, orbNow, applying: orbs[13] < orbNow });
       }
+  // The progressed Ascendant against the birth planets (the progressed Midheaven is the solar-arc Midheaven).
+  if (exact) {
+    const am = ascendantAndMidheaven(c.utc, lat, lon);
+    const asc = months.map((t) => ascendantFromMidheaven(norm(am.mc + progressedLon(c, 'Sun', t) - natalSun), lat, c.utc));
+    for (const t of targets.filter((x) => !['Ascendant', 'Midheaven', 'Descendant', 'IC'].includes(x.name)))
+      for (const a of ASPECTS) {
+        const orbs = asc.map((l) => Math.abs(sep(l, t.lon) - a.angle));
+        const orbNow = orbs[12];
+        let exactAt: string | null = null;
+        for (let i = 1; i < orbs.length - 1; i++) if (orbs[i] <= orbs[i - 1] && orbs[i] < orbs[i + 1] && orbs[i] < 0.6) exactAt = iso(months[i]);
+        if (orbNow > 1 && !exactAt) continue;
+        contacts.push({ progressed: 'Ascendant', aspect: a.name, natal: t.name, exact: exactAt, orbNow, applying: orbs[13] < orbNow });
+      }
+  }
   contacts.sort((x, y) => (x.exact ?? '9999').localeCompare(y.exact ?? '9999') || x.orbNow - y.orbNow);
 
   return {
@@ -191,7 +229,8 @@ export function progressions(c: NatalChart, lat: number, lon: number, now = new 
       nextIngress: fwd[0] ? iso(fwd[0].date) : null,
       enteredOn: back.length ? iso(back[back.length - 1].date) : null,
     },
-    phase: { angle, lastNewMoon: findNewMoon(-1), nextNewMoon: findNewMoon(1) },
+    phase: { angle, name: PHASES[Math.floor(angle / 45) % 8], lastNewMoon: findNewMoon(-1), nextNewMoon: findNewMoon(1), lastFullMoon: findNewMoon(-1, 180), nextFullMoon: findNewMoon(1, 180) },
+    angles,
     ingresses,
     contacts,
   };
@@ -243,12 +282,15 @@ export interface TransitWindow {
   transiting: (typeof SLOW)[number];
   aspect: AspectName;
   natal: string;
-  /** First and last day within 1°, clipped to the year searched. */
+  /** First and last day within the in-effect orb (3°), clipped to the year searched. */
   start: string;
   end: string;
   /** Each date the contact is closest, one per pass (retrogrades can make three). */
   exact: string[];
 }
+
+/** How close a slow planet must be to count as in effect: the same orb the Oracle uses for 'in effect now'. */
+export const IN_EFFECT = 3;
 
 export function yearAhead(c: NatalChart, lat: number, lon: number, now = new Date(), days = 365): TransitWindow[] {
   const step = 2;
@@ -264,18 +306,21 @@ export function yearAhead(c: NatalChart, lat: number, lon: number, now = new Dat
         const orbs = pos[m].map((l) => Math.abs(sep(l, t.lon) - a.angle));
         let i = 0;
         while (i < orbs.length) {
-          if (orbs[i] >= 1) {
+          if (orbs[i] >= IN_EFFECT) {
             i++;
             continue;
           }
+          // The span is the whole time the planet is within the in-effect orb, the same span the Oracle
+          // names everywhere; it counts as a contact only if it comes within 1 degree of exact.
           const s = i;
-          while (i < orbs.length && orbs[i] < 1) i++;
+          while (i < orbs.length && orbs[i] < IN_EFFECT) i++;
           const e = i - 1;
-          // Merge passes separated by a short gap (a retrograde loop that dips just outside orb).
+          if (Math.min(...orbs.slice(s, e + 1)) >= 1) continue;
+          // Merge passes split only by sampling; a retrograde return is its own pass, as in the Oracle.
           const exact: string[] = [];
-          for (let k = s; k <= e; k++) if ((k === 0 || orbs[k] <= orbs[k - 1]) && (k === orbs.length - 1 || orbs[k] < orbs[k + 1])) exact.push(iso(samples[k]));
+          for (let k = s; k <= e; k++) if (orbs[k] < 1 && (k === 0 || orbs[k] <= orbs[k - 1]) && (k === orbs.length - 1 || orbs[k] < orbs[k + 1])) exact.push(iso(samples[k]));
           const prev = out[out.length - 1];
-          if (prev && prev.transiting === m && prev.natal === t.name && prev.aspect === a.name && new Date(iso(samples[s])).getTime() - new Date(prev.end).getTime() < 120 * DAY) {
+          if (prev && prev.transiting === m && prev.natal === t.name && prev.aspect === a.name && new Date(iso(samples[s])).getTime() - new Date(prev.end).getTime() < 10 * DAY) {
             prev.end = iso(samples[e]);
             prev.exact.push(...exact);
           } else out.push({ transiting: m, aspect: a.name, natal: t.name, start: iso(samples[s]), end: iso(samples[e]), exact });
