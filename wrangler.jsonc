@@ -1,6 +1,12 @@
-// Cloudflare hosting: serves the built app (app/dist) as static files at a link without the GitHub address.
+// Cloudflare hosting: serves the built app (app/dist) as static files at withinoracle.app, and still at the
+// workers.dev link. The custom domains are connected by Cloudflare on deploy (the domain is in this account).
 {
   "name": "within-oracle",
   "compatibility_date": "2026-09-01",
-  "assets": { "directory": "./app/dist" }
+  "assets": { "directory": "./app/dist" },
+  "workers_dev": true,
+  "routes": [
+    { "pattern": "withinoracle.app", "custom_domain": true },
+    { "pattern": "www.withinoracle.app", "custom_domain": true }
+  ]
 }
