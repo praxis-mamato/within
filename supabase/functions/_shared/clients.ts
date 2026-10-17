@@ -13,7 +13,7 @@ export async function callingUser(req: Request) {
   return data.user ?? null;
 }
 
-export const SITE_URLS = (Deno.env.get('SITE_URLS') ?? 'https://within-oracle.withinoracle.workers.dev/,https://praxis-mamato.github.io/within/').split(',').map((s) => s.trim());
+export const SITE_URLS = (Deno.env.get('SITE_URLS') ?? 'https://within-oracle.withinoracle.workers.dev/,https://withinoracle.app/,https://www.withinoracle.app/,https://praxis-mamato.github.io/within/').split(',').map((s) => s.trim());
 
 export const cors = {
   'Access-Control-Allow-Origin': '*',

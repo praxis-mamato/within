@@ -61,7 +61,11 @@ export const LIVE =
 /** Sign in with Apple needs an Apple Developer account; until VITE_APPLE_SIGN_IN=true, live mode offers Google only. */
 export const APPLE_SIGN_IN = !LIVE || env.VITE_APPLE_SIGN_IN === 'true';
 
+/** Our own addresses: sign-in and checkout return to whichever one the person is using. */
+const OUR_HOSTS = /(^|\.)withinoracle\.app$|\.workers\.dev$/;
+
 export function siteUrl(): string {
+  if (typeof location !== 'undefined' && OUR_HOSTS.test(location.hostname)) return `${location.origin}${location.pathname}`;
   if (CONFIG.siteUrl) return CONFIG.siteUrl;
   if (typeof location === 'undefined') return '';
   return `${location.origin}${location.pathname}`;
