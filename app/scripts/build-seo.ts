@@ -13,6 +13,7 @@ import { PLANET_IN_SIGN, RISING, RULER, SIGN_KEYWORD, SIGN_MODALITY } from '../s
 import { PLANET_HIGH, PLANET_LOW } from '../src/content/energy';
 import { computeNatal, type BirthInput } from '../src/astro/natal';
 import { consultOracle } from '../src/content/oracleEngine';
+import { ELEMENT_INTRO, ELEMENTS, MODES, POLARITY, SIGN_ENERGY, ELEMENT_OF, MODE_OF, type Element, type Mode } from '../src/content/elements';
 
 const root = join(dirname(new URL(import.meta.url).pathname), '..');
 const DIST = join(root, 'dist');
@@ -88,6 +89,7 @@ const NAV: [string, string][] = [
   ['mercury-retrograde/', 'Mercury retrograde'],
   ['retrogrades/', 'Retrogrades'],
   ['zodiac/', 'Zodiac signs'],
+  ['elements/', 'Elements and modes'],
 ];
 
 function cta(text = 'Ask the Oracle, free') {
@@ -383,7 +385,7 @@ function zodiac() {
       title: `${s} meaning: personality, love, Moon and rising | Within`,
       description: `${s} in astrology: a ${SIGN_ELEMENT[s]} sign of ${SIGN_KEYWORD[s]}. What ${s} means as your Sun, Moon, rising and Venus sign, in Western and Vedic astrology.`,
       h1: `${s}: the sign of ${SIGN_KEYWORD[s]}`,
-      body: `<p class="lede">${s} is a ${SIGN_MODALITY[s]} ${SIGN_ELEMENT[s]} sign, ruled by ${ruler}. Its core quality is ${w.core}: it connects ${w.connect}, and speaks ${w.speak}.</p>
+      body: `<p class="lede">${s} is a <a href="${SITE}${SIGN_MODALITY[s]}-signs/">${SIGN_MODALITY[s]}</a> <a href="${SITE}${SIGN_ELEMENT[s]}-signs/">${SIGN_ELEMENT[s]}</a> sign, ruled by ${ruler}. Its core quality is ${w.core}: it connects ${w.connect}, and speaks ${w.speak}.</p>
 <h2>${s} Sun</h2><p>${PLANET_IN_SIGN.Sun[s]}</p>
 <h2>${s} Moon</h2><p>${PLANET_IN_SIGN.Moon[s]} A ${s} Moon needs ${w.need}.</p>
 <h2>${s} rising</h2><p>${RISING[s]}</p>
@@ -405,6 +407,80 @@ ${cta(`Read my whole chart`)}
     body: `<p class="lede">Each sign describes a way of being. Your chart holds many of them at once: your Sun, Moon, rising, and every planet sits in a sign.</p>
 <div class="scroll"><table class="tbl"><thead><tr><th>Sign</th><th>Element</th><th>Mode</th><th>Ruler</th><th>Theme</th></tr></thead><tbody>${SIGNS.map((s) => `<tr><td><a href="${SITE}zodiac/${slug(s)}/">${s}</a></td><td>${cap(SIGN_ELEMENT[s])}</td><td>${cap(SIGN_MODALITY[s])}</td><td>${RULER[s]}</td><td>${SIGN_KEYWORD[s]}</td></tr>`).join('')}</tbody></table></div>
 ${cta('Find your signs')}`,
+  });
+}
+
+// ---------- Elements and modes ----------
+function elementPages() {
+  const faqLd = (faqs: [string, string][]) => ({ '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: faqs.map(([q, a]) => ({ '@type': 'Question', name: q, acceptedAnswer: { '@type': 'Answer', text: a } })) });
+  const lower = (x: string) => x.charAt(0).toLowerCase() + x.slice(1);
+  const els = Object.keys(ELEMENTS) as Element[];
+  const mds = Object.keys(MODES) as Mode[];
+  const signLinks = (pred: (s: string) => boolean) => `<ul class="grid">${SIGNS.filter(pred).map((x) => `<li><a href="${SITE}zodiac/${slug(x)}/">${x}</a>: ${esc(SIGN_ENERGY[x])}</li>`).join('')}</ul>`;
+  const nav = `<h2>The elements and modes</h2><ul class="grid">${[...els.map((e) => [`${e}-signs/`, `${ELEMENTS[e].name} signs`]), ...mds.map((m) => [`${m}-signs/`, `${MODES[m].name} signs`]), ['elements/', 'All elements and modes']].map(([h, t]) => `<li><a href="${SITE}${h}">${t}</a></li>`).join('')}</ul>`;
+  for (const e of els) {
+    const x = ELEMENTS[e];
+    const faqs: [string, string][] = [
+      [`What are the ${e} signs?`, `${x.signs}. ${x.nature}`],
+      [`What are ${e} signs good at?`, x.gifts],
+      [`What if I have a lot of ${e} in my chart?`, x.strong],
+      [`What if I have no ${e} in my chart?`, `${x.missing} What helps: ${lower(x.helps)}`],
+    ];
+    pages.push({
+      path: `${e}-signs/`,
+      title: `${x.name} signs: ${x.signs} meaning, traits, and love | Within`,
+      description: `The ${e} signs in astrology (${x.signs}): their nature, gifts, shadow, what a lot or a little ${e} in your chart means, and ${e} in love and in Vedic astrology.`,
+      h1: `${x.name} signs: ${x.signs}`,
+      body: `<p class="lede">${esc(x.nature)}</p>
+<h2>Gifts</h2><p>${esc(x.gifts)}</p>
+<h2>Shadow</h2><p>${esc(x.shadow)}</p>
+<h2>A lot of ${e} in your chart</h2><p>${esc(x.strong)}</p>
+<h2>Little or no ${e} in your chart</h2><p>${esc(x.missing)}</p>
+<h2>What helps</h2><p>${esc(x.helps)}</p>
+<h2>${x.name} in love</h2><p>${esc(x.inLove)}</p>
+<h2>${x.name} in Vedic astrology</h2><p>${esc(x.vedic)}</p>
+<h2>The ${e} signs</h2>${signLinks((s) => ELEMENT_OF[s] === e)}
+<h2>More than your Sun sign</h2><p>Your Sun sign is one element of many. Within weighs your whole chart (Sun, Moon, rising, and every personal planet) and shows your balance of all four elements and three modes.</p>
+${cta('See my elements')}${nav}`,
+      ld: [faqLd(faqs)],
+    });
+  }
+  for (const m of mds) {
+    const x = MODES[m];
+    const faqs: [string, string][] = [
+      [`What are the ${m} signs?`, `${x.signs}. ${x.season}`],
+      [`What does ${m} mean in astrology?`, `${x.nature} Its gifts: ${lower(x.gifts)}`],
+      [`What if my chart is mostly ${m}?`, x.strong],
+      [`What if I have little ${m} in my chart?`, x.missing],
+    ];
+    pages.push({
+      path: `${m}-signs/`,
+      title: `${x.name} signs: ${x.signs} meaning and traits | Within`,
+      description: `What ${m} means in astrology: the ${m} signs (${x.signs}), their gifts and shadow, and what a ${m}-heavy or ${m}-light chart means.`,
+      h1: `${x.name} signs: ${x.signs}`,
+      body: `<p class="lede">${esc(x.nature)} ${esc(x.season)}</p>
+<h2>Gifts</h2><p>${esc(x.gifts)}</p>
+<h2>Shadow</h2><p>${esc(x.shadow)}</p>
+<h2>A mostly ${m} chart</h2><p>${esc(x.strong)}</p>
+<h2>Little ${m} in your chart</h2><p>${esc(x.missing)}</p>
+<h2>What helps</h2><p>${esc(x.helps)}</p>
+<h2>The ${m} signs</h2>${signLinks((s) => MODE_OF[s] === m)}
+${cta('See my modes')}${nav}`,
+      ld: [faqLd(faqs)],
+    });
+  }
+  pages.push({
+    path: 'elements/',
+    title: 'Elements and modalities in astrology: fire, earth, air, water; cardinal, fixed, mutable | Within',
+    description: 'The four elements and three modalities of astrology explained: what fire, earth, air, and water mean, what cardinal, fixed, and mutable mean, and how to read your chart’s balance.',
+    h1: 'The elements and modes of astrology',
+    body: `<p class="lede">${esc(ELEMENT_INTRO)}</p>
+<div class="scroll"><table class="tbl"><thead><tr><th></th>${els.map((e) => `<th><a href="${SITE}${e}-signs/">${ELEMENTS[e].name}</a></th>`).join('')}</tr></thead><tbody>${mds.map((m) => `<tr><th><a href="${SITE}${m}-signs/">${MODES[m].name}</a></th>${els.map((e) => { const sg = SIGNS.find((s) => ELEMENT_OF[s] === e && MODE_OF[s] === m)!; return `<td><a href="${SITE}zodiac/${slug(sg)}/">${sg}</a></td>`; }).join('')}</tr>`).join('')}</tbody></table></div>
+<h2>The four elements</h2>${els.map((e) => `<h3><a href="${SITE}${e}-signs/">${ELEMENTS[e].name}</a></h3><p>${esc(ELEMENTS[e].nature)}</p>`).join('')}
+<h2>The three modes</h2>${mds.map((m) => `<h3><a href="${SITE}${m}-signs/">${MODES[m].name}</a></h3><p>${esc(MODES[m].nature)} ${esc(MODES[m].season)}</p>`).join('')}
+<h2>Active and receptive</h2><p>${esc(POLARITY.yang.text)} ${esc(POLARITY.yin.text)}</p>
+<h2>Reading your balance</h2><p>Count where your planets fall. Within weighs your Sun, Moon, and rising sign three times, Mercury, Venus, and Mars twice, Jupiter and Saturn once, and leaves out the outer planets, which are the same for everyone born that year. The result is your signature (for example, mutable water) and the elements you may need to build.</p>
+${cta('See my elements')}`,
   });
 }
 
@@ -546,6 +622,7 @@ moonCalendar();
 retrogrades();
 mercuryRetrograde();
 zodiac();
+elementPages();
 guides();
 privacy();
 
