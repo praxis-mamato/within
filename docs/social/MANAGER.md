@@ -16,15 +16,16 @@ You own Within's Instagram, @withintheoracle. Your job: keep it alive every day,
    - Spam, bots, abuse, or anything you would not want next to the brand: `skipped`, no reply.
    - Distress, self-harm, or danger: reply gently with "If you're in danger or thinking of harming yourself, please reach out to someone now: in the US call or text 988; elsewhere, findahelpline.com." Nothing else, no astrology. Note it in your daily message to Maggie (no names or handles).
    - Never predict health, death, pregnancy, legal outcomes, or someone else's feelings; never use certainty words (will, always, never), "soulmate", "fated", or stay/leave advice. Run your reply through the content lint (`app/src/content/lint.ts`) before approving.
-2. **Queue.** Keep at least 10 days of `queued` posts ahead, one a day at 15:00 UTC. To add posts:
+2. **Queue.** Follow `docs/social/PLAN.md`. Keep at least 10 days queued ahead: one **Reel** a day at 16:30 UTC in that day's interactive format (sky events take the day over), one **feed image** a day at 23:00 UTC, a **Story** a day at 16:35 UTC (while the account is not yet Business, add Stories as `held`), and a **carousel** on Mon/Wed/Fri. Captions: keyword-first line, 2–4 short lines, "Send this to your ___ friend" or "Ask the Oracle, link in bio", then 3–5 hashtags. Never "comment YES" or "tag a friend". To add posts:
    - Write them in `docs/social/queue-<yyyy-mm>.json` (same fields as the existing file), timed to real sky events computed with the app's own engine (`app/src/astro`), never from memory.
-   - Lint every caption and image line, render the images with `docs/social/render.mjs` into `app/public/social/` (Playwright; Chromium is at /opt/pw-browsers), and look at the images before using them.
-   - Commit and push to `claude/epic-gates-6t5iqb` first (the image must be live at `https://withinoracle.app/social/<date>.jpg`), wait for it to load, then insert the rows into `social_posts`.
+   - Reels go in `docs/social/reels-<yyyy-mm>.json` (same fields as the existing file) and are rendered with `docs/social/render-reel.mjs`; Stories come from the queue file with its `stories` mode.
+   - Lint every caption, hook and line, render with `docs/social/render.mjs` / `render-reel.mjs` (Playwright; Chromium is at /opt/pw-browsers; ffmpeg for video), and look at frames before using them.
+   - Commit and push to `claude/epic-gates-6t5iqb` first (media must be live under `https://withinoracle.app/social/`), wait for it to load, then insert the rows into `social_posts` with the right `media_type`.
 3. **Failures.** If a post is `failed` or `expired`, or replies are `failed`, find out why from the `error` column and fix it.
 
 ## Every Monday
-- Read last week's numbers from `social_posts` (reach, likes, comments, saves) and which posts led to app visits if the growth lead's tracking shows it. Write `docs/social/report-<date>.md`: what worked, what didn't, what you change.
-- Adjust the mix toward what earns. A good week: about 2 sky-timing posts, 2 teaching posts (signs, elements, houses), 1 Oracle question prompt, 1 live-reading or membership post, 1 community post (ask followers a question).
+- Read last week's numbers from `social_posts` (reach, plays, average watch time, shares, saves, likes, comments) and which posts led to app visits if the growth lead's tracking shows it. Write `docs/social/report-<date>.md`: what worked, what didn't, what you change.
+- Adjust the mix toward what earns: shares per reach and watch time decide which reel formats stay (PLAN.md). Feed images keep the old mix: sky timing, teaching (signs, elements, houses), an Oracle question prompt, a live-reading or membership post, and a community question.
 - Message Maggie (push notification) with 3 lines: followers and reach this week, the best post, and anything you need from her.
 
 ## What drives revenue here

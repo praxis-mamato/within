@@ -61,27 +61,53 @@ Deno.serve(async (req) => {
   const tok = token;
 
   // 1. Publish the next due post. Posts that missed their moment are set aside, not published late.
-  await admin.from('social_posts').update({ status: 'expired' }).eq('status', 'queued').lt('scheduled_at', new Date(Date.now() - STALE_MS).toISOString());
+  await admin.from('social_posts').update({ status: 'expired' }).eq('status', 'queued').is('container_id', null).lt('scheduled_at', new Date(Date.now() - STALE_MS).toISOString());
   const { data: post } = await admin.from('social_posts').select('*').eq('status', 'queued').lte('scheduled_at', new Date().toISOString()).order('scheduled_at').limit(1).maybeSingle();
   if (post) {
-    await admin.from('social_posts').update({ status: 'publishing', attempts: post.attempts + 1 }).eq('id', post.id);
+    await admin.from('social_posts').update({ status: 'publishing' }).eq('id', post.id);
     try {
-      const container = post.container_id ?? (await graph(`/${igUser}/media`, tok, { form: { image_url: post.image_url, caption: post.caption } })).id;
-      await admin.from('social_posts').update({ container_id: container }).eq('id', post.id);
-      // Instagram fetches and processes the image; wait until the container is ready.
-      for (let i = 0; i < 8; i++) {
+      let container = post.container_id as string | null;
+      if (!container) {
+        const kind = post.media_type ?? 'IMAGE';
+        const form: Record<string, string> = {};
+        if (kind === 'REELS') Object.assign(form, { media_type: 'REELS', video_url: post.video_url, share_to_feed: 'true', ...(post.cover_url ? { cover_url: post.cover_url } : {}) });
+        else if (kind === 'STORIES') Object.assign(form, { media_type: 'STORIES', ...(post.video_url ? { video_url: post.video_url } : { image_url: post.image_url }) });
+        else if (kind === 'CAROUSEL') {
+          // Each slide is its own container first; the carousel holds them (up to 10).
+          const ids: string[] = [];
+          for (const url of (post.children ?? []).slice(0, 10)) ids.push((await graph(`/${igUser}/media`, tok, { form: { image_url: url, is_carousel_item: 'true' } })).id);
+          Object.assign(form, { media_type: 'CAROUSEL', children: ids.join(',') });
+        } else form.image_url = post.image_url;
+        if (kind !== 'STORIES' && post.caption) form.caption = post.caption;
+        container = (await graph(`/${igUser}/media`, tok, { form })).id as string;
+        await admin.from('social_posts').update({ container_id: container }).eq('id', post.id);
+      }
+      // Instagram fetches and processes the media. Video can take minutes: if it isn't ready, try again next run.
+      let ready = false;
+      for (let i = 0; i < 6; i++) {
         const st = await graph(`/${container}?fields=status_code`, tok);
-        if (st.status_code === 'FINISHED') break;
-        if (st.status_code === 'ERROR' || st.status_code === 'EXPIRED') throw new Error(`Instagram could not process the image (${st.status_code}).`);
+        if (st.status_code === 'FINISHED') {
+          ready = true;
+          break;
+        }
+        if (st.status_code === 'ERROR' || st.status_code === 'EXPIRED') {
+          await admin.from('social_posts').update({ container_id: null }).eq('id', post.id);
+          throw new Error(`Instagram could not process the media (${st.status_code}).`);
+        }
         await new Promise((r) => setTimeout(r, 4000));
       }
-      const published = await graph(`/${igUser}/media_publish`, tok, { form: { creation_id: container } });
-      const info = await graph(`/${published.id}?fields=permalink`, tok).catch(() => ({}));
-      await admin.from('social_posts').update({ status: 'published', media_id: published.id, permalink: info.permalink ?? null, published_at: new Date().toISOString(), error: null }).eq('id', post.id);
-      report.published = info.permalink ?? published.id;
+      if (!ready) {
+        await admin.from('social_posts').update({ status: 'queued' }).eq('id', post.id);
+        report.processing = post.id;
+      } else {
+        const published = await graph(`/${igUser}/media_publish`, tok, { form: { creation_id: container } });
+        const info = await graph(`/${published.id}?fields=permalink`, tok).catch(() => ({}));
+        await admin.from('social_posts').update({ status: 'published', media_id: published.id, permalink: info.permalink ?? null, published_at: new Date().toISOString(), error: null }).eq('id', post.id);
+        report.published = info.permalink ?? published.id;
+      }
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
-      await admin.from('social_posts').update({ status: post.attempts + 1 >= 3 ? 'failed' : 'queued', error: msg }).eq('id', post.id);
+      await admin.from('social_posts').update({ status: post.attempts + 1 >= 3 ? 'failed' : 'queued', attempts: post.attempts + 1, error: msg }).eq('id', post.id);
       console.error('instagram publish failed:', msg);
       report.publish_error = msg;
     }
@@ -103,7 +129,7 @@ Deno.serve(async (req) => {
 
   // 3. Collect new comments on posts from the last three weeks (not our own).
   const since = new Date(Date.now() - 21 * DAY).toISOString();
-  const { data: recent } = await admin.from('social_posts').select('id, media_id, metrics_at').eq('status', 'published').gte('published_at', since);
+  const { data: recent } = await admin.from('social_posts').select('id, media_id, media_type, metrics_at').eq('status', 'published').gte('published_at', since);
   let fresh = 0;
   for (const p of recent ?? []) {
     if (!p.media_id) continue;
@@ -123,9 +149,10 @@ Deno.serve(async (req) => {
     if (!p.metrics_at || Date.now() - new Date(p.metrics_at).getTime() > 6 * 3600000) {
       try {
         const m = await graph(`/${p.media_id}?fields=like_count,comments_count`, tok);
-        const ins = await graph(`/${p.media_id}/insights?metric=reach,saved`, tok).catch(() => ({ data: [] }));
+        const metrics = p.media_type === 'REELS' ? 'reach,saved,shares,views,ig_reels_avg_watch_time' : p.media_type === 'STORIES' ? 'reach,shares,views' : 'reach,saved,shares,views';
+        const ins = await graph(`/${p.media_id}/insights?metric=${metrics}`, tok).catch(() => ({ data: [] }));
         const val = (name: string) => ins.data?.find((x: { name: string }) => x.name === name)?.values?.[0]?.value ?? null;
-        await admin.from('social_posts').update({ likes: m.like_count ?? null, comments: m.comments_count ?? null, reach: val('reach'), saves: val('saved'), metrics_at: new Date().toISOString() }).eq('id', p.id);
+        await admin.from('social_posts').update({ likes: m.like_count ?? null, comments: m.comments_count ?? null, reach: val('reach'), saves: val('saved'), shares: val('shares'), plays: val('views'), avg_watch_ms: val('ig_reels_avg_watch_time'), metrics_at: new Date().toISOString() }).eq('id', p.id);
       } catch (e) {
         console.warn('metrics skipped:', e instanceof Error ? e.message : e);
       }

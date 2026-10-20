@@ -8,6 +8,8 @@ Posts go out automatically through Meta's official Instagram API. No password is
 - **Social manager:** a daily agent that follows `docs/social/MANAGER.md`: replies to comments, keeps 10+ days queued, reports weekly.
 - **Token:** pasted once as the `INSTAGRAM_TOKEN` secret, then kept in `public.social_auth` and refreshed weekly, so it does not expire.
 - **Content:** `docs/social/queue-<month>.json` (text) → `docs/social/render.mjs` (images, 1080×1350 JPEG into `app/public/social/`) → rows in `social_posts`. Every caption passes the content lint. `preview-<month>.png` shows the month at a glance.
+- **Reels and Stories:** `docs/social/reels-<month>.json` → `docs/social/render-reel.mjs reels …` (1080×1920 MP4 + cover into `app/public/social/reels/`); `render-reel.mjs stories <queue file> …` makes the day's Story image into `app/public/social/stories/`. Formats are described at the top of `render-reel.mjs`; the daily plan is `PLAN.md`.
+- **Kinds of post:** `media_type` is `IMAGE` (`image_url`), `REELS` (`video_url`, `cover_url`), `STORIES` (`image_url` or `video_url`, no caption; Business accounts only) or `CAROUSEL` (`children`: a JSON list of up to 10 image links). One of each kind can share a time slot.
 
 ## Pause or change a post
 - Pause one: set its `status` to `held`. Pause everything: `select cron.unschedule('instagram-publish');`
