@@ -2,8 +2,8 @@
 
 Everything to paste is below. Images are in `docs/growth/launch/images/`.
 
-Site: https://within-oracle.withinoracle.workers.dev/
-Privacy: https://within-oracle.withinoracle.workers.dev/privacy/
+Site: https://withinoracle.app/
+Privacy: https://withinoracle.app/privacy/
 Support email: privacy@praxisglobal.ai
 
 ---

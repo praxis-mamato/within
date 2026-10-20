@@ -18,7 +18,7 @@ Revenue to date: **$0**. No bookings yet.
 ### 1. Booked but not paid (send after 24 hours, once)
 Subject: Your reading with Within
 > Hi, you started booking a live reading with Within and didn't get to the payment step. If you still
-> want it, you can pick up where you left off here: https://within-oracle.withinoracle.workers.dev/#/astrologer
+> want it, you can pick up where you left off here: https://withinoracle.app/#/astrologer
 > If you have a question about the sessions first (what we cover, timing, Western or Vedic), just reply
 > to this email. No pressure either way.
 

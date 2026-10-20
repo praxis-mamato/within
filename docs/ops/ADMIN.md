@@ -6,7 +6,7 @@ to do: check, fix what is yours to fix, and report in a few lines. Write plainly
 
 ## Systems
 
-- **Site:** https://within-oracle.withinoracle.workers.dev/ (Cloudflare, deploys on every push to
+- **Site:** https://withinoracle.app/ (Cloudflare, deploys on every push to
   `claude/epic-gates-6t5iqb`). Old address praxis-mamato.github.io/within (GitHub Pages).
 - **Supabase** project `lykmusmsfwvaeqxtsbrc`: tables `entitlements`, `astrologer_bookings`, `reviews`,
   `access_codes`, `access_code_redemptions`, `ai_usage`, `usage_events`, `crash_reports`; edge functions
@@ -54,7 +54,7 @@ to do: check, fix what is yours to fix, and report in a few lines. Write plainly
 
 - **Add a partner** on request: insert into `affiliates` (code: lowercase letters, numbers and dashes,
   2–32 characters, e.g. `fiona-marques`; name: the business or show name). Their link is
-  `https://within-oracle.withinoracle.workers.dev/?ref=<code>` and works for 60 days after a click.
+  `https://withinoracle.app/?ref=<code>` and works for 60 days after a click.
 - **On the 1st of each month**, report each partner's commission for the previous month from
   `affiliate_earnings` where `payout_id` is null (sum of `commission`, in cents), so Maggie can pay them.
   After she confirms a payment, set `payout_id` (e.g. `2026-11-paypal`) on those rows.

@@ -1,3 +1,3 @@
 User-agent: *
 Allow: /
-Sitemap: https://within-oracle.withinoracle.workers.dev/sitemap.xml
+Sitemap: https://withinoracle.app/sitemap.xml

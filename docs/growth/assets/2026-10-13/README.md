@@ -6,7 +6,7 @@ Also retrograde in this window: Venus (direct Nov 14, back in Libra from Oct 25)
 Full Moon in Taurus Oct 26 04:12 UTC (evening of Oct 25 on the US West Coast). New Moon in Scorpio Nov 9.
 
 Post from Within's own Instagram / TikTok / Pinterest only. Maggie posts (nothing goes out without her).
-Link in bio: https://within-oracle.withinoracle.workers.dev/links/ (first button now opens the new
+Link in bio: https://withinoracle.app/links/ (first button now opens the new
 Mercury retrograde page). Every caption passes the content lint.
 
 ## Posting calendar

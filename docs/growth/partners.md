@@ -38,7 +38,7 @@ Subject: Live clients for your practice, through Within
 > client pays through Within before you meet. We'd propose you keep 70% of each booking.
 > Separately, if your clients would enjoy the app between sessions, you'd earn 30% of their first
 > year through your own link. Would you be open to a 15-minute call this week or next?
-> [Maggie], Within · https://within-oracle.withinoracle.workers.dev/
+> [Maggie], Within · https://withinoracle.app/
 
 ### To a podcast or newsletter (offer D or A)
 Subject: Mercury retrograde (Oct 24 – Nov 13): a sponsor or affiliate fit?
@@ -47,7 +47,7 @@ Subject: Mercury retrograde (Oct 24 – Nov 13): a sponsor or affiliate fit?
 > and questions stay on the user's phone. With Mercury retrograde in Scorpio from Oct 24, we'd love to
 > sponsor one [episode / issue], or, if you prefer, give you an affiliate link paying 30% of every
 > membership your listeners take in their first year. Could you send your media kit or rates?
-> [Maggie], Within · https://within-oracle.withinoracle.workers.dev/
+> [Maggie], Within · https://withinoracle.app/
 
 ### To a yoga or wellness studio (offer C)
 Subject: A perk for your members: their birth chart, read in full
@@ -55,7 +55,7 @@ Subject: A perk for your members: their birth chart, read in full
 > astrology and answers their questions from it, privately on their phone. We're offering a handful of
 > studios Within memberships as a members' perk at a studio rate, starting at 10 seats. Happy to give
 > your team free access for a month to try it first. Would that be worth a short call?
-> [Maggie], Within · https://within-oracle.withinoracle.workers.dev/
+> [Maggie], Within · https://withinoracle.app/
 
 ## Log
 | Date | Partner | Action | Result |

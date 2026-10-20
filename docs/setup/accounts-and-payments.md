@@ -52,7 +52,7 @@ In the Supabase dashboard:
    | `STRIPE_PRICE_MONTHLY` | `price_…` for $9.99/month |
    | `STRIPE_PRICE_YEARLY` | `price_…` for $100/year |
    | `STRIPE_WEBHOOK_SECRET` | `whsec_…` (step 2) |
-   | `SITE_URLS` | `https://within-oracle.withinoracle.workers.dev/,https://praxis-mamato.github.io/within/,http://localhost:5173/` |
+   | `SITE_URLS` | `https://withinoracle.app/,https://praxis-mamato.github.io/within/,http://localhost:5173/` |
 
 5. **Project Settings → API:** copy the **Project URL** and the **anon / publishable key** for step 5. (These two are public by design: row-level security limits what they can read. Never share the `service_role` key.)
 
