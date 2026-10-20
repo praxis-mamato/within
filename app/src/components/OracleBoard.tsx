@@ -346,7 +346,14 @@ export function useShake(onShake: () => void) {
       }
     };
     window.addEventListener('devicemotion', handler);
-    return () => window.removeEventListener('devicemotion', handler);
+    // iPhones only allow motion after a tap: ask on the first touch anywhere, so a shake works from then on.
+    const DM = window.DeviceMotionEvent as unknown as { requestPermission?: () => Promise<string> } | undefined;
+    const firstTouch = () => void DM?.requestPermission?.().catch(() => 'denied');
+    if (DM?.requestPermission) document.addEventListener('touchend', firstTouch, { once: true });
+    return () => {
+      window.removeEventListener('devicemotion', handler);
+      document.removeEventListener('touchend', firstTouch);
+    };
   }, []);
   return async () => {
     const DM = window.DeviceMotionEvent as unknown as { requestPermission?: () => Promise<string> } | undefined;

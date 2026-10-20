@@ -21,6 +21,8 @@ import { factSheet, requestDeepReading, type DeepResult } from '../services/aiRe
 import { track } from '../services/telemetry';
 import { useStore } from '../state';
 
+/** What a shake asks when no question is written. */
+const SHAKE_QUESTION = 'What do I need to know today?';
 const FREE_PER_DAY = 3;
 const EXAMPLES = [
   'Show my chart’s energy',
@@ -154,7 +156,8 @@ export default function Oracle() {
     board.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     window.setTimeout(() => setPhase('answered'), window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ? 0 : 2600);
   };
-  const enableShake = useShake(() => ask());
+  // Shake with a question to ask it; shake with none for today's message, like an oracle's ball.
+  const enableShake = useShake(() => (q.trim() ? ask() : ask(SHAKE_QUESTION)));
   const energy = useMemo(() => {
     if (!me || answer?.intent !== 'energy') return null;
     const asc = me.timePrecision === 'exact' ? ascendantAndMidheaven(me.utc, place.lat, place.lon).asc : null;
@@ -364,7 +367,7 @@ export default function Oracle() {
             {phase === 'seeking' ? 'The Oracle is reading the sky…' : 'Ask the Oracle'}
           </button>
           <p className="small oracle-muted">
-            Or shake your phone once your question is written. {Number.isFinite(left) ? `${left} of ${FREE_PER_DAY} free questions left today.` : 'Unlimited questions with your subscription.'}
+            Or shake your phone: with a question to ask it, or with none for today’s message. {Number.isFinite(left) ? `${left} of ${FREE_PER_DAY} free questions left today.` : 'Unlimited questions with your subscription.'}
           </p>
           {note && <p className="small oracle-note">{note}</p>}
         </form>
