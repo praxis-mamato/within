@@ -4,7 +4,8 @@ Posts go out automatically through Meta's official Instagram API. No password is
 
 ## How it works
 - **Queue:** `public.social_posts` in Supabase. Each row: when to post (`scheduled_at`), the image (`https://withinoracle.app/social/<date>.jpg`), and the caption. Status: `queued` → `published` (with its `permalink`), or `held` (paused by hand), `failed` (after 3 tries, with `error`), `expired` (missed its moment by 18 hours; dated posts are not published late).
-- **Publisher:** the `instagram-publish` edge function, run every 15 minutes by `pg_cron`. It posts at most one due post per run.
+- **Publisher:** the `instagram-publish` edge function, run every 15 minutes by `pg_cron`. Each run posts at most one due post, sends approved comment replies, collects new comments into `social_comments`, and refreshes likes, comments, reach, and saves on recent posts.
+- **Social manager:** a daily agent that follows `docs/social/MANAGER.md`: replies to comments, keeps 10+ days queued, reports weekly.
 - **Token:** pasted once as the `INSTAGRAM_TOKEN` secret, then kept in `public.social_auth` and refreshed weekly, so it does not expire.
 - **Content:** `docs/social/queue-<month>.json` (text) → `docs/social/render.mjs` (images, 1080×1350 JPEG into `app/public/social/`) → rows in `social_posts`. Every caption passes the content lint. `preview-<month>.png` shows the month at a glance.
 
