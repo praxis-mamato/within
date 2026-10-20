@@ -5,8 +5,9 @@
 import { BODIES, nakshatraOf, norm, RASHIS, SIGNS, tropicalLongitude, lahiriAyanamsa, antardashas } from '../astro/chart';
 import { fmtDeg, type NatalChart } from '../astro/natal';
 import { currentTransits } from '../astro/facts';
-import { NAKSHATRA, SIGN_ELEMENT, LIBRARY_VERSION } from './templates';
+import { NAKSHATRA, LIBRARY_VERSION } from './templates';
 import * as W from './western';
+import { chartBalance, ELEMENT_INTRO, ELEMENTS, MODES, POLARITY, type Element, type Mode } from './elements';
 import * as V from './vedic';
 
 export interface ReadingItem {
@@ -119,26 +120,31 @@ export function westernReading(c: NatalChart, now = new Date()): ReadingSection[
       : [{ heading: 'Few close aspects', text: 'Your personal planets form few tight angles, which may let each part of you work fairly independently.' }],
   });
 
-  // 5. Balance and lunar phase
-  const counted = c.western.planets.filter((x) => PERSONAL.includes(x.body));
-  const elements: Record<string, number> = { fire: 0, earth: 0, air: 0, water: 0 };
-  const modes: Record<string, number> = { cardinal: 0, fixed: 0, mutable: 0 };
-  for (const x of counted) {
-    const w = x.body === 'Sun' || x.body === 'Moon' ? 2 : 1;
-    elements[SIGN_ELEMENT[x.sign]] += w;
-    modes[W.SIGN_MODALITY[x.sign]] += w;
-  }
-  const byCount = Object.entries(elements).sort((a, b) => b[1] - a[1]);
-  const topMode = Object.entries(modes).sort((a, b) => b[1] - a[1])[0];
+  // 5. Elements, modes, polarity, and lunar phase
+  const bal = chartBalance(c);
+  const els = (Object.keys(ELEMENTS) as Element[]).sort((a, b) => bal.elementPct[b] - bal.elementPct[a]);
+  const mds = (Object.keys(MODES) as Mode[]).sort((a, b) => bal.modePct[b] - bal.modePct[a]);
+  const lower = (s: string) => s.charAt(0).toLowerCase() + s.slice(1);
+  const level = (pct: number) => (pct >= 35 ? 'strong' : pct >= 20 ? 'present' : pct >= 10 ? 'light' : 'little');
   const phaseAngle = norm(moon.longitude - sun.longitude);
   const phase = [...W.LUNAR_PHASE].reverse().find((x) => phaseAngle >= x.from)!;
   sections.push({
     id: 'w-balance',
-    title: 'Temperament and lunar phase',
+    title: 'Elements, modes, and lunar phase',
+    intro: ELEMENT_INTRO,
     items: [
-      { heading: `Most emphasized element: ${byCount[0][0]}`, text: `Your chart leans toward ${W.ELEMENT_BALANCE[byCount[0][0]].strong}.`, basis: `Weighted count (Sun and Moon count double): ${byCount.map(([k, v]) => `${k} ${v}`).join(', ')}` },
-      ...(byCount[3][1] === 0 ? [{ heading: `Little ${byCount[3][0]}`, text: `With no personal planets in ${byCount[3][0]} signs, ${W.ELEMENT_BALANCE[byCount[3][0]].weak}.` }] : []),
-      { heading: `Most emphasized mode: ${topMode[0]}`, text: `You may be strongest at ${W.MODALITY_BALANCE[topMode[0]]}.`, basis: Object.entries(modes).map(([k, v]) => `${k} ${v}`).join(', ') },
+      { heading: `Your signature: ${MODES[mds[0]].name} ${els[0]}`, text: `${ELEMENTS[els[0]].nature} ${MODES[mds[0]].nature}`, basis: `Sun, Moon, and rising count triple; Mercury, Venus, and Mars double; Jupiter and Saturn once; the outer planets are left out` },
+      ...els.map((e) => ({
+        heading: `${ELEMENTS[e].name} ${bal.elementPct[e]}% (${level(bal.elementPct[e])})`,
+        text: bal.elementPct[e] >= 30 ? `${ELEMENTS[e].strong} Gifts: ${lower(ELEMENTS[e].gifts)} Watch for: ${lower(ELEMENTS[e].shadow)}` : bal.elementPct[e] < 12 ? `${ELEMENTS[e].missing} What helps: ${lower(ELEMENTS[e].helps)}` : `${ELEMENTS[e].nature} You have enough to draw on when you need it.`,
+        basis: `${ELEMENTS[e].signs}. Yours: ${bal.who[e].join(', ') || 'none'}`,
+      })),
+      ...mds.map((m) => ({
+        heading: `${MODES[m].name} ${bal.modePct[m]}% (${level(bal.modePct[m])})`,
+        text: bal.modePct[m] >= 40 ? `${MODES[m].strong} Watch for: ${lower(MODES[m].shadow)}` : bal.modePct[m] < 15 ? `${MODES[m].missing}` : `${MODES[m].nature} ${MODES[m].season}`,
+        basis: `${MODES[m].signs}. Yours: ${bal.who[m].join(', ') || 'none'}`,
+      })),
+      { heading: bal.yang >= 55 ? 'More active than receptive' : bal.yang <= 45 ? 'More receptive than active' : 'Active and receptive in balance', text: `${bal.yang}% fire and air, ${100 - bal.yang}% earth and water. ${bal.yang >= 55 ? POLARITY.yang.text : bal.yang <= 45 ? POLARITY.yin.text : 'You can move outward and draw inward with equal ease.'}`, basis: 'Polarity' },
       { heading: `Born at the ${phase.name}`, text: `The Moon was ${Math.round(phaseAngle)}° ahead of the Sun. This phase is often read as ${phase.meaning}.`, basis: 'Lunar phase (Rudhyar’s eight phases)' },
     ],
   });

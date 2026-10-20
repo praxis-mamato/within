@@ -19,6 +19,7 @@ import { cycles } from './cycles';
 import { findPatterns } from './patternRules';
 import { relationshipReading } from './relationship';
 import { subjectIn, windowIn } from './askedAbout';
+import { ELEMENT_Q, elementReading, SIGN_ENERGY } from './elements';
 import { computeNatal } from '../astro/natal';
 import { placeLabel, type Place } from '../geo/places';
 import { composite, progressedSynastry } from '../astro/relationship';
@@ -38,7 +39,7 @@ import { consulted, dayScores, oracleLayers, type Layer } from './oracleLayers';
 import * as V from './vedic';
 import * as W from './western';
 
-export type Intent = 'simplify' | 'energy' | 'area' | 'decision' | 'when' | 'return' | 'retro' | 'lunation' | 'together' | 'chart' | 'patterns' | 'feeling' | 'cycle' | 'week' | 'planet' | 'sky' | 'open';
+export type Intent = 'simplify' | 'energy' | 'elements' | 'area' | 'decision' | 'when' | 'return' | 'retro' | 'lunation' | 'together' | 'chart' | 'patterns' | 'feeling' | 'cycle' | 'week' | 'planet' | 'sky' | 'open';
 
 export interface OracleReply {
   intent: Intent;
@@ -199,6 +200,7 @@ const INTENTS: [Intent, RegExp][] = [
   ['when', /^when\b|\bwhen (is|should|will|can|do|does|would|might)\b|\bbest (time|day|week|month)\b|\bgood (time|day|week)\b|\blucky (day|time)\b|\bwhich (day|week|month)\b|\bwhat day\b/i],
   ['together', /\bcompatib|\bsynastry\b|\bour (relationship|charts?|connection|bond)\b|\bthe two of us\b|\bare we\b|\bdo we (fit|match|work)\b|\bus together\b/i],
   ['week', /\bmy week\b|\bweek look\b|\bthis week\b|\bnext week\b|\bthe week\b|\bthis month\b|\bnext month\b|\bcoming (days|weeks)\b|\bweekend\b|\bahead\b/i],
+  ['elements', ELEMENT_Q],
   ['patterns', /\bpatterns?\b|\bwhy do i (always|keep)\b|\bkeep (repeating|doing|attracting)\b|\bstrengths?\b|\bweakness|\bwho am i\b|\bpersonality\b|\bmy gifts?\b|\bwhat am i (like|good at)\b/i],
   ['chart', /\bmy (sun|moon|rising|ascendant|mercury|venus|mars|jupiter|saturn|uranus|neptune|pluto|north node|node|chart|big three|signs?|nakshatra|dasha|lagna|midheaven|mc|houses?|placements?|birth chart)\b|\bwhat sign am i\b|\bwhat('s| is) my\b|\b(maha)?dasha\b|\bnakshatra\b|\bmy (rising|moon|sun) sign\b/i],
   ['feeling', /\bwhy do i feel\b|\bi('m| am)? feel(ing)?\b|\bfeeling\b/i],
@@ -832,6 +834,10 @@ function answerOnly(question: string, ctx: OracleContext): OracleReply {
       const live = relationshipInEffect(ctx);
       return { ...base, intent, label: `You and ${ctx.other.name}`, orb: 'TWO CHARTS', points: 'Venus', lines: [...items.slice(0, 1), ...live.slice(0, 2), ...items.slice(1, 2)], deeper: [...live.slice(2, 8), ...items.slice(2)] };
     }
+    case 'elements': {
+      const r = elementReading(c, place, now);
+      return { ...base, intent, points: 'Sun', ...r };
+    }
     case 'chart': {
       const r = natalLines(c, q, place);
       return { ...base, intent, ...r };
@@ -1019,7 +1025,7 @@ export function boardInfo(kind: 'planet' | 'sign' | 'tone', name: string, c: Nat
   const first = mine.find((m) => m !== 'North Node');
   return {
     title: name,
-    text: `${cap(W.SIGN_KEYWORD[name])}.${mine.length ? ` In your chart: your ${mine.join(', ')}.` : ' None of your birth planets are here.'}${rising ? ' It is also your rising sign.' : ''}`,
+    text: `${SIGN_ENERGY[name] ?? `${cap(W.SIGN_KEYWORD[name])}.`}${mine.length ? ` In your chart: your ${mine.join(', ')}.` : ' None of your birth planets are here.'}${rising ? ' It is also your rising sign.' : ''}`,
     ask: rising ? 'What’s my rising sign?' : first ? `What does my ${first} mean?` : undefined,
   };
 }
