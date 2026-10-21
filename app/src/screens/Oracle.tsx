@@ -27,6 +27,7 @@ const SHAKE_QUESTION = 'What do I need to know today?';
 const FREE_PER_DAY = 3;
 const EXAMPLES = [
   'Show my chart’s energy',
+  'What’s my archetype?',
   'What’s my rising sign?',
   'When is a good day to ask for a raise?',
   'Is Mercury retrograde?',

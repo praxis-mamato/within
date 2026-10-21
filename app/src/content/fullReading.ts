@@ -7,6 +7,7 @@ import { fmtDeg, type NatalChart } from '../astro/natal';
 import { currentTransits } from '../astro/facts';
 import { NAKSHATRA, LIBRARY_VERSION } from './templates';
 import * as W from './western';
+import { ARCHETYPE_INTRO, chartArchetypes } from './archetypes';
 import { chartBalance, ELEMENT_INTRO, ELEMENTS, MODES, POLARITY, type Element, type Mode } from './elements';
 import * as V from './vedic';
 
@@ -149,7 +150,19 @@ export function westernReading(c: NatalChart, now = new Date()): ReadingSection[
     ],
   });
 
-  // 6. The sky now
+  // 6. Archetypes: the cast of characters in the chart
+  sections.push({
+    id: 'w-archetypes',
+    title: 'Your archetypes',
+    intro: ARCHETYPE_INTRO,
+    items: chartArchetypes(c).map((m) => ({
+      heading: m.heading,
+      text: m.note ?? `${m.archetype.essence} Gift: ${lower(m.archetype.gift)} In its shadow: ${lower(m.archetype.shadow)} Growth: ${lower(m.archetype.growth)}`,
+      basis: `${m.basis}. Also called ${m.archetype.also}`,
+    })),
+  });
+
+  // 7. The sky now
   const nowItems: ReadingItem[] = currentTransits(c, now).map((t) => ({ heading: t, text: transitText(t), basis: 'Transit within 2°' }));
   const moonNow = SIGNS[Math.floor(tropicalLongitude('Moon', now) / 30)];
   nowItems.unshift({ heading: `The Moon today is in ${moonNow}`, text: `A two-to-three-day mood that touches everyone: a collective tone of ${W.SIGN_KEYWORD[moonNow]}. You and the people around you may feel it differently, depending on your own charts.`, basis: 'Transiting Moon' });

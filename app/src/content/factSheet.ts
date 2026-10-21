@@ -5,6 +5,7 @@
 import { fmtDeg, type NatalChart } from '../astro/natal';
 import { allAspects, aspectPatterns, dashaCalendar, lordshipYogas, monthAhead, synastry, vargas } from '../astro/deep';
 import { vedicYogas, type ReadingSection } from './fullReading';
+import { chartArchetypes } from './archetypes';
 import { placidusCusps, SIGNS } from '../astro/chart';
 import { progressions, solarArc, solarReturn, yearAhead } from '../astro/progressions';
 import { weekAhead } from '../astro/week';
@@ -58,6 +59,7 @@ function westernFacts(c: NatalChart): string[] {
   if (!c.western.moonSign.certain) f.push(`Moon sign uncertain: ${c.western.moonSign.options.join(' or ')} (Western)`);
   for (const a of allAspects(c).slice(0, 14)) f.push(`${a.a} ${a.aspect} ${a.b}, orb ${fmtDeg(a.orb)} (Western)`);
   for (const p of aspectPatterns(c)) f.push(`${p.name}: ${p.bodies.join(', ')} (${p.where}) (Western)`);
+  for (const m of chartArchetypes(c)) f.push(`${m.heading.replace(/^Your |, twice over$/g, '')} (${m.basis.split(':')[0]}; also called ${m.archetype.also}) (archetype)`);
   return f;
 }
 

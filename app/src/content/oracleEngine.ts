@@ -20,6 +20,7 @@ import { findPatterns } from './patternRules';
 import { relationshipReading } from './relationship';
 import { subjectIn, windowIn } from './askedAbout';
 import { ELEMENT_Q, elementReading, SIGN_ENERGY } from './elements';
+import { ARCHETYPE_Q, archetypeReading } from './archetypes';
 import { computeNatal } from '../astro/natal';
 import { placeLabel, type Place } from '../geo/places';
 import { composite, progressedSynastry } from '../astro/relationship';
@@ -39,7 +40,7 @@ import { consulted, dayScores, oracleLayers, type Layer } from './oracleLayers';
 import * as V from './vedic';
 import * as W from './western';
 
-export type Intent = 'simplify' | 'energy' | 'elements' | 'area' | 'decision' | 'when' | 'return' | 'retro' | 'lunation' | 'together' | 'chart' | 'patterns' | 'feeling' | 'cycle' | 'week' | 'planet' | 'sky' | 'open';
+export type Intent = 'simplify' | 'energy' | 'archetype' | 'elements' | 'area' | 'decision' | 'when' | 'return' | 'retro' | 'lunation' | 'together' | 'chart' | 'patterns' | 'feeling' | 'cycle' | 'week' | 'planet' | 'sky' | 'open';
 
 export interface OracleReply {
   intent: Intent;
@@ -200,6 +201,7 @@ const INTENTS: [Intent, RegExp][] = [
   ['when', /^when\b|\bwhen (is|should|will|can|do|does|would|might)\b|\bbest (time|day|week|month)\b|\bgood (time|day|week)\b|\blucky (day|time)\b|\bwhich (day|week|month)\b|\bwhat day\b/i],
   ['together', /\bcompatib|\bsynastry\b|\bour (relationship|charts?|connection|bond)\b|\bthe two of us\b|\bare we\b|\bdo we (fit|match|work)\b|\bus together\b/i],
   ['week', /\bmy week\b|\bweek look\b|\bthis week\b|\bnext week\b|\bthe week\b|\bthis month\b|\bnext month\b|\bcoming (days|weeks)\b|\bweekend\b|\bahead\b/i],
+  ['archetype', ARCHETYPE_Q],
   ['elements', ELEMENT_Q],
   ['patterns', /\bpatterns?\b|\bwhy do i (always|keep)\b|\bkeep (repeating|doing|attracting)\b|\bstrengths?\b|\bweakness|\bwho am i\b|\bpersonality\b|\bmy gifts?\b|\bwhat am i (like|good at)\b/i],
   ['chart', /\bmy (sun|moon|rising|ascendant|mercury|venus|mars|jupiter|saturn|uranus|neptune|pluto|north node|node|chart|big three|signs?|nakshatra|dasha|lagna|midheaven|mc|houses?|placements?|birth chart)\b|\bwhat sign am i\b|\bwhat('s| is) my\b|\b(maha)?dasha\b|\bnakshatra\b|\bmy (rising|moon|sun) sign\b/i],
@@ -833,6 +835,10 @@ function answerOnly(question: string, ctx: OracleContext): OracleReply {
       // What is moving between you now comes right after the core dynamic.
       const live = relationshipInEffect(ctx);
       return { ...base, intent, label: `You and ${ctx.other.name}`, orb: 'TWO CHARTS', points: 'Venus', lines: [...items.slice(0, 1), ...live.slice(0, 2), ...items.slice(1, 2)], deeper: [...live.slice(2, 8), ...items.slice(2)] };
+    }
+    case 'archetype': {
+      const r = archetypeReading(c, now);
+      return { ...base, intent, points: 'Sun', ...r };
     }
     case 'elements': {
       const r = elementReading(c, place, now);

@@ -47,7 +47,7 @@ describe('full readings', () => {
   it.each(charts.map((c, i) => [people[i].date, c]))('%s: complete, filled, and within the content rules', (_d, c) => {
     const w = westernReading(c, now);
     const v = vedicReading(c, '1990-01-01', now);
-    expect(w.map((s) => s.id)).toEqual(['w-big3', 'w-signs', 'w-houses', 'w-aspects', 'w-balance', 'w-now']);
+    expect(w.map((s) => s.id)).toEqual(['w-big3', 'w-signs', 'w-houses', 'w-aspects', 'w-balance', 'w-archetypes', 'w-now']);
     expect(v.map((s) => s.id)).toEqual(['v-lagna', 'v-moon', 'v-grahas', 'v-yogas', 'v-dasha', 'v-panchang', 'v-now']);
     const text = [...w, ...v].flatMap((s) => [s.title, s.intro ?? '', ...s.items.flatMap((i) => [i.heading, i.text, i.basis ?? ''])]).join(' ');
     expect(text).not.toMatch(/undefined|NaN|\[object/);

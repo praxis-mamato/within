@@ -13,6 +13,7 @@ import { PLANET_IN_SIGN, RISING, RULER, SIGN_KEYWORD, SIGN_MODALITY } from '../s
 import { PLANET_HIGH, PLANET_LOW } from '../src/content/energy';
 import { computeNatal, type BirthInput } from '../src/astro/natal';
 import { consultOracle } from '../src/content/oracleEngine';
+import { ARCHETYPE_INTRO, PLANET_ARCHETYPE, SIGN_ARCHETYPE } from '../src/content/archetypes';
 import { ELEMENT_INTRO, ELEMENTS, MODES, POLARITY, SIGN_ENERGY, ELEMENT_OF, MODE_OF, type Element, type Mode } from '../src/content/elements';
 
 const root = join(dirname(new URL(import.meta.url).pathname), '..');
@@ -90,6 +91,7 @@ const NAV: [string, string][] = [
   ['retrogrades/', 'Retrogrades'],
   ['zodiac/', 'Zodiac signs'],
   ['elements/', 'Elements and modes'],
+  ['archetypes/', 'Archetypes'],
 ];
 
 function cta(text = 'Ask the Oracle, free') {
@@ -484,6 +486,30 @@ ${cta('See my elements')}`,
   });
 }
 
+// ---------- Archetypes ----------
+function archetypePages() {
+  const faqs: [string, string][] = [
+    ['What is my astrological archetype?', 'Your core archetype comes from your Sun sign: who you are becoming. Your Moon sign gives your inner archetype (what you need), your rising sign how you meet the world, and the planet that rules your rising sign is your guide.'],
+    ['What are the 12 zodiac archetypes?', Object.entries(SIGN_ARCHETYPE).map(([sg, a]) => `${sg}: ${a.name}`).join('; ') + '.'],
+    ['What are the planetary archetypes?', Object.entries(PLANET_ARCHETYPE).map(([b, a]) => `${b}: ${a.name}`).join('; ') + '.'],
+  ];
+  const card = (title: string, a: (typeof SIGN_ARCHETYPE)[string]) =>
+    `<h3>${esc(title)}: ${esc(a.name)} <span class="fine">(also ${esc(a.also)})</span></h3><p>${esc(a.essence)}</p><p><strong>Gift:</strong> ${esc(a.gift)} <strong>Shadow:</strong> ${esc(a.shadow)} <strong>Growth:</strong> ${esc(a.growth)}</p>`;
+  pages.push({
+    path: 'archetypes/',
+    title: 'Astrology archetypes: the 12 zodiac signs and 10 planets as archetypes | Within',
+    description: 'The archetype of every zodiac sign and planet, from the Pioneer to the Mystic and the Hero to the Phoenix: their gifts, shadows, and growth, and how to find your own.',
+    h1: 'The archetypes of astrology',
+    body: `<p class="lede">${esc(ARCHETYPE_INTRO)}</p>
+<h2>Find your own</h2><p>Your Sun sign is your core archetype, your Moon sign your inner archetype, your rising sign how you meet the world, and the planet that rules your rising sign is your guide. The Oracle reads all of them from your birth chart.</p>
+${cta('Find my archetype')}
+<h2>The 12 zodiac archetypes</h2>${SIGNS.map((sg) => card(sg, SIGN_ARCHETYPE[sg])).join('')}
+<h2>The 10 planetary archetypes</h2>${Object.entries(PLANET_ARCHETYPE).map(([b, a]) => card(b, a)).join('')}
+${cta('Find my archetype')}`,
+    ld: [{ '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: faqs.map(([q, a]) => ({ '@type': 'Question', name: q, acceptedAnswer: { '@type': 'Answer', text: a } })) }],
+  });
+}
+
 // ---------- Guides ----------
 function guides() {
   const faqLd = (faqs: [string, string][]) => ({ '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: faqs.map(([q, a]) => ({ '@type': 'Question', name: q, acceptedAnswer: { '@type': 'Answer', text: a } })) });
@@ -626,6 +652,7 @@ retrogrades();
 mercuryRetrograde();
 zodiac();
 elementPages();
+archetypePages();
 guides();
 privacy();
 
