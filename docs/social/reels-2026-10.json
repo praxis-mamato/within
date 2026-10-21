@@ -1,5 +1,38 @@
 [
  {
+  "date": "2026-10-21",
+  "format": "pause",
+  "hook": "Pause the crystal ball.|That's your message today.",
+  "open": "PAUSE",
+  "items": [
+   {
+    "word": "TRUST IT",
+    "line": "The quiet hunch you keep|talking yourself out of."
+   },
+   {
+    "word": "SOFTEN",
+    "line": "Be gentler with yourself today|than you were yesterday."
+   },
+   {
+    "word": "FINISH",
+    "line": "Close one small loop.|It frees more than you think."
+   },
+   {
+    "word": "REACH|OUT",
+    "line": "Someone would love|to hear from you."
+   },
+   {
+    "word": "BREATHE",
+    "line": "Slow down before you answer.|The pause is wisdom."
+   },
+   {
+    "word": "RECEIVE",
+    "line": "Let help in.|You don't have to earn it."
+   }
+  ],
+  "caption": "Pause the crystal ball: your oracle message for today. 🔮\n\nWhatever it stops on is yours. Which one did you get?\n\nFor an answer from your own birth chart, ask the Oracle: link in bio.\n\n#oracle #crystalball #dailymessage #astrology #spiritualmessage"
+ },
+ {
   "date": "2026-10-22",
   "format": "pick",
   "hook": "Pick a crystal ball|for Mercury retrograde",
