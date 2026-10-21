@@ -1,10 +1,25 @@
 # WITHIN — Next features
 Draft 0.1 · October 6, 2026 · Builds on [`build-spec.md`](build-spec.md) and [`decisions/G0-gate-record.md`](decisions/G0-gate-record.md)
 
-## Where things stand
+## Where things stand (updated October 21, 2026)
 
 | Area | Status |
 |---|---|
+| App | **Live at https://withinoracle.app/** (Cloudflare). The old workers.dev and GitHub Pages addresses carry each person's saved data over once, then send them there. |
+| Charts | Western + Vedic in the browser; 99.97% match with Swiss Ephemeris. Progressions, solar arcs, solar return, year ahead, composite and Davison. |
+| Readings | Full Western and Vedic readings, patterns, cycles, relationships with several people, elements and modes. **Draft libraries: 0 approved yet** (A1 console built). |
+| The Oracle | Answers with dates (yes / not yet), shake to ask, the crystal ball. **Talk to the Oracle** (members, Claude-written, rule-checked) with on-device memory, opt-in. |
+| Accounts, payment, storage | Google and Apple sign-in (web), Stripe live ($9.99/month, $100/year with 14 days free), live readings from $350, encrypted on-device storage, export and delete. |
+| Safety | Screener, safety ops agent, drills passed. Per-country numbers **not yet human-verified**; out-of-hours coverage undecided. |
+| Measurement | Opt-in usage counts and crash reports; interview mode. |
+| Growth | SEO pages and sitemap, Instagram auto-posting (reels, stories, posts, replies), growth lead, deal-maker and social manager agents. |
+| Within for Claude | Plugin (`plugin/`) and connector (`mcp/`) merged; not deployed yet (`docs/claude-plugin.md`). |
+
+**Not built:** native iOS and Android apps (Capacitor), so no App Store, in-app purchase, real reminder notifications, or iCloud / Google Drive sync. Play Store and Microsoft Store listings wait on the launch kit steps.
+
+**Needs the owner:** approving the reading libraries, verifying safety resources, out-of-hours safety coverage, privacy review, assistive-technology testing with real users.
+
+---|---|
 | Prototype (E1) | Live at https://praxis-mamato.github.io/within/. All PRD §4–§5 screens, nothing stored. |
 | Charts | Live Western + Vedic in the browser; within 0.01° of Swiss Ephemeris on 6 reference charts. |
 | Place + time zone | 49,025 towns, historical daylight saving, manual override. |

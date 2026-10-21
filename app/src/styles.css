@@ -673,7 +673,7 @@ details > summary { cursor: pointer; margin: 8px 0; }
 .oracle-trad { font-family: 'Source Sans 3', sans-serif; font-size: 0.75rem; color: var(--o-gold); letter-spacing: 0.08em; text-transform: uppercase; }
 .sky-strip { margin: 6px 0 16px; }
 .sky-strip h2 { font-size: 1.25rem; margin: 0 0 8px; }
-.sky-strip ul { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.sky-strip ul { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 10rem), 1fr)); gap: 6px; }
 .sky-strip button { width: 100%; display: flex; gap: 8px; align-items: center; text-align: left; background: rgb(255 255 255 / 0.04); border: 1px solid rgb(226 194 126 / 0.3); border-radius: 10px; color: var(--o-ink); padding: 6px 8px; font: inherit; font-size: 0.875rem; min-height: 44px; cursor: pointer; }
 .sky-glyph { color: var(--o-gold); font-size: 1.2rem; width: 1.2em; text-align: center; }
 .packages { border: 0; padding: 0; margin: 0; display: grid; gap: 10px; }

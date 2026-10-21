@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Connect Within to Claude</title>
+<script>
+  // Supabase Auth sends people here (Site URL + authorization path) when they connect Within in Claude.
+  // The app uses hash routing, so forward to its consent screen with the same query.
+  var root = location.pathname.replace(/\/*oauth\/consent\/?(index\.html)?$/, '/');
+  location.replace(root + '#/oauth/consent' + location.search);
+</script>
+</head>
+<body>
+<p><a href="../../">Continue to Within</a></p>
+</body>
+</html>

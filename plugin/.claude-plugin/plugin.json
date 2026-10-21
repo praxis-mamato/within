@@ -1,0 +1,10 @@
+{
+  "name": "within-astrology",
+  "displayName": "Within Astrology",
+  "version": "0.1.0",
+  "description": "Birth chart, timing, and relationship readings in Western and Vedic astrology, calculated by Within and written by Claude in Within's careful, non-fatalistic style.",
+  "author": { "name": "Within", "url": "https://withinoracle.app/" },
+  "homepage": "https://withinoracle.app/",
+  "license": "MIT",
+  "keywords": ["astrology", "birth chart", "vedic", "horoscope", "transits", "synastry"]
+}
