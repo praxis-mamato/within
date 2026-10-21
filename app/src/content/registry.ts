@@ -132,10 +132,13 @@ const SOURCES: [section: string, module: string, Record<string, unknown>, [name:
     ['ORACLE_TONE', 'Answer tones'],
     ['ORACLE_REFRAME', 'Questions it does not answer'],
     ['ORACLE_TEXT', 'Framing and horary notes'],
+    ['ORACLE_MOON_NEXT', 'What the Moon’s next contact points to'],
   ]],
   ['The Oracle engine', 'oracleEngine', OE as Record<string, unknown>, [
     ['ORACLE_SAYS', 'The Oracle’s voice'],
     ['RETURN_MEANING', 'Planetary returns'],
+    ['ORACLE_HEARD', 'Hearing a feeling first'],
+    ['ORACLE_AREA_HEARD', 'Hearing a life-area question first'],
   ]],
   ['The Oracle’s full reading', 'oracleLayers', OL as Record<string, unknown>, [['LAYER_TEXT', 'Layer framing']]],
   ['Relationships', 'relationship', RL as Record<string, unknown>, [
