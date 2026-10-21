@@ -1,0 +1,198 @@
+[
+ {
+  "date": "evergreen-01",
+  "format": "pause",
+  "hook": "Pause the crystal ball.|That's your message today.",
+  "open": "PAUSE",
+  "items": [
+   {
+    "word": "REST",
+    "line": "Your energy is precious.|Spend it on what matters."
+   },
+   {
+    "word": "SPEAK UP",
+    "line": "Your voice belongs|in the room."
+   },
+   {
+    "word": "LET IT|BE",
+    "line": "Not everything needs|fixing today."
+   },
+   {
+    "word": "BEGIN",
+    "line": "The first small step|is the whole secret."
+   },
+   {
+    "word": "GRATITUDE",
+    "line": "Name three good things|before bed tonight."
+   },
+   {
+    "word": "PATIENCE",
+    "line": "It's ripening.|Give it time."
+   }
+  ],
+  "caption": "Pause the crystal ball: your oracle message for today. 🔮\n\nWhatever it stops on is yours. Which one did you get?\n\nAsk the Oracle your own question: link in bio.\n\n#oracle #crystalball #astrology #dailymessage #zodiac"
+ },
+ {
+  "date": "evergreen-02",
+  "format": "pick",
+  "hook": "Pick a crystal ball:|1, 2 or 3",
+  "open": "1 · 2 · 3",
+  "items": [
+   {
+    "word": "NEW DOOR",
+    "line": "Something you didn't plan for|may be worth a yes."
+   },
+   {
+    "word": "CLEAR",
+    "line": "Clear one space: a drawer,|a calendar, a conversation."
+   },
+   {
+    "word": "COURAGE",
+    "line": "Ask for the thing.|The worst answer is not yet."
+   }
+  ],
+  "caption": "Pick a crystal ball: 1, 2 or 3? ✦\n\nPause, choose, then watch the reveal.\n\nSend this to the friend who'd pick the same one.\n\n#pickacard #oracle #crystalball #astrology #spiritualmessage"
+ },
+ {
+  "date": "evergreen-03",
+  "format": "pause",
+  "hook": "Which element runs you?|Pause the ball.",
+  "open": "FIRE|EARTH|AIR|WATER",
+  "each": 0.6,
+  "items": [
+   {
+    "word": "FIRE",
+    "title": "ARIES · LEO · SAGITTARIUS",
+    "line": "You need something to look forward to."
+   },
+   {
+    "word": "EARTH",
+    "title": "TAURUS · VIRGO · CAPRICORN",
+    "line": "You need proof, then you're all in."
+   },
+   {
+    "word": "AIR",
+    "title": "GEMINI · LIBRA · AQUARIUS",
+    "line": "You need a good conversation."
+   },
+   {
+    "word": "WATER",
+    "title": "CANCER · SCORPIO · PISCES",
+    "line": "You need to feel it first."
+   }
+  ],
+  "caption": "Fire, earth, air or water: which element runs you? Pause the crystal ball. 🔥🌍💨🌊\n\nYour Sun sign is one element; your whole chart is a mix. The Oracle shows you yours: link in bio.\n\n#elements #zodiacsigns #astrology #firesign #watersign"
+ },
+ {
+  "date": "evergreen-04",
+  "format": "pause",
+  "hook": "Pause the ball:|what your heart needs",
+  "open": "PAUSE",
+  "items": [
+   {
+    "word": "HONESTY",
+    "line": "Say the true thing, kindly."
+   },
+   {
+    "word": "SPACE",
+    "line": "A little room to miss someone."
+   },
+   {
+    "word": "TENDERNESS",
+    "line": "Be held, even by yourself."
+   },
+   {
+    "word": "PLAY",
+    "line": "Something silly, just for joy."
+   },
+   {
+    "word": "CLOSURE",
+    "line": "Write the letter you won't send."
+   },
+   {
+    "word": "FAITH",
+    "line": "Trust the timing a little longer."
+   }
+  ],
+  "caption": "Pause the crystal ball: what does your heart need right now? 💫\n\nTell us which one you got.\n\nFor an answer from your own birth chart, ask the Oracle: link in bio.\n\n#lovereading #oracle #crystalball #astrology #selflove"
+ },
+ {
+  "date": "evergreen-05",
+  "format": "pick",
+  "hook": "Pick a crystal ball|for your week",
+  "open": "1 · 2 · 3",
+  "items": [
+   {
+    "word": "SLOW",
+    "line": "Do fewer things, better.|Protect your mornings."
+   },
+   {
+    "word": "CONNECT",
+    "line": "One real conversation|changes the whole week."
+   },
+   {
+    "word": "CREATE",
+    "line": "Make something, even small.|It's medicine."
+   }
+  ],
+  "caption": "Pick a crystal ball for your week: 1, 2 or 3? ✦\n\nPause, choose, then watch the reveal.\n\nSend this to someone who needs ball 2.\n\n#pickacard #weeklyreading #oracle #crystalball #astrology"
+ },
+ {
+  "date": "evergreen-06",
+  "format": "pause",
+  "hook": "Cardinal, fixed or mutable?|Pause the ball.",
+  "open": "MODES",
+  "each": 0.6,
+  "items": [
+   {
+    "word": "CARDINAL",
+    "title": "ARIES · CANCER · LIBRA · CAPRICORN",
+    "line": "You start things."
+   },
+   {
+    "word": "FIXED",
+    "title": "TAURUS · LEO · SCORPIO · AQUARIUS",
+    "line": "You see things through."
+   },
+   {
+    "word": "MUTABLE",
+    "title": "GEMINI · VIRGO · SAGITTARIUS · PISCES",
+    "line": "You adapt and connect."
+   }
+  ],
+  "caption": "Every sign has a mode: cardinal starts, fixed sustains, mutable adapts. Pause on yours. ✦\n\nWhich one sounds like you? Send this to your opposite.\n\n#zodiacsigns #astrology101 #astrology #zodiac #horoscope"
+ },
+ {
+  "date": "evergreen-07",
+  "format": "pause",
+  "hook": "Pause the crystal ball.|Your sign from the stars.",
+  "open": "PAUSE",
+  "items": [
+   {
+    "word": "YES",
+    "line": "The answer you're hoping for|is worth asking about."
+   },
+   {
+    "word": "LISTEN",
+    "line": "Someone is telling you something.|Hear it fully."
+   },
+   {
+    "word": "MOVE",
+    "line": "Your body knows.|Walk it out."
+   },
+   {
+    "word": "FORGIVE",
+    "line": "Starting with yourself."
+   },
+   {
+    "word": "DREAM|BIG",
+    "line": "Write the wish down today."
+   },
+   {
+    "word": "HOME",
+    "line": "Make one corner of it|feel like you."
+   }
+  ],
+  "caption": "Pause the crystal ball: a sign from the stars for today. 🔮\n\nWhatever it stops on is yours. Which one did you get?\n\nAsk the Oracle your own question: link in bio.\n\n#oracle #crystalball #astrology #dailymessage #zodiac"
+ }
+]

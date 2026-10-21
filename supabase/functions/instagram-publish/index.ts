@@ -62,6 +62,26 @@ Deno.serve(async (req) => {
 
   // 1. Publish the next due post. Posts that missed their moment are set aside, not published late.
   await admin.from('social_posts').update({ status: 'expired' }).eq('status', 'queued').is('container_id', null).lt('scheduled_at', new Date(Date.now() - STALE_MS).toISOString());
+  // Every day gets a reel (from 16:30 UTC) and a feed post (from 23:00 UTC). If the queue has none for the day,
+  // or it failed, the next held evergreen one (evergreen = true) goes out instead.
+  const now = new Date();
+  const dayStart = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
+  for (const [kind, hours] of [['REELS', 16.5], ['IMAGE', 23]] as const) {
+    if (now.getTime() < dayStart + hours * 3600000) continue;
+    const { count } = await admin
+      .from('social_posts')
+      .select('id', { count: 'exact', head: true })
+      .eq('media_type', kind)
+      .in('status', ['queued', 'publishing', 'published'])
+      .gte('scheduled_at', new Date(dayStart).toISOString())
+      .lt('scheduled_at', new Date(dayStart + DAY).toISOString());
+    if (count) continue;
+    const { data: spare } = await admin.from('social_posts').select('id').eq('media_type', kind).eq('status', 'held').eq('evergreen', true).order('id').limit(1).maybeSingle();
+    if (spare) {
+      await admin.from('social_posts').update({ status: 'queued', scheduled_at: now.toISOString() }).eq('id', spare.id);
+      report[`evergreen_${kind.toLowerCase()}`] = spare.id;
+    } else report[`no_${kind.toLowerCase()}_today`] = true;
+  }
   const { data: post } = await admin.from('social_posts').select('*').eq('status', 'queued').lte('scheduled_at', new Date().toISOString()).order('scheduled_at').limit(1).maybeSingle();
   if (post) {
     await admin.from('social_posts').update({ status: 'publishing' }).eq('id', post.id);

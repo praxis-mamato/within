@@ -21,7 +21,8 @@ You own Within's Instagram, @withintheoracle. Your job: keep it alive every day,
    - Reels go in `docs/social/reels-<yyyy-mm>.json` (same fields as the existing file) and are rendered with `docs/social/render-reel.mjs`; Stories come from the queue file with its `stories` mode.
    - Lint every caption, hook and line, render with `docs/social/render.mjs` / `render-reel.mjs` (Playwright; Chromium is at /opt/pw-browsers; ffmpeg for video), and look at frames before using them.
    - Commit and push to `claude/epic-gates-6t5iqb` first (media must be live under `https://withinoracle.app/social/`), wait for it to load, then insert the rows into `social_posts` with the right `media_type`.
-3. **Failures.** If a post is `failed` or `expired`, or replies are `failed`, find out why from the `error` column and fix it.
+3. **Every day: one reel and one feed post (Maggie's rule).** If a day has no reel by 16:30 UTC or no feed post by 23:00 UTC (missing, failed, or expired), the publisher sends the next held **evergreen** one instead (`evergreen = true`, `status = 'held'`; `docs/social/reels-evergreen.json` and `posts-evergreen.json`). Keep at least 5 of each kind in that pool: when one is used, write and render a replacement the same day. The run report says `no_reels_today` / `no_image_today` if the pool is empty: fix that first.
+4. **Failures.** If a post is `failed` or `expired`, or replies are `failed`, find out why from the `error` column and fix it.
 
 ## Every Monday
 - Read last week's numbers from `social_posts` (reach, plays, average watch time, shares, saves, likes, comments) and which posts led to app visits if the growth lead's tracking shows it. Write `docs/social/report-<date>.md`: what worked, what didn't, what you change.
