@@ -7,7 +7,8 @@ import { SafetyPanel } from './ui';
 
 /**
  * "Talk to the Oracle": a conversation about what the person is living through, under the Oracle's answer.
- * The conversation lives only in this component, so it is gone when the page closes.
+ * The conversation lives only in this component, so it is gone when the page closes. If the person turns memory
+ * on, a short note of each conversation is kept on the device and shared with the next one.
  */
 export function OracleChat({ question, answer, facts }: { question: string; answer: string[]; facts: () => string[] }) {
   const { state, dispatch } = useStore();
@@ -18,6 +19,7 @@ export function OracleChat({ question, answer, facts }: { question: string; answ
   const [error, setError] = useState('');
   const [flagged, setFlagged] = useState(false);
   const factsRef = useRef<string[] | null>(null);
+  const convo = useRef('');
   const end = useRef<HTMLDivElement>(null);
 
   // A new question starts a new conversation.
@@ -27,6 +29,7 @@ export function OracleChat({ question, answer, facts }: { question: string; answ
     setError('');
     setFlagged(false);
     factsRef.current = null;
+    convo.current = `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
   }, [question]);
   useEffect(() => end.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), [turns.length, busy]);
 
@@ -61,8 +64,11 @@ export function OracleChat({ question, answer, facts }: { question: string; answ
     setError('');
     try {
       factsRef.current ??= facts();
-      const r = await talkToOracle(factsRef.current, answer, next);
+      const { on, notes } = state.oracleMemory;
+      const memory = on ? notes.filter((n) => n.id !== convo.current).map((n) => `${n.at.slice(0, 10)}: ${n.text}`) : [];
+      const r = await talkToOracle(factsRef.current, answer, next, memory);
       setTurns([...next, { role: 'assistant', text: r.reply }]);
+      if (on && r.remember) dispatch({ type: 'memory/note', id: convo.current, text: r.remember });
       setFollowups(r.followups);
       track('oracle_chat', { turn: next.length });
     } catch (e) {
@@ -123,6 +129,27 @@ export function OracleChat({ question, answer, facts }: { question: string; answ
         <p role="alert" className="small oracle-note">
           {error}
         </p>
+      )}
+      <label className="small oracle-muted chat-remember">
+        <input type="checkbox" checked={state.oracleMemory.on} onChange={(e) => dispatch({ type: 'memory/on', on: e.target.checked })} /> Let the Oracle remember our conversations, so you don’t have to start over each time. A short note of what you shared is kept on this phone only and sent with your next message.
+      </label>
+      {state.oracleMemory.on && state.oracleMemory.notes.length > 0 && (
+        <details className="small oracle-muted chat-memory">
+          <summary>What the Oracle remembers ({state.oracleMemory.notes.length})</summary>
+          <ul>
+            {[...state.oracleMemory.notes].reverse().map((n) => (
+              <li key={n.id}>
+                {new Date(n.at).toLocaleDateString()}: {n.text}{' '}
+                <button type="button" className="link small" onClick={() => dispatch({ type: 'memory/forget', id: n.id })}>
+                  Forget
+                </button>
+              </li>
+            ))}
+          </ul>
+          <button type="button" className="link small" onClick={() => dispatch({ type: 'memory/forget' })}>
+            Forget everything
+          </button>
+        </details>
       )}
       <p className="small oracle-muted" style={{ marginTop: 8 }}>
         Written with AI help from your chart, never your name or birth details · Within doesn’t store this conversation · for reflection, not prediction

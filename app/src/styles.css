@@ -826,3 +826,7 @@ details > summary { cursor: pointer; margin: 8px 0; }
 .chat-oracle { background: rgb(255 255 255 / 0.06); border: 1px solid rgb(226 194 126 / 0.35); border-bottom-left-radius: 4px; }
 .chat-thinking { opacity: 0.75; font-style: italic; }
 .oracle-chat .chip { background: rgb(226 194 126 / 0.12); color: var(--o-ink); border: 1px solid rgb(226 194 126 / 0.6); text-align: left; }
+.chat-remember { display: flex; gap: 8px; align-items: flex-start; margin-top: 12px; font-weight: 400; }
+.chat-remember input { margin-top: 3px; flex: none; }
+.chat-memory ul { padding-left: 18px; }
+.chat-memory .link { color: var(--o-gold); }

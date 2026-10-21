@@ -5,7 +5,11 @@ const turns = [{ role: 'user' as const, text: 'It’s my mom’s birthday and I 
 
 describe('validateChat', () => {
   it('accepts a conversation that ends with the person', () => {
-    expect(validateChat({ facts, answer: ['Your 4th house is lit.'], turns })).toMatchObject({ turns });
+    expect(validateChat({ facts, answer: ['Your 4th house is lit.'], turns })).toMatchObject({ turns, memory: [] });
+  });
+  it('accepts a short memory and rejects a long one', () => {
+    expect(validateChat({ facts, answer: [], turns, memory: ['2026-10-20: Your mom’s birthday is today.'] })).toMatchObject({ memory: ['2026-10-20: Your mom’s birthday is today.'] });
+    expect(validateChat({ facts, answer: [], turns, memory: Array(13).fill('x') })).toMatch(/memory/);
   });
   it.each([
     [null, /Missing/],
@@ -19,8 +23,9 @@ describe('validateChat', () => {
 
 describe('chatMessages', () => {
   it('sends the chart with the first message only', () => {
-    const m = chatMessages({ facts, answer: ['a'], turns: [...turns, { role: 'assistant', text: 'b' }, { role: 'user', text: 'c' }] });
+    const m = chatMessages({ facts, answer: ['a'], turns: [...turns, { role: 'assistant', text: 'b' }, { role: 'user', text: 'c' }], memory: ['2026-10-20: Your mom’s birthday.'] });
     expect(m[0].content).toContain('CHART FACTS:');
+    expect(m[0].content).toContain('WHAT YOU REMEMBER FROM EARLIER CONVERSATIONS:\n- 2026-10-20: Your mom’s birthday.');
     expect(m[0].content).toContain('mom’s birthday');
     expect(m[2].content).toBe('c');
   });

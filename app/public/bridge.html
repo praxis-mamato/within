@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Within</title>
+</head>
+<body style="margin:0;min-height:100vh;display:grid;place-items:center;background:#0b1030;color:#fbf5ea;font-family:system-ui,sans-serif">
+<p>Moving you to withinoracle.app…</p>
+<script>
+// Within moved to withinoracle.app. Browsers keep each address's saved data separately, so people who used
+// the old address would arrive with an empty app. This page runs once on the old address: it opens the
+// saved app state with this device's own key, and carries it to the new address in the #fragment, which
+// never leaves the phone (browsers don't send it to any server). The new address saves it in its own vault.
+(function () {
+  var HOME = 'https://withinoracle.app/';
+  var gone = false;
+  function go(frag) {
+    if (gone) return;
+    gone = true;
+    location.replace(HOME + (frag || ''));
+  }
+  setTimeout(function () { go(); }, 5000);
+  function b64(bytes) {
+    var s = '';
+    for (var i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+    return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  }
+  function get(db, key) {
+    return new Promise(function (res, rej) {
+      var r = db.transaction('kv').objectStore('kv').get(key);
+      r.onsuccess = function () { res(r.result); };
+      r.onerror = function () { rej(r.error); };
+    });
+  }
+  try {
+    if (localStorage.getItem('within.moved')) return go();
+  } catch (e) {}
+  new Promise(function (res, rej) {
+    var r = indexedDB.open('within-vault');
+    // No saved app here: don't create an empty one, just move on.
+    r.onupgradeneeded = function () { r.transaction.abort(); };
+    r.onsuccess = function () { res(r.result); };
+    r.onerror = function () { rej(r.error); };
+  })
+    .then(function (db) { return Promise.all([get(db, 'key'), get(db, 'v:state.v1')]); })
+    .then(function (got) {
+      var key = got[0], rec = got[1];
+      if (!key || !rec) throw new Error('nothing saved');
+      return crypto.subtle.decrypt({ name: 'AES-GCM', iv: new Uint8Array(rec.iv) }, key, rec.data);
+    })
+    .then(function (plain) {
+      if (typeof CompressionStream === 'undefined') return 'r.' + b64(new Uint8Array(plain));
+      var s = new Blob([plain]).stream().pipeThrough(new CompressionStream('gzip'));
+      return new Response(s).arrayBuffer().then(function (z) { return 'g.' + b64(new Uint8Array(z)); });
+    })
+    .then(function (payload) {
+      try { localStorage.setItem('within.moved', new Date().toISOString()); } catch (e) {}
+      go('#import=' + payload);
+    })
+    .catch(function () { go(); });
+})();
+</script>
+</body>
+</html>

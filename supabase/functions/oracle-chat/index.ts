@@ -1,6 +1,6 @@
 // "Talk to the Oracle": a member's conversation with the Oracle about what they're living through (Claude Sonnet 5.5).
-// The device sends calculated chart facts, the Oracle's first answer, and the conversation; never the name or
-// birth details. Nothing is stored except a usage count. Each reply is checked against Within's rules first.
+// The device sends calculated chart facts, the Oracle's first answer, the conversation, and (if the person turned
+// memory on) notes from earlier conversations kept on their device; never the name or birth details. Nothing is stored except a usage count. Each reply is checked against Within's rules first.
 import Anthropic from 'npm:@anthropic-ai/sdk@0.131';
 import { admin, callingUser, cors, json } from '../_shared/clients.ts';
 import { CHAT_SCHEMA, CHAT_SYSTEM, chatMessages, chatProblems, cleanFollowups, validateChat, type ChatReply } from '../_shared/oracleChat.ts';
@@ -72,5 +72,5 @@ Deno.serve(async (req) => {
 
   await admin.rpc('record_chat_usage', { p_user: user.id, p_period: period, p_in: tokensIn, p_out: tokensOut });
   if (!reply?.reply?.trim()) return json({ error: 'The Oracle couldn’t find the words for that. Try saying it another way.' }, 422);
-  return json({ reply: reply.reply.trim(), followups: cleanFollowups(reply.followups ?? []) });
+  return json({ reply: reply.reply.trim(), followups: cleanFollowups(reply.followups ?? []), remember: (reply.remember ?? '').trim().slice(0, 400) });
 });

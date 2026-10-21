@@ -103,6 +103,8 @@ export interface State {
   aiConsent: boolean;
   /** AI readings kept on this device, keyed by reading type and chart. */
   aiReadings: Record<string, { at: string; sections: { title: string; body: string; tradition: string }[]; reflection_question: string }>;
+  /** What the Oracle remembers between conversations, only if the person turns it on. Stays on this device. */
+  oracleMemory: { on: boolean; notes: { id: string; at: string; text: string }[] };
   /** What the person tells Within about themselves, so readings can mirror them. Stays on this device. */
   profile: Profile | null;
   /** How each pattern fits, in the person's own judgment. */
@@ -149,6 +151,7 @@ export function initialState(): State {
     todayDone: false,
     aiConsent: false,
     aiReadings: {},
+    oracleMemory: { on: false, notes: [] },
     profile: null,
     patternChecks: {},
     oracle: [],
@@ -181,6 +184,9 @@ export type Event =
   | { type: 'today/finish' }
   | { type: 'ai/consent'; on: boolean }
   | { type: 'ai/save'; key: string; reading: State['aiReadings'][string] }
+  | { type: 'memory/on'; on: boolean }
+  | { type: 'memory/note'; id: string; text: string }
+  | { type: 'memory/forget'; id?: string }
   | { type: 'reset' }
   | { type: 'profile/set'; profile: Profile }
   | { type: 'oracle/ask'; answer: OracleReply }
@@ -269,7 +275,17 @@ function reduceOne(s: State, e: Event): State {
     case 'today/finish':
       return { ...s, todayDone: true };
     case 'ai/consent':
-      return { ...s, aiConsent: e.on, aiReadings: e.on ? s.aiReadings : {} };
+      return { ...s, aiConsent: e.on, aiReadings: e.on ? s.aiReadings : {}, oracleMemory: e.on ? s.oracleMemory : { on: false, notes: [] } };
+    case 'memory/on':
+      return { ...s, oracleMemory: { on: e.on, notes: e.on ? s.oracleMemory.notes : [] } };
+    case 'memory/note': {
+      // One note per conversation, updated as it goes; the twelve most recent are kept.
+      if (!s.oracleMemory.on) return s;
+      const notes = [...s.oracleMemory.notes.filter((n) => n.id !== e.id), { id: e.id, at: new Date().toISOString(), text: e.text.slice(0, 400) }].slice(-12);
+      return { ...s, oracleMemory: { ...s.oracleMemory, notes } };
+    }
+    case 'memory/forget':
+      return { ...s, oracleMemory: { ...s.oracleMemory, notes: e.id ? s.oracleMemory.notes.filter((n) => n.id !== e.id) : [] } };
     case 'ai/save':
       return { ...s, aiReadings: { ...s.aiReadings, [e.key]: e.reading } };
     case 'profile/set':
