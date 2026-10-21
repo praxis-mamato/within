@@ -105,6 +105,7 @@ export const WHY: [string, string][] = [
 /** What a subscription adds, side by side with what is free. */
 export const COMPARE: [string, string, string][] = [
   ['The Oracle', '3 a day', 'Unlimited, with the full reading'],
+  ['Talk to the Oracle', '—', 'A personal conversation, about what you’re living through'],
   ['Timing', 'This week’s first planet', 'Every transit, progression, dasha'],
   ['Your chart', 'The core', 'Every placement, Western + Vedic'],
   ['Patterns', 'Your top two', 'All, with dates'],

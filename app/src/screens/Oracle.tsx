@@ -9,6 +9,7 @@ import { OracleBoard, useShake } from '../components/OracleBoard';
 import { EnergyWheel } from '../components/EnergyWheel';
 import { chartEnergy } from '../content/energy';
 import { ascendantAndMidheaven } from '../astro/chart';
+import { OracleChat } from '../components/OracleChat';
 import { Paywall } from '../components/Paywall';
 import { ReviewPrompt } from '../components/ReviewPrompt';
 import { datesIn, LiveReadingNudge, LockedSummary } from '../components/SalesCloser';
@@ -92,6 +93,7 @@ export default function Oracle() {
   const input = useRef<HTMLTextAreaElement>(null);
   const [info, setInfo] = useState<BoardInfo | null>(null);
   const [prompt, setPrompt] = useState<string | undefined>(undefined);
+  const [talkPitch, setTalkPitch] = useState(false);
   const place = { lat: state.birth.lat, lon: state.birth.lon };
   const day = new Date().toISOString().slice(0, 10);
   const asked = state.oracle.filter((a) => a.day === day);
@@ -188,12 +190,16 @@ export default function Oracle() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [me]);
 
+  /** Everything the AI may draw on: natal Western and Vedic, plus timing (today's sky, progressions, periods). */
+  const wholeChart = () => (me ? [...factSheet('western', me, place), ...factSheet('vedic', me, place), ...factSheet('timing', me, place)].slice(0, 220) : []);
+  const answerText = (a: OracleReply) => [...a.lines, ...a.deeper].map((l) => `${l.heading}${l.heading && l.text ? ': ' : ''}${l.text}`.slice(0, 600)).filter(Boolean);
+
   const runConsult = async (a: OracleReply) => {
     if (!me) return;
     setConsult({ q: a.question, busy: true });
     try {
-      const facts = [...factSheet('western', me, place), ...factSheet('vedic', me, place), ...factSheet('timing', me, place)].slice(0, 220);
-      const source = [...a.lines, ...a.deeper].map((l) => `${l.heading}${l.heading && l.text ? ': ' : ''}${l.text}`.slice(0, 600)).filter(Boolean);
+      const facts = wholeChart();
+      const source = answerText(a);
       const result = await requestDeepReading('question', facts, source, a.question);
       setConsult({ q: a.question, result });
     } catch (e) {
@@ -340,6 +346,35 @@ export default function Oracle() {
         </section>
       )}
 
+      {answer && phase === 'answered' && answer.intent !== 'simplify' && (
+        <section className="oracle-answer oracle-talk" aria-labelledby="ot-h">
+          <h2 id="ot-h">Talk it through with the Oracle</h2>
+          <p className="small oracle-muted">Tell it what’s really going on, and it answers you, not just your chart.</p>
+          {entitlement.active ? (
+            <OracleChat question={answer.question} answer={answerText(answer)} facts={wholeChart} />
+          ) : talkPitch ? (
+            <Paywall where="reading" what="Talking with the Oracle">
+              {null}
+            </Paywall>
+          ) : (
+            <>
+              <p>Members can talk it through: tell the Oracle what happened, how it feels, who it’s about, and it answers you personally from your chart and today’s sky, with follow-up questions.</p>
+              <button
+                type="button"
+                className="btn secondary"
+                onClick={() => {
+                  // The membership offer is already on the page with the full reading: go there rather than show it twice.
+                  const pay = document.querySelector('.oracle-answer:not(.oracle-talk) .paywall');
+                  if (pay) pay.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  else setTalkPitch(true);
+                }}
+              >
+                See membership
+              </button>
+            </>
+          )}
+        </section>
+      )}
       {answer && !flagged && <LiveReadingNudge key={`${answer.day}-${answer.question}`} intent={answer.intent} />}
       {answer && <ReviewPrompt key={state.oracle.length} answers={state.oracle.length} />}
       <SkyStrip onAsk={(x) => (setQ(x), ask(x))} />

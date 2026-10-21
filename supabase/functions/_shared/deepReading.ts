@@ -104,7 +104,7 @@ export function userMessage(r: DeepRequest): string {
 
 // ─── Checks on the model's output ─────────────────────────────────────────────
 
-const BANNED = [/\bwill\b/i, /\bdestined\b/i, /\bdestiny\b/i, /\bsoulmate/i, /\bfated?\b/i, /\bdoom/i, /\bcursed?\b/i, /\balways\b/i, /\bnever\b/i, /\b(he|she|they) (feels?|wants?|intends?|thinks?)\b/i, /\bdiagnos/i, /\b(break up|leave (him|her|them)|stay with)\b/i, /\bcompatibility score\b/i, /\bkarmic debt\b/i];
+export const BANNED = [/\bwill\b/i, /\bdestined\b/i, /\bdestiny\b/i, /\bsoulmate/i, /\bfated?\b/i, /\bdoom/i, /\bcursed?\b/i, /\balways\b/i, /\bnever\b/i, /\b(he|she|they) (feels?|wants?|intends?|thinks?)\b/i, /\bdiagnos/i, /\b(break up|leave (him|her|them)|stay with)\b/i, /\bcompatibility score\b/i, /\bkarmic debt\b/i];
 
 const BODIES = 'Sun|Moon|Mercury|Venus|Mars|Jupiter|Saturn|Uranus|Neptune|Pluto|Rahu|Ketu|Chandra|Surya|Shukra|Mangala|Budha|Guru|Shani';
 const SIGNS = 'Aries|Taurus|Gemini|Cancer|Leo|Virgo|Libra|Scorpio|Sagittarius|Capricorn|Aquarius|Pisces|Mesha|Vrishabha|Mithuna|Karka|Simha|Kanya|Tula|Vrishchika|Dhanu|Makara|Kumbha|Meena';
