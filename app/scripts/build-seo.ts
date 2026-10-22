@@ -619,8 +619,8 @@ function privacy() {
 <p>Depending on where you live, including the EU, UK and California, you can ask to access, correct, export or delete your data, or object to how it is used. Most of this you can do yourself in Settings. For anything else, ${ask}. We do not sell personal information.</p>
 <h2>Security</h2>
 <p>Data is encrypted in transit. Account records are protected by access rules, so each person can read only their own.</p>
-<h2>Children</h2>
-<p>Within is not intended for children under 13, and we do not knowingly collect their data. If you believe a child has created an account, ${ask} and we will delete it.</p>
+<h2>Children and teens</h2>
+<p>Within welcomes teens: readings are written to suit any age, and the Oracle points young people toward a trusted adult when something is hard. Teens under 18 need a parent’s or guardian’s permission to buy a membership or a live reading. Within is not intended for children under 13 (in parts of Europe, under 16 without a parent’s consent), and we do not knowingly collect their data. If you believe a child has created an account, ${ask} and we will delete it.</p>
 <h2>Changes</h2>
 <p>If this policy changes, we will update the date at the top. Significant changes will be shown in the app.</p>
 ${CONTACT ? `<h2>Contact</h2><p>Questions or requests: <a href="mailto:${CONTACT}">${CONTACT}</a>.</p>` : ''}`,
