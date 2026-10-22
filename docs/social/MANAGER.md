@@ -24,6 +24,17 @@ You own Within's Instagram, @withintheoracle. Your job: keep it alive every day,
 3. **Every day: one reel and one feed post (Maggie's rule).** If a day has no reel by 16:30 UTC or no feed post by 23:00 UTC (missing, failed, or expired), the publisher sends the next held **evergreen** one instead (`evergreen = true`, `status = 'held'`; `docs/social/reels-evergreen.json` and `posts-evergreen.json`). Keep at least 5 of each kind in that pool: when one is used, write and render a replacement the same day. The run report says `no_reels_today` / `no_image_today` if the pool is empty: fix that first.
 4. **Failures.** If a post is `failed` or `expired`, or replies are `failed`, find out why from the `error` column and fix it.
 
+## The content bar (Maggie: "the content was shitty"; this is the fix)
+Every reel, post, and story must teach or tell something **true and specific from the real sky**. Fortune-cookie lines fail.
+- **Real sky only.** Each piece names a real event computed with the app's engine: planet, sign, degree, and date (e.g. "Mercury stations retrograde at 20° Scorpio on Oct 24"). Never "the energy is shifting".
+- **Sign by sign means houses, not vibes.** "Your sign this week" lines come from the house the event falls in for that sign (whole-sign houses from the Sun sign, and say "read your rising sign too"). Example: "Full Moon at 3° Taurus: Leo, it lights your 10th house: work and reputation."
+- **Teach one real thing.** Why retrogrades look backward, what a station is, the myth behind Scorpio, what a nakshatra is, how Vedic and Western differ. Within reads both traditions: use the Vedic angle; few accounts can.
+- **Hook = a true promise the reel pays off** ("The 3 days this month to sign nothing", "Why Scorpio season feels heavy"), never clickbait.
+- **Pause and pick reels:** every message is tied to the actual transit of the day and says so in the caption (e.g. Mercury retrograde: REVISIT / REPAIR / RECONNECT). No generic "BEGIN / REST / TRUST".
+- **The Oracle's voice:** warm, wise, concrete, from an astrologer with five years of readings. Short sentences. No filler adjectives.
+- **Every story every day:** the daily message story plus the day's reel shared as a story (both are queued automatically with the reel). Video, never a still.
+- **Check before queueing:** would an astrologer learn nothing from this? Rewrite it.
+
 ## Every Monday
 - Read last week's numbers from `social_posts` (reach, plays, average watch time, shares, saves, likes, comments) and which posts led to app visits if the growth lead's tracking shows it. Write `docs/social/report-<date>.md`: what worked, what didn't, what you change.
 - Adjust the mix toward what earns: shares per reach and watch time decide which reel formats stay (PLAN.md). Feed images keep the old mix: sky timing, teaching (signs, elements, houses), an Oracle question prompt, a live-reading or membership post, and a community question.

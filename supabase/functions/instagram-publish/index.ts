@@ -62,11 +62,11 @@ Deno.serve(async (req) => {
 
   // 1. Publish the next due post. Posts that missed their moment are set aside, not published late.
   await admin.from('social_posts').update({ status: 'expired' }).eq('status', 'queued').is('container_id', null).lt('scheduled_at', new Date(Date.now() - STALE_MS).toISOString());
-  // Every day gets a reel (from 16:30 UTC) and a feed post (from 23:00 UTC). If the queue has none for the day,
+  // Every day gets a reel (from 16:30 UTC), a story (16:45) and a feed post (23:00). If the queue has none for the day,
   // or it failed, the next held evergreen one (evergreen = true) goes out instead.
   const now = new Date();
   const dayStart = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
-  for (const [kind, hours] of [['REELS', 16.5], ['IMAGE', 23]] as const) {
+  for (const [kind, hours] of [['REELS', 16.5], ['STORIES', 16.75], ['IMAGE', 23]] as const) {
     if (now.getTime() < dayStart + hours * 3600000) continue;
     const { count } = await admin
       .from('social_posts')
