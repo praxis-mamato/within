@@ -127,7 +127,10 @@ Deno.serve(async (req) => {
       }
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
-      await admin.from('social_posts').update({ status: post.attempts + 1 >= 3 ? 'failed' : 'queued', attempts: post.attempts + 1, error: msg }).eq('id', post.id);
+      // A blocked or expired token is the account's problem, not the post's: keep it queued, untried, until access is back.
+      const auth = /API access blocked|access token|OAuth|session has expired|Error validating/i.test(msg);
+      await admin.from('social_posts').update({ status: !auth && post.attempts + 1 >= 3 ? 'failed' : 'queued', attempts: auth ? post.attempts : post.attempts + 1, error: msg }).eq('id', post.id);
+      if (auth) report.access_problem = msg;
       console.error('instagram publish failed:', msg);
       report.publish_error = msg;
     }
