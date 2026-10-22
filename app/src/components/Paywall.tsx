@@ -40,7 +40,12 @@ export function SignInButtons({ plan }: { plan?: Plan } = {}) {
         </button>
       )}
       {gis ? (
-        <GoogleButton plan={plan} onFail={noGis} />
+        <>
+          <GoogleButton plan={plan} onFail={noGis} />
+          <button type="button" className="link small" disabled={!!busy} onClick={() => go('google')}>
+            Google button not working? Sign in another way
+          </button>
+        </>
       ) : (
       <button type="button" className="btn auth google" disabled={!!busy} onClick={() => go('google')}>
         <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
