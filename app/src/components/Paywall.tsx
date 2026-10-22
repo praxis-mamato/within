@@ -7,13 +7,16 @@ import { APPLE_SIGN_IN, CONFIG, IN_PLAY_APP, PLAY_APP_TEXT } from '../services/c
 import { useStore } from '../state';
 import { MiniOrb } from './OracleBoard';
 import { WorthIt } from './SalesCloser';
+import { rememberReturn } from '../services/afterSignIn';
 
-export function SignInButtons() {
+/** Google and Apple sign-in. With `plan`, the person goes straight on to payment once signed in. */
+export function SignInButtons({ plan }: { plan?: Plan } = {}) {
   const [busy, setBusy] = useState<Provider | null>(null);
   const [error, setError] = useState('');
   const go = async (p: Provider) => {
     setBusy(p);
     setError('');
+    rememberReturn(plan);
     try {
       await accountService().signIn(p);
     } catch (e) {
@@ -193,8 +196,9 @@ export function Paywall({ children, what, where }: { children: ReactNode; what: 
       <WorthIt />
       {!account ? (
         <>
-          <p className="small muted">Sign in first, so your subscription follows you to your other devices.</p>
-          <SignInButtons />
+          <p className="small muted">Sign in first, so your subscription follows you to your other devices. You’ll go straight on to payment after.</p>
+          <SignInButtons plan={plan} />
+          <p className="small muted">Google or Apple asks to share only your name and email address with Within, and may send you a notice that you signed in. That is all Within receives: never your contacts, files, or password. Your chart stays on your phone.</p>
         </>
       ) : (
         <div className="btn-row">

@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useRef } from 'react';
+import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { HashRouter, Link, MemoryRouter, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { StoreProvider, useStore } from './state';
 import { TabBar } from './components/ui';
@@ -16,7 +16,9 @@ import { MilestoneDetail, MilestoneForm, RelationshipHome, RelationshipsList, Yo
 import Growth, { FollowUp } from './screens/Growth';
 import Settings from './screens/Settings';
 import AccountScreen from './screens/Account';
-import { AccountProvider } from './services/AccountContext';
+import { AccountProvider, useAccount } from './services/AccountContext';
+import { accountService } from './services/account';
+import { takeReturn } from './services/afterSignIn';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { track } from './services/telemetry';
 import Interview, { ComprehensionCheck, InterviewBar } from './screens/Interview';
@@ -42,9 +44,40 @@ function useResumeConsent() {
   }, [nav, loc.pathname]);
 }
 
+/**
+ * Back from Google or Apple sign-in: return to the page the person was on, and if they were about to pay,
+ * go straight on to secure payment instead of making them find the button again.
+ */
+function AfterSignIn() {
+  const { account, entitlement, loading } = useAccount();
+  const nav = useNavigate();
+  const [paying, setPaying] = useState(false);
+  useEffect(() => {
+    if (loading || !account) return;
+    const r = takeReturn();
+    if (!r) return;
+    const path = r.hash.replace(/^#/, '');
+    if (path && path !== '/') nav(path, { replace: true });
+    if (r.plan && !entitlement.active) {
+      setPaying(true);
+      track('checkout_started', { plan: r.plan });
+      accountService()
+        .startCheckout(r.plan)
+        .catch(() => setPaying(false));
+    }
+  }, [account, loading, entitlement.active, nav]);
+  return paying ? (
+    <div className="resume-pay" role="status">
+      <p>Signed in. Taking you to secure payment…</p>
+    </div>
+  ) : null;
+}
+
 function Routed() {
   useResumeConsent();
   return (
+    <>
+    <AfterSignIn />
     <Routes>
       <Route
         path="/oauth/consent"
@@ -64,6 +97,7 @@ function Routed() {
       />
       <Route path="*" element={<Shell />} />
     </Routes>
+    </>
   );
 }
 
