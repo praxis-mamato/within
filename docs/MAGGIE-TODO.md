@@ -4,12 +4,15 @@ Kept by Claude. Things only Maggie can do (account-owner steps), most urgent fir
 
 ## Urgent
 1. **Approve the readings.** withinoracle.app/#/review: 0 approved so far.
-2. **App stores.** Answer: is there a registered company (e.g. Praxis Global)? Start the Android rebuild and iPhone app? Join the Apple Developer Program ($99/yr).
-3. **Shannon.** Open the old link once (moves her data), delete the old icon, add withinoracle.app to the home screen, sign in with the email she paid with.
+2. **D-U-N-S number for Praxis Global LLC (free, 10 min, then 1–2 weeks).** developer.apple.com/enroll/duns-lookup → enter Praxis Global LLC, Bozeman MT address, your name as contact → if not found, submit the request. Use the LLC's exact legal name and address as registered with Montana. When the number arrives (email from Dun & Bradstreet), tell Claude.
+   Then, with the D-U-N-S: **Apple Developer Program as an organization** ($99/yr, developer.apple.com/programs/enroll) and **Google Play as an organization** ($25 once, play.google.com/console). Store pages then show Praxis Global, and Google skips the 12-tester test.
+3. **Supabase: let the iPhone app sign in (1 min).** supabase.com → project → Authentication → URL Configuration → Redirect URLs → Add `app.withinoracle://**` → Save.
+4. **Shannon.** Open the old link once (moves her data), delete the old icon, add withinoracle.app to the home screen, sign in with the email she paid with.
 
 ## Free listings (docs/growth/launch/FREE-LISTINGS.md)
 - **Claude in Chrome on your computer:** tell it "Yes, go. Start with Pinterest." Pinterest profile is up (pinterest.com/withintheoracle); next it does YouTube, Facebook Page, Threads, TikTok, AlternativeTo and 6 directories; you do passwords, codes and robot checks.
-- **Send Claude:** the Pinterest HTML tag, and which accounts got made (for automatic reel posting).
+- **Pinterest:** the tag is live on the site: tap **Verify** in Pinterest → Settings → Claimed accounts.
+- **Send Claude:** which accounts got made (for automatic reel posting).
 - **Instagram partners:** check the top 5 in docs/sales/instagram-partners.md (handle, US, 2k–100k followers, posted lately), fill the [blank] in each message, and send them yourself.
 
 ## When there's time
