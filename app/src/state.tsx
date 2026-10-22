@@ -5,6 +5,7 @@ import { createContext, useContext, useEffect, useMemo, useReducer, useRef, useS
 import type { PatternCheck, Profile } from './content/mirror';
 import type { OracleReply } from './content/oracleEngine';
 import { deviceVault } from './storage/vault';
+import { setDailyReminder } from './services/native';
 import { SAMPLE_MILESTONES, type Milestone, type Tradition } from './data/fixtures';
 import { screen, type ScreenResult } from './lib/screener';
 import { setConsent, type Consent } from './services/telemetry';
@@ -351,6 +352,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }, 300);
     return () => clearTimeout(t);
   }, [state, ready]);
+
+  // In the iPhone app, the check-in reminder is a daily notification the phone schedules itself.
+  useEffect(() => {
+    if (ready) void setDailyReminder(state.notifications);
+  }, [ready, state.notifications]);
 
   // Set during render (idempotent) so children's effects already see the current choice.
   setConsent(state.sharing);

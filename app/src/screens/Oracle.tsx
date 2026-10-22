@@ -20,6 +20,7 @@ import { loadPlaces, type Place } from '../geo/places';
 import { useAccount } from '../services/AccountContext';
 import { factSheet, requestDeepReading, type DeepResult } from '../services/aiReading';
 import { personalAnswer, type AnswerReply } from '../services/oracleAnswer';
+import { haptic } from '../services/native';
 import { track } from '../services/telemetry';
 import { useStore } from '../state';
 
@@ -177,6 +178,7 @@ export default function Oracle() {
       }
       setAnswer((cur) => (cur === a ? final : cur));
       setPhase('answered');
+      void haptic('answer');
     });
   };
   // Shake with a question to ask it; shake with none for today's message, like an oracle's ball.

@@ -4,6 +4,7 @@
  */
 import { LIVE, siteUrl } from './config';
 import { supabase } from './supabase';
+import { APP_RETURN_URL, NATIVE_APP, openInBrowser } from './native';
 import { referralCode } from '../lib/referral';
 
 export type Provider = 'google' | 'apple';
@@ -115,7 +116,15 @@ function live(): AccountService {
     onChange: (cb) => sb.auth.onAuthStateChange((_e, s) => cb(toAccount(s))).data.subscription.unsubscribe,
     signIn: async (provider) => {
       // Always show Google's account chooser, so people with several accounts can pick the right one.
-      const { error } = await sb.auth.signInWithOAuth({ provider, options: { redirectTo: siteUrl(), queryParams: provider === 'google' ? { prompt: 'select_account' } : undefined } });
+      const queryParams = provider === 'google' ? { prompt: 'select_account' } : undefined;
+      if (NATIVE_APP) {
+        // In the iPhone app, sign-in happens in Safari (Google doesn't allow it inside apps) and comes back by link.
+        const { data, error } = await sb.auth.signInWithOAuth({ provider, options: { redirectTo: APP_RETURN_URL, skipBrowserRedirect: true, queryParams } });
+        if (error) throw error;
+        if (data.url) await openInBrowser(data.url);
+        return;
+      }
+      const { error } = await sb.auth.signInWithOAuth({ provider, options: { redirectTo: siteUrl(), queryParams } });
       if (error) throw error;
     },
     signInWithGoogle: async (token, nonce) => {
@@ -126,7 +135,7 @@ function live(): AccountService {
       const { data } = await sb.auth.getUser();
       if (!data.user?.email) throw new Error('This account has no email address to send a link to.');
       ls.set(PENDING, data.user.id);
-      const { error } = await sb.auth.signInWithOtp({ email: data.user.email, options: { shouldCreateUser: false, emailRedirectTo: siteUrl() } });
+      const { error } = await sb.auth.signInWithOtp({ email: data.user.email, options: { shouldCreateUser: false, emailRedirectTo: NATIVE_APP ? APP_RETURN_URL : siteUrl() } });
       if (error) throw error;
       return { sentTo: data.user.email };
     },
