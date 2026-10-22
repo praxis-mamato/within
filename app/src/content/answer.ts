@@ -154,6 +154,10 @@ const FEELINGS: [RegExp, string][] = [
   [/\bangry|\birritab|\bfrustrat|\bshort.?fuse/i, 'irritable'],
   [/\btired\b|\bexhausted\b|\bdrained\b|\bno energy\b/i, 'drained'],
   [/\bunsettled|\brestless|\boff lately|\bnot myself|\bemotional\b|\bmoody\b/i, 'unsettled'],
+  [/\blonely|\bloneliness|\bisolated\b|\bleft out\b|\bso alone\b|\ball alone\b/i, 'lonely'],
+  [/\bstuck\b|\btrapped\b|\bin a rut\b|\bgoing nowhere\b|\bstagnant\b/i, 'stuck'],
+  [/\bfeel(ing)? lost\b|\blost in life\b|\bdirectionless\b|\bconfused\b|\bdon[’']?t know what to do\b/i, 'lost'],
+  [/\bheartbr|\bbroken.?hearted|\bgriev|\bgrief\b/i, 'heartbroken'],
 ];
 
 /** The feeling the person named, in their own terms, or null. */

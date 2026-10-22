@@ -29,6 +29,7 @@ import { chartEnergy, energyLayers } from './energy';
 import { healthAnswer } from './health';
 import { AREA_SIGNIFICATOR } from './oracleLayers';
 import { MOVER_AREA, TARGET_AREAS } from './mirror';
+import { lint } from './lint';
 import { HOUSE_AREA } from './week';
 import type { Area, Profile } from './mirror';
 import { askOracle, areaOf, limitOf, ORACLE_REFRAME, ORACLE_TONE, type Limit, type Tone } from './oracle';
@@ -92,6 +93,35 @@ export const ORACLE_SAYS = {
   noTime: 'This needs an exact birth time. Add it in Settings and ask again.',
   returnNow: 'You are in it now, or close to it: this return is active within a year either side of today.',
   consult: 'For a fuller answer, the Oracle can consult your whole chart and write it out for you.',
+  feelingTurn: 'Here is what in your chart may be stirring it right now, and what may help.',
+  onMind: 'You told Within this part of life is on your mind, so the Oracle starts here.',
+  forQuestion: 'For what you asked:',
+  stillHere: 'The same long backdrop the Oracle named before, in short:',
+};
+
+/** What the Oracle says first when a question carries a feeling: it hears the person before it reads the chart. */
+export const ORACLE_HEARD: Record<string, string> = {
+  anxious: 'Anxiety is tiring to carry, and it makes sense to want to understand it. Nothing here means something is wrong with you.',
+  stressed: 'It sounds like a lot is landing on you at once. You do not have to hold all of it today.',
+  low: 'Feeling low is heavy, and it is okay that it is here. Go gently with yourself while you look at it.',
+  irritable: 'Frustration often means something you care about is being pushed. It is worth listening to before it boils over.',
+  drained: 'Running on empty is real, not a failing. Rest is part of the answer here, not a reward for later.',
+  unsettled: 'Not feeling like yourself can be unnerving, especially when there is no clear reason for it.',
+  lonely: 'Loneliness can sit with you even in a full room. It is a real need asking to be met, not a flaw in you.',
+  stuck: 'Feeling stuck is its own kind of tiring: wanting to move and not seeing where. That frustration is often a sign you are ready for something to change.',
+  lost: 'Not knowing which way to go is disorienting. It is also often the quiet before a clearer direction.',
+  heartbroken: 'Heartbreak hurts in the body as well as the heart. There is no schedule for it, and you do not need to rush.',
+};
+
+/** The first line of an answer about a part of life, before the chart. */
+export const ORACLE_AREA_HEARD: Record<Exclude<Area, 'health'>, string> = {
+  love: 'Questions about love tend to carry hope and worry in the same breath, so the Oracle reads this gently, from your own chart.',
+  work: 'Work questions are rarely only about the job: they touch money, pride, and how much of you the day uses up.',
+  money: 'Money questions are often really about safety and freedom. The Oracle reads the part of your chart that holds them.',
+  family: 'Questions about home and family go deep, because they reach back to where you come from.',
+  creativity: 'What you make carries a piece of you, so questions about it can feel tender. The Oracle reads where your chart supports it.',
+  friends: 'Friendship questions are about belonging, which matters more than people often admit.',
+  purpose: 'Questions about direction can feel big and blurry. The Oracle reads where your chart is pointing now.',
 };
 
 /** What a planetary return asks, in brief. */
@@ -354,7 +384,14 @@ function withOuter(r: OracleReply, ctx: OracleContext): OracleReply {
   const prog = pr.contacts.filter((l) => !named(l, '(progressed|directed|solar arc)[^.|]{0,12}')).slice(0, 3);
   const moon = [...(/progressed Moon/i.test(said) ? [] : [pr.moon]), ...(/progressed lunar phase/i.test(said) || prog.some((l) => /progressed (New|Full) Moon/.test(l.heading)) ? [] : [pr.phase])];
   if (LONG_IN_DEEPER.has(r.intent)) return { ...r, deeper: [...outer, ...prog, ...r.deeper] };
-  const show = [...outer.slice(0, 1), ...(PROGRESSED_IN_LINES.has(r.intent) ? prog.slice(0, 1) : [])];
+  // The first long transit is said for this question: what that planet means for the part of life it is about.
+  const area = areaOf(r.question) ?? (r.intent === 'open' || r.intent === 'area' ? (ctx.profile?.onMind[0] ?? null) : null);
+  const forArea = (l: SkyLine): SkyLine => {
+    const b = l.heading.match(/^In effect now: (\w+) /)?.[1];
+    const say = b && area ? MOVER_AREA[b]?.[area] : undefined;
+    return say ? { ...l, text: `${l.text} ${ORACLE_SAYS.forQuestion} ${say.charAt(0).toLowerCase()}${say.slice(1)}` } : l;
+  };
+  const show = [...outer.slice(0, 1).map(forArea), ...(PROGRESSED_IN_LINES.has(r.intent) ? prog.slice(0, 1) : [])];
   const rest = [...outer.slice(1), ...(PROGRESSED_IN_LINES.has(r.intent) ? prog.slice(1) : prog), ...(['open', 'cycle', 'feeling'].includes(r.intent) ? moon : [])];
   // A love question with someone added also reads what is moving between the two of you.
   const rel = ctx.other && r.intent === 'area' && areaOf(r.question) === 'love' ? relationshipInEffect(ctx).filter((l) => l.heading.includes('composite') || l.heading.includes(ctx.other!.name)).slice(0, 3) : [];
@@ -516,7 +553,16 @@ function remember(question: string, ctx: OracleContext, r: OracleReply): OracleR
     const fresh = ORACLE_TONE[r.tone].lines.find((x) => !used.has(x));
     if (fresh) lines = [{ ...lines[0], text: fresh }, ...lines.slice(1)];
   }
-  // 3. A related earlier question is brought back.
+  // 3. A long transit explained on an earlier day is named as the same backdrop, not explained in full again.
+  const before = new Map<string, string>();
+  for (const h of history) if (h.day !== day) for (const l of h.lines) if (/^(In effect now|Progressed|Solar arc):/.test(l.heading)) before.set(l.heading, h.day);
+  lines = lines.map((l) => {
+    const d = before.get(l.heading);
+    if (!d || !l.text) return l;
+    const first = l.text.match(/^.+?[.!?](?=\s|$)/)?.[0] ?? l.text;
+    return { ...l, text: `${ORACLE_SAYS.stillHere} ${first}`, basis: `${l.basis ? `${l.basis}; ` : ''}also named ${fmtDate(d)}` };
+  });
+  // 4. A related earlier question is brought back.
   const area = areaOf(question);
   const related = [...history].reverse().find((h) => h.day !== day && (area ? areaOf(h.question) === area : h.intent === r.intent && !['open', 'sky'].includes(r.intent)));
   if (related) {
@@ -699,10 +745,36 @@ function settle(a: ReturnType<typeof askOracle>, area: Area | null, ctx: OracleC
   return { ...a, tone: 'go', careful: true, label: 'Yes, with care', orb: 'YES, WITH CARE', best };
 }
 
+/**
+ * The question said back in the Oracle's words: "Should I text my ex?" becomes "to text your ex", so the answer
+ * is about what the person asked. Null when it cannot be said back cleanly.
+ */
+export function whetherOf(q: string): string | null {
+  const s = q.trim().replace(/[?.!\s]+$/, '');
+  let m: RegExpMatchArray | null;
+  let out: string | null = null;
+  if ((m = s.match(/^(?:should|shall) i\s+(.+)/i))) out = `to ${m[1]}`;
+  else if ((m = s.match(/^is (?:it|now|this) (?:a good (?:idea|time)|the (?:right )?time|wise|okay|ok|right) (?:for me )?to\s+(.+)/i))) out = `to ${m[1]}`;
+  else if ((m = s.match(/^(can|could) i\s+(.+)/i))) out = `you ${m[1].toLowerCase()} ${m[2]}`;
+  else if ((m = s.match(/^am i\s+(.+)/i))) out = `you are ${m[1]}`;
+  else if ((m = s.match(/^do i\s+(.+)/i))) out = `you ${m[1]}`;
+  if (!out) return null;
+  out = out
+    .replace(/\bI[’']m\b/g, 'you’re')
+    .replace(/\bI\b/g, 'you')
+    .replace(/\bmy\b/gi, 'your')
+    .replace(/\bmyself\b/gi, 'yourself')
+    .replace(/\bmine\b/gi, 'yours')
+    .replace(/\bme\b/gi, 'you');
+  return out.length <= 60 && !/[,;:"“”]/.test(out) && !lint(out).length ? out : null;
+}
+
 function decisionLines(a: Settled, area: Area | null, ctx: OracleContext): SkyLine[] {
   const now = ctx.now ?? new Date();
   const fmt = (s: string) => new Date(`${s}T12:00:00Z`).toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric', timeZone: 'UTC' });
-  const lead = a.careful ? 'Yes, with care.' : TONE_LEAD[a.tone];
+  const verdict = a.careful ? 'Yes, with care.' : TONE_LEAD[a.tone];
+  const asked = whetherOf(a.question);
+  const lead = asked ? `${verdict.slice(0, -1)}, about whether ${asked}.` : verdict;
   const k = a.contact;
   const out: SkyLine[] = [];
   if (k) {
@@ -753,7 +825,10 @@ function areaAnswer(area: Area, ctx: OracleContext, base: { question: string; da
   const pick = (title: string, n: number) => layers.find((l) => l.title.startsWith(title))?.lines.filter((l) => l.text).slice(0, n) ?? [];
   const lines = [...pick('Your birth chart', 2), ...pick('The next 30 days', 1).filter((l) => !/^Quiet$/.test(l.heading)), ...pick('Your best and hardest', 2).filter((l) => l.heading.startsWith('Best'))].slice(0, 4);
   const deeper = [...pick('The year ahead', 2), ...pick('The Vedic view', 1)];
-  return { ...base, intent: 'area', label, orb, points: AREA_SIGNIFICATOR[area], lines, deeper };
+  // Before the chart: the feeling in the question, or what questions about this part of life tend to carry.
+  const heard = ORACLE_HEARD[feelingIn(base.question) ?? ''];
+  const opener: SkyLine = { heading: '', text: heard ?? ORACLE_AREA_HEARD[area] };
+  return { ...base, intent: 'area', label, orb, points: AREA_SIGNIFICATOR[area], lines: [opener, ...lines], deeper };
 }
 
 function answerOnly(question: string, ctx: OracleContext): OracleReply {
@@ -774,7 +849,7 @@ function answerOnly(question: string, ctx: OracleContext): OracleReply {
   const area = areaOf(q);
   // A question about a part of life gets that part of the chart, not a general reading.
   const specific = /\b(rising|ascendant|lagna|nakshatra|dasha|north node|node|sun|moon|mercury|venus|mars|jupiter|saturn|uranus|neptune|pluto)\b/i.test(q);
-  if (area && (['open', 'sky', 'cycle'].includes(intent) || (intent === 'chart' && !specific))) return areaAnswer(area, ctx, base);
+  if (area && (['open', 'sky', 'cycle', 'feeling'].includes(intent) || (intent === 'chart' && !specific))) return areaAnswer(area, ctx, base);
 
   switch (intent) {
     case 'decision': {
@@ -864,7 +939,8 @@ function answerOnly(question: string, ctx: OracleContext): OracleReply {
       const a = answerFor(q, topicFor(q, []), c, place, now, ctx.profile ?? null);
       if (a) {
         const secs = a.sections.map((s) => ({ heading: s.title, text: [...s.paragraphs, ...(s.points ?? [])].join(' '), basis: s.basis }));
-        return { ...base, intent, label: a.title, orb: 'THE MOON', points: 'Moon', lines: [{ heading: a.title, text: a.intro }, ...secs.slice(0, 1)], deeper: [...secs.slice(1), ...(a.care ? [{ heading: '', text: a.care }] : [])] };
+        const heard = ORACLE_HEARD[feelingIn(q) ?? ''];
+        return { ...base, intent, label: a.title, orb: 'THE MOON', points: 'Moon', lines: [{ heading: a.title, text: heard ? `${heard} ${ORACLE_SAYS.feelingTurn}` : a.intro }, ...secs.slice(0, 1)], deeper: [...secs.slice(1), ...(a.care ? [{ heading: '', text: a.care }] : [])] };
       }
       break;
     }
@@ -953,7 +1029,10 @@ function answerOnly(question: string, ctx: OracleContext): OracleReply {
   // chart is working on right now, never from a general reading.
   if (intent === 'open') {
     const focus = ctx.profile?.onMind[0];
-    if (focus) return areaAnswer(focus, ctx, base);
+    if (focus) {
+      const r = areaAnswer(focus, ctx, base);
+      return { ...r, lines: [{ heading: '', text: ORACLE_SAYS.onMind }, ...r.lines] };
+    }
     const season = cycles(c, place.lat, place.lon, now, ctx.profile ?? null).now[0];
     const sky = todaySky(c, place, now);
     const lines: SkyLine[] = [
