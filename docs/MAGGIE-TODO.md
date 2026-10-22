@@ -8,8 +8,7 @@ Kept by Claude. Things only Maggie can do (account-owner steps), most urgent fir
 3. **Shannon.** Open the old link once (moves her data), delete the old icon, add withinoracle.app to the home screen, sign in with the email she paid with.
 
 ## Free listings (docs/growth/launch/FREE-LISTINGS.md)
-- **Bing Webmaster:** finish the import (approve Bing in admin.google.com → Security → Access and data control → API controls → Manage Third-Party App Access), or add the site manually with the XML file and send Claude the code.
-- **Claude in Chrome on your computer:** tell it "Yes, go. Start with Pinterest." It does Pinterest, YouTube, Facebook Page, Threads, TikTok, AlternativeTo and 6 directories; you do passwords, codes and robot checks.
+- **Claude in Chrome on your computer:** tell it "Yes, go. Start with Pinterest." Pinterest profile is up (pinterest.com/withintheoracle); next it does YouTube, Facebook Page, Threads, TikTok, AlternativeTo and 6 directories; you do passwords, codes and robot checks.
 - **Send Claude:** the Pinterest HTML tag, and which accounts got made (for automatic reel posting).
 - **Instagram partners:** check the top 5 in docs/sales/instagram-partners.md (handle, US, 2k–100k followers, posted lately), fill the [blank] in each message, and send them yourself.
 
