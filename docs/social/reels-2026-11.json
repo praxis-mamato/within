@@ -2,318 +2,336 @@
  {
   "date": "2026-11-01",
   "format": "scenes",
-  "hook": "The week ahead.|Two dates to circle",
+  "hook": "The week ahead:|3 real dates",
   "items": [
    {
-    "word": "NOV 9",
-    "title": "NEW MOON IN SCORPIO",
-    "line": "A fresh start, 17° Scorpio.|Plant one small seed.",
-    "dur": 3.4
+    "word": "NOV 1",
+    "title": "LAST QUARTER MOON · 9° LEO",
+    "line": "Tonight, 20:30 UTC. Half the Moon is lit:|finish what the Full Moon showed.",
+    "dur": 4.0
    },
    {
-    "word": "NOV 13",
-    "title": "MERCURY TURNS DIRECT",
-    "line": "The review season ends, at 5° Scorpio.|Old plans can move again.",
-    "dur": 3.4
+    "word": "NOV 4",
+    "title": "SUN MEETS MERCURY · 12° SCORPIO",
+    "line": "Mercury Rx meets the Sun at 14:30 UTC:|the midpoint of this retrograde.",
+    "dur": 4.2
    },
    {
-    "word": "YOUR|HOUSE",
-    "title": "WHAT MATTERS",
-    "line": "Where Scorpio sits in your chart|is where both land for you.",
-    "dur": 3.4
+    "word": "NOV 7",
+    "title": "SUN AT 15° SCORPIO",
+    "line": "10:00 UTC: the midpoint of autumn,|halfway to the solstice.",
+    "dur": 3.8
    }
   ],
-  "caption": "The week ahead in the sky: New Moon in Scorpio on Nov 9, Mercury direct on Nov 13. 🌑\n\nTonight the Moon is at its last quarter in Leo, a good moment to see what is ready to finish.\n\nSend this to the friend who circles dates in their calendar.\n\n#newmoon #mercuryretrograde #scorpio #astrology #weekahead"
+  "caption": "The week ahead in the sky: Last Quarter Moon at 9° Leo (Nov 1), Sun conjunct Mercury at 12° Scorpio (Nov 4), Sun at 15° Scorpio (Nov 7). 🌗\n\nSend this to the friend who circles dates in their calendar.\n\n#astrology #mercuryretrograde #lastquartermoon #scorpio #weekahead"
  },
  {
   "date": "2026-11-02",
   "format": "signs",
-  "hook": "Your sign this week.|Pause on yours.",
+  "hook": "Your sign this week:|Sun meets Mercury Nov 4",
   "open": "THIS|WEEK",
-  "openLine": "Mercury retrograde, last stretch",
-  "items": [
-   {
-    "word": "ARIES",
-    "title": "ARIES · THIS WEEK",
-    "line": "Slow your first reply.|The second draft is kinder."
-   },
-   {
-    "word": "TAURUS",
-    "title": "TAURUS · THIS WEEK",
-    "line": "Say the thing|you've been rehearsing."
-   },
-   {
-    "word": "GEMINI",
-    "title": "GEMINI · THIS WEEK",
-    "line": "Finish one thread before|opening five more."
-   },
-   {
-    "word": "CANCER",
-    "title": "CANCER · THIS WEEK",
-    "line": "Ask for what you've been|quietly hoping for."
-   },
-   {
-    "word": "LEO",
-    "title": "LEO · THIS WEEK",
-    "line": "Let someone else have|the spotlight for a day."
-   },
-   {
-    "word": "VIRGO",
-    "title": "VIRGO · THIS WEEK",
-    "line": "Done is a good enough|place to rest."
-   },
-   {
-    "word": "LIBRA",
-    "title": "LIBRA · THIS WEEK",
-    "line": "Choose before everyone|has weighed in."
-   },
-   {
-    "word": "SCORPIO",
-    "title": "SCORPIO · THIS WEEK",
-    "line": "Share one thing you|usually keep to yourself."
-   },
-   {
-    "word": "SAGITTA-|RIUS",
-    "title": "SAGITTARIUS · THIS WEEK",
-    "line": "Read the fine print|before the big leap."
-   },
-   {
-    "word": "CAPRICORN",
-    "title": "CAPRICORN · THIS WEEK",
-    "line": "Rest is part of the plan."
-   },
-   {
-    "word": "AQUARIUS",
-    "title": "AQUARIUS · THIS WEEK",
-    "line": "Reach out to the friend|you've gone quiet on."
-   },
-   {
-    "word": "PISCES",
-    "title": "PISCES · THIS WEEK",
-    "line": "Write the dream down|before it fades."
-   }
-  ],
-  "caption": "Your sign this week, as Mercury retrograde winds down toward Nov 13: pause on yours. ✦\n\nRead your Sun sign, then your rising sign for the closer answer.\n\nSend this to the friend who needs the Capricorn one.\n\n#horoscope #weeklyhoroscope #zodiac #astrology #mercuryretrograde"
- },
- {
-  "date": "2026-11-03",
-  "format": "pause",
-  "hook": "Pause the crystal ball.|That's your message today.",
-  "open": "PAUSE",
-  "items": [
-   {
-    "word": "BEGIN",
-    "line": "Start the small version.|It counts."
-   },
-   {
-    "word": "LISTEN",
-    "line": "The answer is quieter|than the question."
-   },
-   {
-    "word": "RELEASE",
-    "line": "Put down what you're|only carrying out of habit."
-   },
-   {
-    "word": "CHOOSE",
-    "line": "Pick the option that|feels like relief."
-   },
-   {
-    "word": "ASK",
-    "line": "Say the question out loud.|Even once."
-   },
-   {
-    "word": "REST",
-    "line": "Nothing is late.|Take the night."
-   }
-  ],
-  "caption": "Pause the crystal ball: your oracle message for today. 🔮\n\nWhatever it stops on is yours. Which one did you get?\n\nFor an answer from your own birth chart, ask the Oracle: link in bio.\n\n#oracle #crystalball #dailymessage #astrology #spiritualmessage"
- },
- {
-  "date": "2026-11-04",
-  "format": "scenes",
-  "hook": "Scorpios, stop scrolling",
-  "items": [
-   {
-    "word": "SCORPIO",
-    "title": "THE SUN IS IN YOUR SIGN",
-    "line": "Your season runs until Nov 22.|It's the year's spotlight on you.",
-    "dur": 3.4
-   },
-   {
-    "word": "MERCURY",
-    "title": "SO IS MERCURY",
-    "line": "Retrograde in Scorpio until Nov 13.|Rethink how you say what you mean.",
-    "dur": 3.4
-   },
-   {
-    "word": "USE IT",
-    "title": "WHAT TO DO WITH IT",
-    "line": "Finish what you started in October.|Then plan the next chapter.",
-    "dur": 3.4
-   }
-  ],
-  "caption": "Scorpio horoscope for early November: the Sun and Mercury are both in Scorpio. ♏︎\n\nMercury turns direct on Nov 13; the Sun leaves Scorpio on Nov 22.\n\nSend this to your Scorpio friend ✦\n\n#scorpio #scorpioseason #horoscope #astrology #zodiac"
- },
- {
-  "date": "2026-11-05",
-  "format": "pick",
-  "hook": "Pick a crystal ball|for the New Moon",
-  "open": "1 · 2 · 3",
-  "items": [
-   {
-    "word": "PLANT",
-    "line": "Choose one small seed|and put it in the ground."
-   },
-   {
-    "word": "CLEAR",
-    "line": "Make room first.|One drawer, one inbox, one yes."
-   },
-   {
-    "word": "TRUST",
-    "line": "The idea you keep returning to|deserves a real try."
-   }
-  ],
-  "caption": "Pick a crystal ball for the New Moon in Scorpio on Nov 9: 1, 2 or 3? 🌑\n\nPause, choose, then watch the reveal.\n\nSend this to the friend who would pick ball 3.\n\n#newmoon #pickacard #astrology #oracle #crystalball"
- },
- {
-  "date": "2026-11-06",
-  "format": "scenes",
-  "hook": "Which element are you?|3 questions",
-  "items": [
-   {
-    "word": "FRIDAY",
-    "title": "A FREE FRIDAY NIGHT",
-    "line": "A: out, now, with people.|B: home, cozy, with a plan.",
-    "dur": 3.4
-   },
-   {
-    "word": "FRIDAY",
-    "title": "KEEP GOING",
-    "line": "C: talking for hours.|D: alone, feeling things.",
-    "dur": 3.4
-   },
-   {
-    "word": "ANSWER",
-    "title": "YOUR ELEMENT",
-    "line": "A fire · B earth · C air · D water.|Your Sun sign has the full story.",
-    "dur": 3.6
-   }
-  ],
-  "caption": "Which element are you? Fire, earth, air or water: pick A, B, C or D. 🔥🌍💨💧\n\nA fire, B earth, C air, D water. The Oracle reads all four in your birth chart: link in bio.\n\nSend this to a friend and compare answers.\n\n#elements #fire #astrology #zodiacsigns #quiz"
- },
- {
-  "date": "2026-11-07",
-  "format": "scenes",
-  "hook": "Send this to|your Libra friend",
-  "items": [
-   {
-    "word": "LIBRA",
-    "title": "THEY DECIDE",
-    "line": "Twenty minutes on where to eat.|Then pick the perfect place.",
-    "dur": 2.8
-   },
-   {
-    "word": "FAIR",
-    "title": "THEY LISTEN",
-    "line": "Both sides of every story,|held without taking one.",
-    "dur": 2.8
-   },
-   {
-    "word": "KIND",
-    "title": "THEY NOTICE",
-    "line": "The mood in the room|before anyone says a word.",
-    "dur": 2.8
-   }
-  ],
-  "caption": "Send this to your Libra friend. ♎︎\n\nThey weigh both sides, notice the mood and keep the peace. Tell them what they mean to you.\n\n#libra #librasign #zodiacsigns #astrology #horoscope"
- },
- {
-  "date": "2026-11-08",
-  "format": "scenes",
-  "hook": "Next week in the sky:|two dates",
-  "items": [
-   {
-    "word": "MON",
-    "title": "NEW MOON IN SCORPIO · NOV 9",
-    "line": "The seed moon.|Choose what to begin.",
-    "dur": 3.4
-   },
-   {
-    "word": "FRI",
-    "title": "MERCURY DIRECT · NOV 13",
-    "line": "The review ends.|Move old plans forward.",
-    "dur": 3.4
-   },
-   {
-    "word": "ASK",
-    "title": "WHERE IT LANDS FOR YOU",
-    "line": "The Oracle shows the house|each one touches in your chart.",
-    "dur": 3.4
-   }
-  ],
-  "caption": "This week in the sky: New Moon in Scorpio on Monday, Nov 9, and Mercury direct on Friday, Nov 13. 🌑☿\n\nWhere Scorpio sits in your chart decides the part of life each one touches. Ask the Oracle, link in bio.\n\n#newmoon #mercurydirect #astrology #scorpio #weekahead"
- },
- {
-  "date": "2026-11-09",
-  "format": "signs",
-  "hook": "New Moon in Scorpio.|Pause on your sign.",
-  "open": "NEW|MOON",
-  "openLine": "Nov 9, 17° Scorpio",
+  "openLine": "Nov 4 · 12° Scorpio",
   "items": [
    {
     "word": "ARIES",
     "title": "ARIES · YOUR 8TH HOUSE",
-    "line": "Begin something shared:|money, trust, closeness."
+    "line": "Nov 4 clarifies shared money.|Ask the question about the debt or split."
    },
    {
     "word": "TAURUS",
     "title": "TAURUS · YOUR 7TH HOUSE",
-    "line": "Begin a new chapter with|a partner or client."
+    "line": "A partnership gets clear.|Decide what needs revising."
    },
    {
     "word": "GEMINI",
     "title": "GEMINI · YOUR 6TH HOUSE",
-    "line": "Begin a routine|that supports you."
+    "line": "Work and routine make sense.|Choose the task worth redoing."
    },
    {
     "word": "CANCER",
     "title": "CANCER · YOUR 5TH HOUSE",
-    "line": "Begin something just|for the joy of it."
+    "line": "Creative and love matters clarify.|Finish the draft."
    },
    {
     "word": "LEO",
     "title": "LEO · YOUR 4TH HOUSE",
-    "line": "Begin at home: a room,|a ritual, a conversation."
+    "line": "Home and family talks make sense.|Decide what to repair."
    },
    {
     "word": "VIRGO",
     "title": "VIRGO · YOUR 3RD HOUSE",
-    "line": "Begin the conversation|you've been postponing."
+    "line": "Messages and plans make sense.|Send the corrected version."
    },
    {
     "word": "LIBRA",
     "title": "LIBRA · YOUR 2ND HOUSE",
-    "line": "Begin a new way|of earning or spending."
+    "line": "Money and worth get clear.|Update the budget."
    },
    {
     "word": "SCORPIO",
     "title": "SCORPIO · YOUR 1ST HOUSE",
-    "line": "Begin as the person|you're becoming."
+    "line": "Sun and Mercury meet in your sign.|See yourself clearly, revise the story."
    },
    {
     "word": "SAGITTA-|RIUS",
     "title": "SAGITTARIUS · YOUR 12TH HOUSE",
-    "line": "Begin quietly: rest,|a journal, solitude."
+    "line": "What's hidden comes to light, in private.|Write it down."
    },
    {
     "word": "CAPRICORN",
     "title": "CAPRICORN · YOUR 11TH HOUSE",
-    "line": "Begin with the people|who share your hopes."
+    "line": "Friends and goals get clear.|Choose who gets your time."
    },
    {
     "word": "AQUARIUS",
     "title": "AQUARIUS · YOUR 10TH HOUSE",
-    "line": "Begin a goal|you'd be proud of."
+    "line": "Career comes into focus.|Revise the plan, not the goal."
+   },
+   {
+    "word": "PISCES",
+    "title": "PISCES · YOUR 9TH HOUSE",
+    "line": "Beliefs and plans get clear.|Recheck bookings and study plans."
+   }
+  ],
+  "caption": "Your sign this week: the Sun meets retrograde Mercury at 12° Scorpio on Nov 4, and the house it lights for every sign. ☿\n\nPause on your Sun sign (whole-sign houses), then read your rising sign for the closer answer.\n\nSend this to the friend who needs the Capricorn one.\n\n#horoscope #weeklyhoroscope #mercuryretrograde #astrology #zodiac"
+ },
+ {
+  "date": "2026-11-03",
+  "format": "pause",
+  "hook": "Pause the crystal ball.|Today's sky message",
+  "open": "PAUSE",
+  "items": [
+   {
+    "word": "CLARITY",
+    "line": "Tomorrow Mercury meets the Sun|at 12° Scorpio. Prepare the question."
+   },
+   {
+    "word": "REVISE",
+    "line": "Mercury is still retrograde:|edit it, don't publish it yet."
+   },
+   {
+    "word": "SORT",
+    "line": "The Moon is in Virgo today.|One drawer, one inbox, one list."
+   },
+   {
+    "word": "ASK",
+    "line": "Scorpio rewards the direct question.|Ask it."
+   },
+   {
+    "word": "LISTEN",
+    "line": "Retrograde Mercury returns old words.|Hear what was actually said."
+   },
+   {
+    "word": "WAIT",
+    "line": "Hold the signature until Nov 13.|Read the fine print."
+   }
+  ],
+  "caption": "Pause the crystal ball: today's message comes from the sky. 🔮\n\nMercury meets the Sun tomorrow at 12° Scorpio, still retrograde, and the Moon is in Virgo.\n\nWhich one did you get?\n\nAsk the Oracle for yours, from your own chart: link in bio.\n\n#mercuryretrograde #oracle #crystalball #astrology #dailymessage"
+ },
+ {
+  "date": "2026-11-04",
+  "format": "scenes",
+  "hook": "Mercury meets the Sun.|Why that matters",
+  "items": [
+   {
+    "word": "12° SCORPIO",
+    "title": "NOV 4 · SUN CONJUNCT MERCURY",
+    "line": "Retrograde Mercury is conjunct the Sun|at 12°11' Scorpio, 14:30 UTC.",
+    "dur": 4.0
+   },
+   {
+    "word": "CAZIMI",
+    "title": "THE OLD WORD",
+    "line": "Within 17 arcminutes of the Sun, it's|called cazimi: 'in the heart'.",
+    "dur": 4.2
+   },
+   {
+    "word": "ASTA",
+    "title": "THE VEDIC WORD",
+    "line": "Jyotish calls it 'asta' (combust):|said to be hidden. Both views exist.",
+    "dur": 4.2
+   },
+   {
+    "word": "ALSO",
+    "title": "VENUS SEXTILE JUPITER",
+    "line": "10:30 UTC at 24°43' Libra/Leo:|a link that favors kindness and giving.",
+    "dur": 4.0
+   }
+  ],
+  "caption": "Mercury meets the Sun on Nov 4 at 12°11' Scorpio, mid-retrograde. ☿\n\nTraditional astrology calls it cazimi, Vedic astrology calls it asta. Also today: Venus sextile Jupiter at 24°43' Libra/Leo.\n\nSend this to the friend who loves astrology facts.\n\n#mercuryretrograde #cazimi #astrologyfacts #astrology #scorpio"
+ },
+ {
+  "date": "2026-11-05",
+  "format": "pick",
+  "hook": "Pick a crystal ball:|Venus meets Jupiter",
+  "open": "1 · 2 · 3",
+  "items": [
+   {
+    "word": "GIVE",
+    "line": "Venus sextile Jupiter: say the kind thing.|Generosity opens a door."
+   },
+   {
+    "word": "ASK",
+    "line": "Jupiter likes the bold ask.|The answer is friendlier now."
+   },
+   {
+    "word": "ENJOY",
+    "line": "Venus at 24° Libra rewards pleasure:|one good meal, one good friend."
+   }
+  ],
+  "caption": "Pick a crystal ball: Venus (retrograde, 24° Libra) and Jupiter (25° Leo) made a sextile yesterday. 1, 2 or 3? 💫\n\nPause, choose, then watch the reveal.\n\nSend this to the friend who would pick ball 3.\n\n#venus #jupiter #pickacard #astrology #oracle"
+ },
+ {
+  "date": "2026-11-06",
+  "format": "scenes",
+  "hook": "The Vedic star sign|almost nobody knows",
+  "items": [
+   {
+    "word": "27",
+    "title": "THE MOON'S HOUSES",
+    "line": "Vedic astrology splits the sky in 27 stars,|one per night of the Moon's orbit.",
+    "dur": 4.0
+   },
+   {
+    "word": "13°20'",
+    "title": "EACH ONE",
+    "line": "Each nakshatra is 13°20' of the zodiac,|named for a group of stars.",
+    "dur": 3.8
+   },
+   {
+    "word": "VISHAKHA",
+    "title": "THE NEW MOON'S",
+    "line": "On Nov 9 the Moon is in Vishakha:|'forked branch': the drive to a goal.",
+    "dur": 4.0
+   },
+   {
+    "word": "YOURS",
+    "title": "YOUR MOON",
+    "line": "The star your Moon was in at birth|is the core of your Vedic chart.",
+    "dur": 3.8
+   }
+  ],
+  "caption": "What is a nakshatra? The Vedic star sign almost nobody knows. ✦\n\nThere are 27, each 13°20' wide. The New Moon on Nov 9 falls in Vishakha. Your birth Moon's nakshatra is the core of your Vedic chart.\n\nAsk the Oracle for your Moon nakshatra: link in bio.\n\n#nakshatra #vedicastrology #jyotish #astrology #moonsign"
+ },
+ {
+  "date": "2026-11-07",
+  "format": "scenes",
+  "hook": "Today is the real|halfway point of autumn",
+  "items": [
+   {
+    "word": "15°",
+    "title": "NOV 7 · 10:00 UTC",
+    "line": "The Sun reaches 15° Scorpio:|halfway from the equinox to the solstice.",
+    "dur": 4.0
+   },
+   {
+    "word": "SAMHAIN",
+    "title": "THE OLD FESTIVALS",
+    "line": "Samhain and Halloween keep this midpoint,|rounded to Oct 31 – Nov 1.",
+    "dur": 3.8
+   },
+   {
+    "word": "FIXED",
+    "title": "THE ASTROLOGY",
+    "line": "Scorpio is a fixed sign.|15° is the deepest point of its season.",
+    "dur": 3.8
+   }
+  ],
+  "caption": "Today, Nov 7, is the real halfway point of autumn. 🍂\n\nThe Sun reaches 15° Scorpio at 10:00 UTC, halfway between the equinox and the solstice.\n\nSend this to the friend who loves Halloween and the real dates behind it.\n\n#scorpioseason #samhain #astrologyfacts #astrology #scorpio"
+ },
+ {
+  "date": "2026-11-08",
+  "format": "scenes",
+  "hook": "Next week in the sky:|four real dates",
+  "items": [
+   {
+    "word": "NOV 9",
+    "title": "NEW MOON · 17° SCORPIO",
+    "line": "07:10 UTC. The seed moon,|in the Vedic star Vishakha.",
+    "dur": 3.6
+   },
+   {
+    "word": "NOV 10",
+    "title": "VENUS SEXTILE MARS",
+    "line": "06:40 UTC at 23° Libra/Leo:|desire and action line up.",
+    "dur": 3.6
+   },
+   {
+    "word": "NOV 13",
+    "title": "MERCURY TURNS DIRECT",
+    "line": "15:30 UTC at 5°02' Scorpio.|The review ends.",
+    "dur": 3.6
+   },
+   {
+    "word": "NOV 14",
+    "title": "VENUS TURNS DIRECT",
+    "line": "22°52' Libra.|Love and money questions start moving.",
+    "dur": 3.6
+   }
+  ],
+  "caption": "Next week in the sky: four real dates. 🌑\n\nNew Moon at 17° Scorpio (Nov 9), Venus sextile Mars (Nov 10), Mercury direct at 5° Scorpio (Nov 13), Venus direct at 23° Libra (Nov 14).\n\nSend this to the friend who plans around the sky.\n\n#newmoon #mercurydirect #venusdirect #astrology #weekahead"
+ },
+ {
+  "date": "2026-11-09",
+  "format": "signs",
+  "hook": "New Moon at 17° Scorpio.|Pause on your house.",
+  "open": "NEW|MOON",
+  "openLine": "Nov 9 · 17° Scorpio",
+  "items": [
+   {
+    "word": "ARIES",
+    "title": "ARIES · YOUR 8TH HOUSE",
+    "line": "Begin an honest talk about shared money.|Set the terms."
+   },
+   {
+    "word": "TAURUS",
+    "title": "TAURUS · YOUR 7TH HOUSE",
+    "line": "A new beginning with a partner or client.|Ask for clarity."
+   },
+   {
+    "word": "GEMINI",
+    "title": "GEMINI · YOUR 6TH HOUSE",
+    "line": "Start a routine that supports your work.|Keep it small and daily."
+   },
+   {
+    "word": "CANCER",
+    "title": "CANCER · YOUR 5TH HOUSE",
+    "line": "Begin something you'd do for joy.|A date, a draft, a hobby."
+   },
+   {
+    "word": "LEO",
+    "title": "LEO · YOUR 4TH HOUSE",
+    "line": "Begin at home: a repair, a room,|a conversation."
+   },
+   {
+    "word": "VIRGO",
+    "title": "VIRGO · YOUR 3RD HOUSE",
+    "line": "Begin the message you've postponed.|Keep it short."
+   },
+   {
+    "word": "LIBRA",
+    "title": "LIBRA · YOUR 2ND HOUSE",
+    "line": "Begin a new money habit.|Name what you value."
+   },
+   {
+    "word": "SCORPIO",
+    "title": "SCORPIO · YOUR 1ST HOUSE",
+    "line": "A new cycle starts in your sign.|Decide who you're becoming."
+   },
+   {
+    "word": "SAGITTA-|RIUS",
+    "title": "SAGITTARIUS · YOUR 12TH HOUSE",
+    "line": "Begin quietly: sleep, therapy, solitude.|Rest is the project."
+   },
+   {
+    "word": "CAPRICORN",
+    "title": "CAPRICORN · YOUR 11TH HOUSE",
+    "line": "Begin with people who share your hopes.|Say yes to one invitation."
+   },
+   {
+    "word": "AQUARIUS",
+    "title": "AQUARIUS · YOUR 10TH HOUSE",
+    "line": "Begin a work goal you'd be proud of.|One step."
    },
    {
     "word": "PISCES",
@@ -321,39 +339,71 @@
     "line": "Begin a study, trip or belief|worth exploring."
    }
   ],
-  "caption": "New Moon in Scorpio, Nov 9: what to begin for every sign. Pause on yours. 🌑\n\nRead your Sun sign, then your rising sign for the closer answer.\n\nSend this to the friend who loves a fresh start.\n\n#newmoon #scorpio #astrology #zodiac #horoscope"
+  "caption": "New Moon at 17° Scorpio, Nov 9 (07:10 UTC), in the Vedic star Vishakha: what to begin in your house. 🌑\n\nPause on your Sun sign (whole-sign houses), then read your rising sign for the closer answer.\n\nSend this to the friend who loves a fresh start.\n\n#newmoon #scorpio #horoscope #astrology #zodiac"
  },
  {
   "date": "2026-11-10",
   "format": "pause",
-  "hook": "Pause the crystal ball.|That's your message today.",
+  "hook": "Pause the crystal ball.|Today's sky message",
   "open": "PAUSE",
   "items": [
    {
-    "word": "PLANT",
-    "line": "Name the seed.|Say it plainly."
+    "word": "ATTRACT",
+    "line": "Venus sextile Mars: desire meets action.|Make the first move."
    },
    {
-    "word": "PATIENCE",
-    "line": "Roots grow before|anything shows."
+    "word": "SAY IT",
+    "line": "Venus at 23° Libra, Mars at 23° Leo:|ask for what you want, warmly."
    },
    {
-    "word": "ASK",
-    "line": "Ask for the help|you'd offer someone else."
+    "word": "CREATE",
+    "line": "Mars in Leo wants an audience.|Show the work."
    },
    {
-    "word": "SOFTEN",
-    "line": "Be as kind to yourself|as you'd be to a friend."
+    "word": "SHARE",
+    "line": "Venus in Libra rewards a shared plan.|Invite someone in."
    },
    {
-    "word": "FOCUS",
-    "line": "One thing, done well,|beats ten half-started."
+    "word": "PLAY",
+    "line": "The Moon enters Sagittarius today.|Do the fun, honest thing."
    },
    {
-    "word": "TRUST",
-    "line": "You already know|the first step."
+    "word": "FINISH",
+    "line": "Mars is steady in fixed Leo.|Finish what the New Moon started."
    }
   ],
-  "caption": "Pause the crystal ball: your oracle message the day after the New Moon. 🔮\n\nWhatever it stops on is yours. Which one did you get?\n\nFor an answer from your own birth chart, ask the Oracle: link in bio.\n\n#oracle #crystalball #dailymessage #astrology #newmoon"
+  "caption": "Pause the crystal ball: today's message comes from the sky. 🔮\n\nVenus sextile Mars is exact today at 23° Libra/Leo, and the Moon enters Sagittarius.\n\nWhich one did you get?\n\nAsk the Oracle for yours, from your own chart: link in bio.\n\n#venus #mars #oracle #crystalball #astrology"
+ },
+ {
+  "date": "2026-11-11",
+  "format": "scenes",
+  "hook": "Mercury turns direct|Friday. Not yet done.",
+  "items": [
+   {
+    "word": "NOV 13",
+    "title": "THE STATION · 5°02' SCORPIO",
+    "line": "Mercury turns direct at 15:30 UTC.|It is nearly still around the station.",
+    "dur": 4.0
+   },
+   {
+    "word": "SHADOW",
+    "title": "NOT OVER YET",
+    "line": "It re-crosses 21° Scorpio on Nov 30:|the retrograde's shadow runs until then.",
+    "dur": 4.0
+   },
+   {
+    "word": "WHAT TO DO",
+    "title": "THE WEEK",
+    "line": "Hold launches until after Nov 30.|Use these days to finish edits.",
+    "dur": 3.8
+   },
+   {
+    "word": "NOV 14",
+    "title": "VENUS TOO",
+    "line": "Venus turns direct at 22°52' Libra:|love and money questions start moving.",
+    "dur": 4.0
+   }
+  ],
+  "caption": "Mercury turns direct on Nov 13, but the shadow runs to Nov 30. ☿\n\nIt turns at 5°02' Scorpio and re-crosses 21° Scorpio on Nov 30. Venus turns direct on Nov 14 at 23° Libra.\n\nSend this to the friend counting down the days.\n\n#mercurydirect #mercuryretrograde #venusretrograde #astrology #scorpio"
  }
 ]
