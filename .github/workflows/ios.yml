@@ -24,6 +24,8 @@ jobs:
     runs-on: macos-15
     defaults:
       run:
+        # bash with pipefail, so a failed build piped through tail still fails the job
+        shell: bash
         working-directory: app
     env:
       KEY_ID: ${{ secrets.APPSTORE_KEY_ID }}
