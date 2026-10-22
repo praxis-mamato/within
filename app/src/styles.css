@@ -833,3 +833,4 @@ details > summary { cursor: pointer; margin: 8px 0; }
 
 /* Back from sign-in, on the way to payment */
 .resume-pay { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; background: rgb(11 16 48 / 0.85); color: #fbf5ea; text-align: center; padding: 24px; }
+.google-gis { min-height: 44px; display: flex; justify-content: center; }

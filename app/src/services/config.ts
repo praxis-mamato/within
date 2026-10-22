@@ -60,6 +60,12 @@ export const LIVE =
 
 /** Sign in with Apple needs an Apple Developer account; until VITE_APPLE_SIGN_IN=true, live mode offers Google only. */
 export const APPLE_SIGN_IN = !LIVE || env.VITE_APPLE_SIGN_IN === 'true';
+/**
+ * Google's own sign-in button, run on Within's address, so Google shows "withinoracle.app" instead of the
+ * Supabase address. Needs https://withinoracle.app listed under the Google client's Authorized JavaScript
+ * origins; until VITE_GOOGLE_GIS=true, sign-in uses the redirect.
+ */
+export const GOOGLE_CLIENT_ID = LIVE && env.VITE_GOOGLE_GIS === 'true' ? (env.VITE_GOOGLE_CLIENT_ID ?? '') : '';
 
 /** Our own addresses: sign-in and checkout return to whichever one the person is using. */
 const OUR_HOSTS = /(^|\.)withinoracle\.app$|\.workers\.dev$/;

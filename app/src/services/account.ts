@@ -33,6 +33,8 @@ export interface AccountService {
   current(): Promise<Account | null>;
   onChange(cb: (a: Account | null) => void): () => void;
   signIn(provider: Provider): Promise<void>;
+  /** Signs in with the ID token from Google's own button (no redirect). */
+  signInWithGoogle(idToken: string, nonce: string): Promise<void>;
   sendEmailLink(): Promise<{ sentTo: string }>;
   signOut(): Promise<void>;
   deleteAccount(): Promise<void>;
@@ -116,6 +118,10 @@ function live(): AccountService {
       const { error } = await sb.auth.signInWithOAuth({ provider, options: { redirectTo: siteUrl(), queryParams: provider === 'google' ? { prompt: 'select_account' } : undefined } });
       if (error) throw error;
     },
+    signInWithGoogle: async (token, nonce) => {
+      const { error } = await sb.auth.signInWithIdToken({ provider: 'google', token, nonce });
+      if (error) throw error;
+    },
     sendEmailLink: async () => {
       const { data } = await sb.auth.getUser();
       if (!data.user?.email) throw new Error('This account has no email address to send a link to.');
@@ -184,6 +190,10 @@ function demo(): AccountService {
     onChange: (cb) => (listeners.add(cb), () => listeners.delete(cb)),
     signIn: async (provider) => {
       ls.set(DEMO, JSON.stringify({ id: `demo-${provider}`, email: provider === 'apple' ? 'demo@privaterelay.appleid.com' : 'demo@gmail.com', provider, deviceVerified: false }));
+      emit();
+    },
+    signInWithGoogle: async () => {
+      ls.set(DEMO, JSON.stringify({ id: 'demo-google', email: 'demo@gmail.com', provider: 'google', deviceVerified: false }));
       emit();
     },
     sendEmailLink: async () => {
