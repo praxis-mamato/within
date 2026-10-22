@@ -7,6 +7,9 @@ Kept by Claude. Things only Maggie can do (account-owner steps), most urgent fir
 2. **App stores.** Answer: is there a registered company (e.g. Praxis Global)? Start the Android rebuild and iPhone app? Join the Apple Developer Program ($99/yr).
 3. **Shannon.** Open the old link once (moves her data), delete the old icon, add withinoracle.app to the home screen, sign in with the email she paid with.
 
+## Free listings (docs/growth/launch/FREE-LISTINGS.md)
+- Tier 1 first: Bing Webmaster (2 min import), Pinterest business + claim site, YouTube channel, Facebook Page + Threads, TikTok. Then the directories.
+
 ## When there's time
 4. Microsoft Store, Product Hunt (Tue Oct 27) and AlternativeTo: steps in `docs/growth/launch/LAUNCH-KIT.md`.
 5. Ads: yes or no on a $100–150 test around Nov 3.
