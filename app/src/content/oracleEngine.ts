@@ -63,6 +63,8 @@ export interface OracleReply {
   layers?: Layer[];
   /** What the Oracle read to answer. */
   consulted?: string[];
+  /** True when the words were written for this person from their whole chart (oracle-answer). */
+  personal?: boolean;
 }
 
 export interface OracleContext {

@@ -101,6 +101,8 @@ export interface State {
   todayDone: boolean;
   /** Opt-in for AI deep readings (sends calculated placements only). */
   aiConsent: boolean;
+  /** Oracle answers written for the person from their whole chart (on unless turned off in Settings). */
+  aiAnswers: boolean;
   /** AI readings kept on this device, keyed by reading type and chart. */
   aiReadings: Record<string, { at: string; sections: { title: string; body: string; tradition: string }[]; reflection_question: string }>;
   /** What the Oracle remembers between conversations, only if the person turns it on. Stays on this device. */
@@ -150,6 +152,7 @@ export function initialState(): State {
     country: null,
     todayDone: false,
     aiConsent: false,
+    aiAnswers: true,
     aiReadings: {},
     oracleMemory: { on: false, notes: [] },
     profile: null,
@@ -183,6 +186,7 @@ export type Event =
   | { type: 'country/set'; country: string | null }
   | { type: 'today/finish' }
   | { type: 'ai/consent'; on: boolean }
+  | { type: 'ai/answers'; on: boolean }
   | { type: 'ai/save'; key: string; reading: State['aiReadings'][string] }
   | { type: 'memory/on'; on: boolean }
   | { type: 'memory/note'; id: string; text: string }
@@ -276,6 +280,8 @@ function reduceOne(s: State, e: Event): State {
       return { ...s, todayDone: true };
     case 'ai/consent':
       return { ...s, aiConsent: e.on, aiReadings: e.on ? s.aiReadings : {}, oracleMemory: e.on ? s.oracleMemory : { on: false, notes: [] } };
+    case 'ai/answers':
+      return { ...s, aiAnswers: e.on };
     case 'memory/on':
       return { ...s, oracleMemory: { on: e.on, notes: e.on ? s.oracleMemory.notes : [] } };
     case 'memory/note': {

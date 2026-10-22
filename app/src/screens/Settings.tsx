@@ -85,6 +85,17 @@ export default function Settings() {
         <p className="small muted">Reminders say only “You have a reflection waiting.” No names or relationship details.</p>
       </section>
 
+      <section aria-labelledby="ai-ans-h">
+        <h2 id="ai-ans-h">Personal answers</h2>
+        <label className="toggle">
+          The Oracle writes each answer for you
+          <input type="checkbox" checked={state.aiAnswers} onChange={(e) => dispatch({ type: 'ai/answers', on: e.target.checked })} />
+        </label>
+        <p className="small muted">
+          When on, your question and your chart’s calculated positions (never your name, birth date, time, or place) are sent to Claude, an AI model, which writes the answer for your whole chart, checked against Within’s rules. Nothing is stored. When off, answers come from Within’s own library on your phone.
+        </p>
+      </section>
+
       <section aria-labelledby="ai-set-h">
         <h2 id="ai-set-h">Connected readings</h2>
         <label className="toggle">

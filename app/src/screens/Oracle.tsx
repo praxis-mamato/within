@@ -19,8 +19,19 @@ import { hasBirthDate } from '../content/askedAbout';
 import { loadPlaces, type Place } from '../geo/places';
 import { useAccount } from '../services/AccountContext';
 import { factSheet, requestDeepReading, type DeepResult } from '../services/aiReading';
+import { personalAnswer, type AnswerReply } from '../services/oracleAnswer';
 import { track } from '../services/telemetry';
 import { useStore } from '../state';
+
+/** The engine's answer with the Oracle's own words for this person: the verdict, dates, and board stay. */
+function personalize(a: OracleReply, p: AnswerReply): OracleReply {
+  return {
+    ...a,
+    personal: true,
+    lines: [...p.answer.map((text) => ({ heading: '', text })), ...(p.reflection ? [{ heading: 'To sit with', text: p.reflection }] : [])],
+    deeper: p.deeper.length ? p.deeper.map((d) => ({ heading: d.heading, text: d.text })) : a.deeper,
+  };
+}
 
 /** What a shake asks when no question is written. */
 const SHAKE_QUESTION = 'What do I need to know today?';
@@ -148,16 +159,25 @@ export default function Oracle() {
     }
     const a = consultOracle(question, { chart: me, place, profile: state.profile, history: state.oracle, places: places.current, other: who?.birth && theirChart ? { chart: theirChart, place: { lat: who.birth.lat, lon: who.birth.lon }, name: who.nickname } : null });
     if (same) setNote(ORACLE_TEXT.sameDay);
-    else {
-      // History keeps the answer itself; the full reading is recalculated when asked again.
-      dispatch({ type: 'oracle/ask', answer: { ...a, layers: undefined, consulted: undefined } });
-      track('oracle_asked', { intent: a.intent });
-    }
     setAnswer(a);
     setPhase('seeking');
     setInfo(null);
     board.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    window.setTimeout(() => setPhase('answered'), window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ? 0 : 2600);
+    // While the ball turns, the Oracle writes the answer for this person from their whole chart. The same
+    // question on the same day keeps its answer; if writing fails or is slow, the engine's own answer stands.
+    const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    const turning = new Promise((r) => window.setTimeout(r, reduce ? 0 : 2600));
+    const writing = same?.personal || !state.aiAnswers || a.intent === 'energy' ? Promise.resolve(null) : personalAnswer({ question, label: a.label, notes: answerText(a), facts: wholeChart(), about: aboutMe() });
+    void Promise.all([writing, turning]).then(([p]) => {
+      const final: OracleReply = same?.personal ? { ...a, lines: same.lines, deeper: same.deeper, personal: true } : p ? personalize(a, p) : a;
+      if (!same) {
+        // History keeps the answer itself; the full reading is recalculated when asked again.
+        dispatch({ type: 'oracle/ask', answer: { ...final, layers: undefined, consulted: undefined } });
+        track('oracle_asked', { intent: a.intent });
+      }
+      setAnswer((cur) => (cur === a ? final : cur));
+      setPhase('answered');
+    });
   };
   // Shake with a question to ask it; shake with none for today's message, like an oracle's ball.
   const enableShake = useShake(() => (q.trim() ? ask() : ask(SHAKE_QUESTION)));
@@ -191,9 +211,18 @@ export default function Oracle() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [me]);
 
+  /** What the person has told Within, and the Oracle's notes from earlier talks if they allowed memory. */
+  const aboutMe = () => {
+    const p = state.profile;
+    return [
+      ...(p ? [`Season of life: ${p.season}`, ...(p.onMind.length ? [`On their mind: ${p.onMind.join(', ')}`] : []), ...(p.recharge ? [`Recharges by: ${p.recharge}`] : [])] : []),
+      ...(state.oracleMemory.on ? state.oracleMemory.notes.map((n) => `Remembered (${n.at.slice(0, 10)}): ${n.text}`) : []),
+    ];
+  };
+
   /** Everything the AI may draw on: natal Western and Vedic, plus timing (today's sky, progressions, periods). */
   const wholeChart = () => (me ? [...factSheet('western', me, place), ...factSheet('vedic', me, place), ...factSheet('timing', me, place)].slice(0, 220) : []);
-  const answerText = (a: OracleReply) => [...a.lines, ...a.deeper].map((l) => `${l.heading}${l.heading && l.text ? ': ' : ''}${l.text}`.slice(0, 600)).filter(Boolean);
+  const answerText = (a: OracleReply) => [...a.lines, ...a.deeper].map((l) => `${l.heading}${l.heading && l.text ? ': ' : ''}${l.text}${l.basis ? ` (${l.basis})` : ''}`.slice(0, 600)).filter(Boolean);
 
   const runConsult = async (a: OracleReply) => {
     if (!me) return;
@@ -263,6 +292,7 @@ export default function Oracle() {
           )}
           {answer.intent === 'energy' && energy && <EnergyWheel planets={me.western.planets} aspects={energy.aspects} asc={energy.asc} />}
           <Lines items={answer.lines} />
+          {answer.personal && <p className="small oracle-muted">Written for you from your whole chart, with AI help, and checked against Within’s rules.</p>}
           {answer.consulted && (
             <div className="oracle-consulted">
               <p className="small">The Oracle read</p>
@@ -405,6 +435,11 @@ export default function Oracle() {
           <p className="small oracle-muted">
             Or shake your phone: with a question to ask it, or with none for today’s message. {Number.isFinite(left) ? `${left} of ${FREE_PER_DAY} free questions left today.` : 'Unlimited questions with your subscription.'}
           </p>
+          {state.aiAnswers && (
+            <p className="small oracle-muted">
+              Each answer is written for you by AI from your chart’s positions: never your name or birth details, and nothing is stored. <Link to="/settings">Settings</Link>
+            </p>
+          )}
           {note && <p className="small oracle-note">{note}</p>}
         </form>
       )}
