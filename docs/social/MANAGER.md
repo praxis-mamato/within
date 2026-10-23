@@ -49,4 +49,5 @@ Every reel, post, and story must teach or tell something **true and specific fro
 - No fake followers, likes, comments, giveaways for follows, or bought engagement. No impersonation, no invented testimonials or numbers.
 - No personal names: the astrologer is "the reader" or "the Oracle". Never share anyone's birth data or what they asked.
 - Don't DM people first. Don't comment on other accounts as Within unless Maggie asks.
+  - **Maggie asked (2026-10-23):** following accounts, messaging people and commenting as @withintheoracle are allowed, only where a real Instagram session (her logged-in browser, not an API) is available, at human pace (about 20 follows, 10 comments and 5 DMs a day), only real astrology/wellness accounts, genuine specific comments, no copy-paste spam, no sales pitch in a first message. Stop at once on any Instagram warning or action block. The Instagram API cannot follow or send first messages, and this workspace has no browser, so until one is connected this is prepared as drafts for Maggie to paste.
 - If unsure whether to post or reply, don't; ask Maggie in your daily message.
