@@ -7,7 +7,7 @@
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import * as Astronomy from 'astronomy-engine';
-import { SIGNS, tropicalLongitude } from '../src/astro/chart';
+import { lahiriAyanamsa, NAKSHATRAS, SIGNS, tropicalLongitude } from '../src/astro/chart';
 import { SIGN_ELEMENT, VEDIC_RASHI, WESTERN_SIGN } from '../src/content/templates';
 import { PLANET_IN_SIGN, RISING, RULER, SIGN_KEYWORD, SIGN_MODALITY } from '../src/content/western';
 import { PLANET_HIGH, PLANET_LOW } from '../src/content/energy';
@@ -194,7 +194,8 @@ function moonCalendar() {
   eclipses.sort((a, b) => +a.t - +b.t);
   for (const e of events) {
     const ecl = eclipses.find((x) => Math.abs(+x.t - +e.t) < 2 * DAY);
-    rows.push(`<tr><td>${fmt(e.t)}</td><td>${fmtTime(e.t)} UTC</td><td>${e.kind}${ecl ? ` · <strong>${ecl.kind}</strong>` : ''}</td><td>${e.sign}</td></tr>`);
+    const page = LUNATIONS.find((x) => Math.abs(+x.t - +e.t) < DAY);
+    rows.push(`<tr><td>${fmt(e.t)}</td><td>${fmtTime(e.t)} UTC</td><td>${page ? `<a href="${SITE}${page.href}">${e.kind}</a>` : e.kind}${ecl ? ` · <strong>${ecl.kind}</strong>` : ''}</td><td>${e.sign}</td></tr>`);
   }
   const first = events[0];
   const yrs = `${Y}–${Y + 1}`;
@@ -509,6 +510,108 @@ ${cta('Find my archetype')}`,
     ld: [{ '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: faqs.map(([q, a]) => ({ '@type': 'Question', name: q, acceptedAnswer: { '@type': 'Answer', text: a } })) }],
   });
 }
+
+// ---------- Each New and Full Moon: its own page, the weeks around it ----------
+const HOUSE_THEME = [
+  'you: your body, your presence, how you begin',
+  'money, possessions, and what you value',
+  'conversations, siblings, neighbors, and short trips',
+  'home, family, roots, and your private life',
+  'romance, play, creativity, and children',
+  'daily work, routines, health habits, and service',
+  'partners, close one-to-one relationships, and agreements',
+  'shared money, debts, intimacy, and deep change',
+  'travel, study, beliefs, and the bigger picture',
+  'career, reputation, and your public life',
+  'friends, groups, community, and hopes for the future',
+  'rest, solitude, endings, and what is hidden',
+];
+const FULL_IN_HOUSE = [
+  'How you show up is in the spotlight; notice what you are ready to stop performing.',
+  'A money or worth question comes to a head: what you pay for, and what you are worth.',
+  'A conversation you have been circling may finally happen; say it plainly.',
+  'Home and family feelings rise to the surface; give them room before you act.',
+  'A creative project or a romance reaches a turning point; enjoy what has bloomed.',
+  'Routines and the body ask for attention; finish what is half-done and rest.',
+  'A partnership asks what each of you needs; listen as much as you speak.',
+  'Shared money or a deep bond reaches a reckoning; honesty clears the air.',
+  'A belief, a course of study, or a journey comes to completion or a new view.',
+  'Work and reputation peak: a result, a visibility moment, or a decision about your path.',
+  'Friendships and hopes come into focus; notice who truly supports you.',
+  'Something hidden surfaces, or you need deep rest; let an old chapter close quietly.',
+];
+const NEW_IN_HOUSE = [
+  'Begin something for yourself: a new look, habit, or way of showing up.',
+  'Set an intention about money or self-worth; start one small, steady habit.',
+  'Start the conversation, the class, or the writing you have been putting off.',
+  'Plant something at home: a ritual, a repair, a family intention.',
+  'Begin a creative project or let yourself play; romance can start small.',
+  'A fresh routine for body and work; begin with one small daily step.',
+  'A new start in a partnership or agreement; say what you hope for.',
+  'Begin a deeper honesty about shared money, trust, or intimacy.',
+  'Plan the trip, the study, or the bigger question; let the horizon open.',
+  'Set a career intention; quietly begin the first step toward it.',
+  'Reach out to a friend or a group; name a hope for the future.',
+  'Rest, reflect, and let a quiet intention form before you share it.',
+];
+const ordinal = (n: number) => `${n}${n === 1 ? 'st' : n === 2 ? 'nd' : n === 3 ? 'rd' : 'th'}`;
+const MOON_DIGNITY: Record<string, string> = {
+  Taurus: 'The Moon is exalted in Taurus: tradition counts this its happiest sign, steady, sensual, and calm.',
+  Cancer: 'The Moon rules Cancer, its home sign: feelings run deep and close to home.',
+  Scorpio: 'The Moon is in its fall in Scorpio: feelings run deep and private, and nothing stays on the surface.',
+  Capricorn: 'The Moon is in its detriment in Capricorn: feelings are held in and turned into work.',
+};
+const zoneTime = (d: Date, tz: string) => d.toLocaleString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZone: tz });
+
+function lunationPages(): { t: Date; href: string }[] {
+  const out: { t: Date; href: string }[] = [];
+  const from = new Date(NOW.getTime() - 20 * DAY);
+  const to = new Date(NOW.getTime() + 100 * DAY);
+  for (const [angle, kind] of [[0, 'New Moon'], [180, 'Full Moon']] as const) {
+    let t = Astronomy.SearchMoonPhase(angle, from, 40);
+    while (t && t.date < to) {
+      const d = t.date;
+      const lon = tropicalLongitude('Moon', d);
+      const sign = signOf(lon);
+      const deg = Math.floor(((lon % 30) + 30) % 30);
+      const min = Math.floor((((lon % 30) + 30) % 30 - deg) * 60);
+      const sid = (((lon - lahiriAyanamsa(d)) % 360) + 360) % 360;
+      const nak = NAKSHATRAS[Math.floor(sid / (360 / 27))];
+      const month = d.toLocaleDateString('en-US', { month: 'long', timeZone: 'UTC' });
+      const year = d.getUTCFullYear();
+      const sunSign = signOf(tropicalLongitude('Sun', d));
+      const path = `${slug(kind.replace(' ', '-'))}-in-${slug(sign)}-${slug(month)}-${year}/`;
+      const si = SIGNS.indexOf(sign);
+      const perSign = SIGNS.map((x, i) => {
+        const h = ((si - i + 12) % 12) + 1;
+        return `<li><strong>${x}</strong>: your ${ordinal(h)} house, ${HOUSE_THEME[h - 1]}. ${(kind === 'Full Moon' ? FULL_IN_HOUSE : NEW_IN_HOUSE)[h - 1]}</li>`;
+      });
+      const faqs: [string, string][] = [
+        [`When is the ${kind} in ${sign} in ${month} ${year}?`, `It is exact at ${fmtTime(d)} UTC on ${fmt(d)}: ${zoneTime(d, 'America/Los_Angeles')} Pacific, ${zoneTime(d, 'America/New_York')} Eastern, ${zoneTime(d, 'Europe/London')} in London.`],
+        [`What does the ${kind} in ${sign} mean?`, `${kind === 'Full Moon' ? `The Moon in ${sign} opposes the Sun in ${sunSign}` : `The Sun and Moon meet in ${sign}`}: a time of ${SIGN_KEYWORD[sign]}. ${kind === 'Full Moon' ? 'Full Moons bring things to light and to completion.' : 'New Moons are for beginnings and intentions.'}`],
+        [`What is the ${kind} in ${sign} in Vedic astrology?`, `In the sidereal zodiac the Moon is in ${signOf(sid)}, in the nakshatra ${nak}.`],
+      ];
+      pages.push({
+        path,
+        title: `${kind} in ${sign} ${month} ${year}: meaning, time, and what it means for your sign | Within`,
+        description: `The ${kind} in ${sign} on ${fmt(d)} at ${deg}° ${sign}: exact times, what it means, the house it lights for each sign, and the Vedic view.`,
+        h1: `${kind} in ${sign}, ${month} ${d.getUTCDate()}, ${year}`,
+        body: `<p class="lede">${kind === 'Full Moon' ? 'The Full Moon' : 'The New Moon'} is exact at <strong>${deg}°${String(min).padStart(2, '0')}′ ${esc(sign)}</strong> on ${fmt(d)} at ${fmtTime(d)} UTC: <strong>${zoneTime(d, 'America/Los_Angeles')}</strong> Pacific and <strong>${zoneTime(d, 'America/New_York')}</strong> Eastern.</p>
+<h2>What it means</h2><p>${kind === 'Full Moon' ? `The Moon in ${esc(sign)} faces the Sun in ${esc(sunSign)}, so two needs pull against each other and something comes to light.` : `The Sun and Moon meet in ${esc(sign)}, the dark of the Moon, the start of a new cycle.`} ${esc(sign)} is ${esc(SIGN_KEYWORD[sign])}. ${MOON_DIGNITY[sign] ? esc(MOON_DIGNITY[sign]) : ''}</p>
+<h2>What it lights up for your sign</h2><p>Read your Sun sign, then your rising sign for the closer answer.</p><ul>${perSign.join('')}</ul>
+<h2>The Vedic view</h2><p>In the sidereal zodiac used in Vedic astrology, the Moon is in ${esc(signOf(sid))}, in the nakshatra <strong>${esc(nak)}</strong>.</p>
+<h2>For your own chart</h2><p>Where this ${kind} falls in your birth chart, and which of your planets it touches, is personal. The Oracle reads it from your exact birth time and place.</p>
+${cta(`What does this ${kind} mean for me?`)}
+<p><a href="${SITE}moon-calendar/">Every New and Full Moon this year ›</a></p>`,
+        ld: [{ '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: faqs.map(([q, a]) => ({ '@type': 'Question', name: q, acceptedAnswer: { '@type': 'Answer', text: a } })) }],
+      });
+      out.push({ t: d, href: path });
+      t = Astronomy.SearchMoonPhase(angle, new Date(d.getTime() + DAY), 40);
+    }
+  }
+  return out;
+}
+const LUNATIONS = lunationPages();
 
 // ---------- Guides ----------
 function guides() {
