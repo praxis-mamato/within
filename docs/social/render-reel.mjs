@@ -99,7 +99,7 @@ const BLOBS = Array.from({ length: 7 }, (_, i) => ({ r: 50 + rnd() * 120, o: 30 
 // The sphere inside the ball image: centre at the middle, radius 18.8% of the width.
 const CX = 500, CY = 500, R = 188;
 let D = null, lastKey = '';
-window.setData = (d) => (D = d);
+window.setData = (d) => { D = d; lastKey = ''; }; // a new entry must rebuild the stage, or every story shows the first one
 const lerp = (a, b, k) => a + (b - a) * Math.max(0, Math.min(1, k));
 const ease = (k) => 1 - Math.pow(1 - Math.max(0, Math.min(1, k)), 3);
 
