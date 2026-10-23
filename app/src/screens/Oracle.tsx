@@ -20,6 +20,7 @@ import { loadPlaces, type Place } from '../geo/places';
 import { useAccount } from '../services/AccountContext';
 import { factSheet, requestDeepReading, type DeepResult } from '../services/aiReading';
 import { personalAnswer, type AnswerReply } from '../services/oracleAnswer';
+import { skyNow } from '../content/skyNow';
 import { haptic } from '../services/native';
 import { track } from '../services/telemetry';
 import { useStore } from '../state';
@@ -223,7 +224,7 @@ export default function Oracle() {
   };
 
   /** Everything the AI may draw on: natal Western and Vedic, plus timing (today's sky, progressions, periods). */
-  const wholeChart = () => (me ? [...factSheet('western', me, place), ...factSheet('vedic', me, place), ...factSheet('timing', me, place)].slice(0, 220) : []);
+  const wholeChart = () => (me ? [...skyNow(), ...factSheet('western', me, place), ...factSheet('vedic', me, place), ...factSheet('timing', me, place)].slice(0, 220) : []);
   const answerText = (a: OracleReply) => [...a.lines, ...a.deeper].map((l) => `${l.heading}${l.heading && l.text ? ': ' : ''}${l.text}${l.basis ? ` (${l.basis})` : ''}`.slice(0, 600)).filter(Boolean);
 
   const runConsult = async (a: OracleReply) => {

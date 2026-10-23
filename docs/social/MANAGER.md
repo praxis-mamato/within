@@ -35,6 +35,10 @@ Every reel, post, and story must teach or tell something **true and specific fro
 - **Every story every day:** the daily message story plus the day's reel shared as a story (both are queued automatically with the reel). Video, never a still.
 - **Check before queueing:** would an astrologer learn nothing from this? Rewrite it.
 
+## The sky now (every caption, story and reply)
+Before writing anything, print the prominent transits: `cd app && npx tsx -e "import('./src/content/skyNow.ts').then(m => console.log(m.skyNow().join('\n')))"`.
+Lead with whichever is biggest this week (a station, a New or Full Moon, an exact aspect, a retrograde), using its exact date and degree from that list, and say in plain words how it may feel by sign or house. Comment replies name the transit that fits the person's question. The app's Oracle answers and conversations get the same list, so the account and the app agree.
+
 ## Every Monday
 - Read last week's numbers from `social_posts` (reach, plays, average watch time, shares, saves, likes, comments) and which posts led to app visits if the growth lead's tracking shows it. Write `docs/social/report-<date>.md`: what worked, what didn't, what you change.
 - Adjust the mix toward what earns: shares per reach and watch time decide which reel formats stay (PLAN.md). Feed images keep the old mix: sky timing, teaching (signs, elements, houses), an Oracle question prompt, a live-reading or membership post, and a community question.
