@@ -1,5 +1,5 @@
 import ref from './reference.swisseph.json';
-import { ascendantAndMidheaven, BODIES, lahiriAyanamsa, meanNode, nakshatraOf, norm, placidusCusps, tropicalLongitude, vimshottari } from './chart';
+import { ascendantAndMidheaven, BODIES, lahiriAyanamsa, meanNode, nakshatraOf, trueNode, norm, placidusCusps, tropicalLongitude, vimshottari } from './chart';
 
 /** Smallest angular distance in degrees. */
 const diff = (a: number, b: number) => Math.abs(((a - b + 540) % 360) - 180);
@@ -8,6 +8,12 @@ describe.each(ref)('$name matches Swiss Ephemeris', (c) => {
   const date = new Date(c.utc);
   it.each(BODIES)('%s within 0.01°', (body) => {
     expect(diff(tropicalLongitude(body, date), c.tropical[body])).toBeLessThan(0.01);
+  });
+  it('true node stays within 2° of the mean node', () => {
+    for (let y = 1950; y <= 2050; y += 3.7) {
+      const d = new Date(Date.UTC(Math.floor(y), Math.round((y % 1) * 11), 15));
+      expect(diff(trueNode(d), meanNode(d))).toBeLessThan(2);
+    }
   });
   it('mean node within 0.01°', () => expect(diff(meanNode(date), c.tropical.MeanNode)).toBeLessThan(0.01));
   it('Lahiri sidereal Moon within 0.01°', () => {
