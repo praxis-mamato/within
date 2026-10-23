@@ -42,7 +42,7 @@ export async function startNative(finishSignIn: (code: string) => Promise<unknow
   if (!NATIVE_APP) return;
   const [{ App }, { Browser }, { StatusBar, Style }] = await Promise.all([import('@capacitor/app'), import('@capacitor/browser'), import('@capacitor/status-bar')]);
   await StatusBar.setStyle({ style: Style.Dark }).catch(() => undefined);
-  App.addListener('appUrlOpen', async ({ url }) => {
+  App.addListener('appUrlOpen', async ({ url }: { url: string }) => {
     if (!url.startsWith(APP_RETURN_URL)) return;
     const code = new URL(url.replace(/^app\.withinoracle:\/\//, 'https://x/')).searchParams.get('code');
     if (code) await finishSignIn(code).catch(() => undefined);
