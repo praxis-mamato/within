@@ -1,2 +1,4 @@
 week,paying_monthly,paying_yearly,mrr_usd,comp_members,live_reading_usd,reviews_total,reviews_approved,codes_redeemed,notes
 2026-10-13,0,0,0.00,1,0,0,0,1,"Live-mode day one baseline. 2 Google sign-ins; 1 yearly checkout started not paid; 0 bookings; usage_events table missing so funnel unreadable"
+2026-10-19,1,0,9.99,1,0,0,0,1,"Week 2. One monthly Stripe member (Oct 14, origin unknown). 7 opt-in app opens, 5 paywall views, 0 checkouts started"
+2026-10-26,1,0,9.99,3,0,0,0,3,"Week 3 (read Oct 29). No new paying member. Comp 3, codes redeemed 3 of 52. 1 stale yearly checkout (status none). Opt-in events last 14 days: 1 app open, 1 paywall view. Instagram live: 8 posts, 9 reels, 16 stories published"
