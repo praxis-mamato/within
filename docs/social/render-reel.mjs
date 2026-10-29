@@ -1,6 +1,6 @@
 // Renders Instagram Reels and Stories as animated video (1080×1920 MP4, 30 fps, H.264 + AAC) from the app's
 // own crystal ball: drifting stars, mist swirling inside the ball, a breathing glow, a flash of light on each
-// reveal, text that rises in, and an original ambient sound with a chime on every reveal.
+// reveal, text that rises in, and original composed music (music.py) with a chime on every reveal.
 // Usage, with Playwright and ffmpeg installed:
 //   node docs/social/render-reel.mjs reels docs/social/reels-2026-10.json app/public/social/reels <balls cache dir> [only-date]
 //   node docs/social/render-reel.mjs stories docs/social/queue-2026-10.json app/public/social/stories <balls cache dir> [only-date]
@@ -14,7 +14,8 @@
 //   scenes: the items one after another, `dur` seconds each (explainers, "send this to your ___ friend")
 // Stories: today's message from a queue file, as a 7-second video plus a still JPEG.
 import { execFileSync } from 'node:child_process';
-import { resolve } from 'node:path';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { existsSync, mkdirSync, readFileSync, rmSync } from 'node:fs';
 import { chromium } from 'playwright';
 import { openBoard, shootBall } from './ball.mjs';
@@ -191,7 +192,7 @@ const page = await browser.newPage({ viewport: { width: 1080, height: 1920 } });
 await page.setContent(PAGE, { waitUntil: 'networkidle' });
 
 /** The sound: a slow ambient chord with a chime on each reveal and a soft shimmer under fast flashes. All original. */
-function sound(scenes, total) {
+function sound(scenes, total, withMusic = false) {
   const pad = `0.035*sin(2*PI*110*t)+0.03*sin(2*PI*164.81*t)*(0.7+0.3*sin(2*PI*0.2*t))+0.022*sin(2*PI*220*t)+0.016*sin(2*PI*277.18*t)*(0.6+0.4*sin(2*PI*0.13*t))+0.012*sin(2*PI*329.63*t)`;
   const chimes = scenes
     .filter((s) => s.chime)
@@ -201,7 +202,23 @@ function sound(scenes, total) {
     .filter((s) => s.flash)
     .map((s) => s.start.toFixed(2))
     .map((T) => `if(gte(t,${T}),0.035*exp(-18*(t-${T}))*sin(2*PI*2093*(t-${T})),0)`);
-  return [pad, ...chimes, ...ticks].join('+');
+  // With a composed track underneath, the drone pad steps aside and only the chimes and ticks stay.
+  return withMusic ? [...chimes, ...ticks, '0'].join('+') : [pad, ...chimes, ...ticks].join('+');
+}
+
+
+// Composed music (docs/social/music.py): a track chosen by the post's subject, or by the date, so
+// neighbouring days sound different. An entry can name one with "music": "oracle".
+const MUSIC_DIR = resolve(dirname(fileURLToPath(import.meta.url)), 'music');
+const MUSIC = ['oracle', 'moonlight', 'venus', 'scorpio', 'pulse', 'dawn'];
+function pickMusic(data) {
+  const text = `${data.music ?? ''} ${data.hook ?? ''} ${(data.scenes ?? []).map((s) => `${s.title ?? ''} ${s.line ?? ''}`).join(' ')}`.toLowerCase();
+  const byWord = data.music ?? (/scorpio|pluto|eclipse|shadow/.test(text) ? 'scorpio' : /venus|love|heart/.test(text) ? 'venus' : /full moon|new moon|moon/.test(text) ? 'moonlight' : /countdown|tonight|now|starts/.test(text) ? 'pulse' : null);
+  let hash = 0;
+  for (const c of String(data.key ?? text)) hash = (hash * 31 + c.charCodeAt(0)) >>> 0;
+  const name = byWord ?? MUSIC[hash % MUSIC.length];
+  const file = resolve(MUSIC_DIR, `${name}.m4a`);
+  return existsSync(file) ? { file, offset: (hash % 6) * 8 } : null;
 }
 
 async function render(name, data) {
@@ -214,14 +231,19 @@ async function render(name, data) {
     await page.evaluate((t) => window.renderAt(t), f / FPS);
     await page.screenshot({ path: `${tmp}/${String(f).padStart(5, '0')}.jpg`, type: 'jpeg', quality: 88 });
   }
-  const expr = sound(data.scenes, data.total);
+  const track = pickMusic({ key: name, ...data });
+  const expr = sound(data.scenes, data.total, !!track);
+  const fade = `afade=t=in:d=0.6,afade=t=out:st=${Math.max(0, data.total - 0.8).toFixed(2)}:d=0.8`;
   execFileSync('ffmpeg', [
     '-y', '-loglevel', 'error',
     '-framerate', String(FPS), '-i', `${tmp}/%05d.jpg`,
     '-f', 'lavfi', '-i', `aevalsrc=exprs='${expr}':s=48000:d=${data.total.toFixed(2)}`,
-    '-af', `lowpass=f=6000,afade=t=in:d=0.6,afade=t=out:st=${Math.max(0, data.total - 0.8).toFixed(2)}:d=0.8,volume=1.6`,
+    ...(track ? ['-stream_loop', '-1', '-ss', String(track.offset), '-i', track.file] : []),
+    ...(track
+      ? ['-filter_complex', `[1:a]lowpass=f=6000,volume=1.3,aformat=channel_layouts=stereo:sample_rates=48000[fx];[2:a]aresample=48000,volume=0.85[m];[m][fx]amix=inputs=2:normalize=0,${fade}[a]`, '-map', '0:v', '-map', '[a]']
+      : ['-af', `lowpass=f=6000,${fade},volume=1.6`]),
     '-c:v', 'libx264', '-profile:v', 'high', '-pix_fmt', 'yuv420p', '-crf', '21', '-preset', 'medium',
-    '-c:a', 'aac', '-b:a', '160k', '-ac', '2', '-shortest', '-movflags', '+faststart',
+    '-c:a', 'aac', '-b:a', '160k', '-ac', '2', '-t', data.total.toFixed(2), '-movflags', '+faststart',
     `${outDir}/${name}.mp4`,
   ]);
   // Cover: the first reveal, fully in.
