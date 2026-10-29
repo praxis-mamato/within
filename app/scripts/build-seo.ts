@@ -8,6 +8,7 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import * as Astronomy from 'astronomy-engine';
 import { lahiriAyanamsa, NAKSHATRAS, SIGNS, tropicalLongitude } from '../src/astro/chart';
+import { westernDignity } from '../src/astro/progressions';
 import { SIGN_ELEMENT, VEDIC_RASHI, WESTERN_SIGN } from '../src/content/templates';
 import { PLANET_IN_SIGN, RISING, RULER, SIGN_KEYWORD, SIGN_MODALITY } from '../src/content/western';
 import { PLANET_HIGH, PLANET_LOW } from '../src/content/energy';
@@ -563,6 +564,37 @@ const MOON_DIGNITY: Record<string, string> = {
 };
 const zoneTime = (d: Date, tz: string) => d.toLocaleString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZone: tz });
 
+const PLANET_THEME: Record<string, string> = {
+  Sun: 'purpose and visibility', Mercury: 'words, plans and news', Venus: 'love, money and what you value', Mars: 'drive, anger and courage',
+  Jupiter: 'growth, faith and luck', Saturn: 'limits, duty and what lasts', Uranus: 'sudden change and freedom', Neptune: 'dreams, longing and blurred lines', Pluto: 'power, endings and rebirth',
+};
+const ASPECT_SENSE: [number, string, string][] = [
+  [0, 'conjoins', 'fuses its theme with the lunation'],
+  [60, 'sextiles', 'opens an easy door'],
+  [90, 'squares', 'adds friction that asks for action'],
+  [120, 'trines', 'lends support and flow'],
+  [180, 'opposes', 'pulls from the other side, asking for balance'],
+];
+const atDeg = (lon: number) => { const x = ((lon % 30) + 30) % 30; return `${Math.floor(x)}°${String(Math.floor((x % 1) * 60)).padStart(2, '0')}′ ${signOf(lon)}`; };
+const isRetro = (b: string, d: Date) => { const a = tropicalLongitude(b as never, new Date(d.getTime() - 6 * 3600000)); const c = tropicalLongitude(b as never, new Date(d.getTime() + 6 * 3600000)); return ((c - a + 540) % 360) - 180 < 0; };
+/** The planets a lunation touches, its ruler's condition, and the retrogrades in force: different for every lunation. */
+function lunationSky(d: Date, lon: number, kind: string): string {
+  const items: string[] = [];
+  for (const b of ['Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Pluto']) {
+    const pl = tropicalLongitude(b as never, d);
+    const sep = Math.abs(((pl - lon + 540) % 360) - 180);
+    const hit = ASPECT_SENSE.find(([a]) => Math.abs(sep - a) <= 6);
+    if (hit) items.push(`<li><strong>${b}</strong> at ${atDeg(pl)}${isRetro(b, d) ? ', retrograde,' : ''} ${hit[1]} the ${kind === 'Full Moon' ? 'Moon' : 'Sun and Moon'} (${Math.abs(sep - hit[0]).toFixed(1)}° from exact): ${PLANET_THEME[b]} ${hit[2]}.</li>`);
+  }
+  const sign = signOf(lon);
+  const ruler = RULER[sign];
+  const rl = tropicalLongitude(ruler as never, d);
+  const dig = westernDignity(ruler, signOf(rl));
+  const retro = ['Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Pluto'].filter((b) => isRetro(b, d));
+  return `<h2>The sky around it</h2>${items.length ? `<ul>${items.join('')}</ul>` : '<p>No planet makes a close aspect to this lunation, so it speaks mostly through its sign and house.</p>'}
+<p>${esc(sign)} is ruled by <strong>${ruler}</strong>, which is at ${atDeg(rl)}${ruler !== 'Sun' && ruler !== 'Moon' && isRetro(ruler, d) ? ', retrograde' : ''}${dig ? `, in its ${dig.toLowerCase()}` : ''}: where ${ruler} stands shows where this ${kind}'s story plays out next.${retro.length ? ` Retrograde at the time: ${retro.join(', ')}.` : ''}</p>`;
+}
+
 function lunationPages(): { t: Date; href: string }[] {
   const out: { t: Date; href: string }[] = [];
   const from = new Date(NOW.getTime() - 20 * DAY);
@@ -584,7 +616,7 @@ function lunationPages(): { t: Date; href: string }[] {
       const si = SIGNS.indexOf(sign);
       const perSign = SIGNS.map((x, i) => {
         const h = ((si - i + 12) % 12) + 1;
-        return `<li><strong>${x}</strong>: your ${ordinal(h)} house, ${HOUSE_THEME[h - 1]}. ${(kind === 'Full Moon' ? FULL_IN_HOUSE : NEW_IN_HOUSE)[h - 1]}</li>`;
+        return `<li><strong>${x}</strong>: your ${ordinal(h)} house, ${HOUSE_THEME[h - 1]}. ${(kind === 'Full Moon' ? FULL_IN_HOUSE : NEW_IN_HOUSE)[h - 1]} ${RULER[sign]}, its ruler, is in your ${ordinal(((SIGNS.indexOf(signOf(tropicalLongitude(RULER[sign] as never, d))) - i + 12) % 12) + 1)} house, so the story continues there.</li>`;
       });
       const faqs: [string, string][] = [
         [`When is the ${kind} in ${sign} in ${month} ${year}?`, `It is exact at ${fmtTime(d)} UTC on ${fmt(d)}: ${zoneTime(d, 'America/Los_Angeles')} Pacific, ${zoneTime(d, 'America/New_York')} Eastern, ${zoneTime(d, 'Europe/London')} in London.`],
@@ -598,6 +630,7 @@ function lunationPages(): { t: Date; href: string }[] {
         h1: `${kind} in ${sign}, ${month} ${d.getUTCDate()}, ${year}`,
         body: `<p class="lede">${kind === 'Full Moon' ? 'The Full Moon' : 'The New Moon'} is exact at <strong>${deg}°${String(min).padStart(2, '0')}′ ${esc(sign)}</strong> on ${fmt(d)} at ${fmtTime(d)} UTC: <strong>${zoneTime(d, 'America/Los_Angeles')}</strong> Pacific and <strong>${zoneTime(d, 'America/New_York')}</strong> Eastern.</p>
 <h2>What it means</h2><p>${kind === 'Full Moon' ? `The Moon in ${esc(sign)} faces the Sun in ${esc(sunSign)}, so two needs pull against each other and something comes to light.` : `The Sun and Moon meet in ${esc(sign)}, the dark of the Moon, the start of a new cycle.`} ${esc(sign)} is ${esc(SIGN_KEYWORD[sign])}. ${MOON_DIGNITY[sign] ? esc(MOON_DIGNITY[sign]) : ''}</p>
+${lunationSky(d, lon, kind)}
 <h2>What it lights up for your sign</h2><p>Read your Sun sign, then your rising sign for the closer answer.</p><ul>${perSign.join('')}</ul>
 <h2>The Vedic view</h2><p>In the sidereal zodiac used in Vedic astrology, the Moon is in ${esc(signOf(sid))}, in the nakshatra <strong>${esc(nak)}</strong>.</p>
 <h2>For your own chart</h2><p>Where this ${kind} falls in your birth chart, and which of your planets it touches, is personal. The Oracle reads it from your exact birth time and place.</p>
