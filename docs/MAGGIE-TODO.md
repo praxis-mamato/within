@@ -16,7 +16,7 @@ Kept by Claude. Things only Maggie can do (account-owner steps), most urgent fir
 - **Instagram partners:** check the top 5 in docs/sales/instagram-partners.md (handle, US, 2k–100k followers, posted lately), fill the [blank] in each message, and send them yourself.
 
 ## When there's time
-4. Microsoft Store, Product Hunt (Tue Oct 27) and AlternativeTo: steps in `docs/growth/launch/LAUNCH-KIT.md`.
+4. Microsoft Store: **developer account done (Maggie, before Oct 29)**; if the app isn't submitted yet, next is the PWABuilder package. Product Hunt and AlternativeTo: steps in `docs/growth/launch/LAUNCH-KIT.md`.
 5. Ads: yes or no on a $100–150 test around Nov 3.
 6. Safety: check the in-app emergency numbers; decide out-of-hours cover for safety flags.
 7. Within for Claude: Cloudflare Workers Paid + `CLOUDFLARE_API_TOKEN`; Supabase → Authentication → OAuth Server on (path `/oauth/consent`, dynamic registration). After readings are approved.

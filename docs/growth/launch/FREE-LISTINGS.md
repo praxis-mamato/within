@@ -29,7 +29,7 @@ Tick each one off here when it's done.
 | 3 | **YouTube** (Shorts: the same daily reels, free extra views) | 5 min | youtube.com → your account → Create a channel → name "Within: The Oracle". Tell Claude; uploading the daily reel as a Short can be automatic once you allow it. | ☐ |
 | 4 | **Product Hunt** | scheduled | Tue Oct 27, 12:01am PT. Steps and first comment in `LAUNCH-KIT.md` §2. | ☐ |
 | 5 | **AlternativeTo** | 10 min | `LAUNCH-KIT.md` §3. Alternative to: Co–Star, The Pattern, CHANI, Sanctuary, TimePassages. | ☐ |
-| 6 | **Microsoft Store** | 30 min | `LAUNCH-KIT.md` §1 (PWABuilder package with withinoracle.app). | ☐ |
+| 6 | **Microsoft Store** | 30 min | `LAUNCH-KIT.md` §1 (PWABuilder package with withinoracle.app). Developer account done. | ☑ |
 | 7 | **Facebook Page + Threads** | 5 min | Facebook → Create Page "Within: The Oracle" → link @withintheoracle in Instagram settings. Threads: open Threads with the Instagram account (one tap). Claude can then post the daily reel to both. | ☐ |
 | 8 | **TikTok** | 5 min | Create @withintheoracle. Upload the daily reel from your phone (TikTok's posting API needs an app review; Claude will apply once the account exists). | ☐ |
 
