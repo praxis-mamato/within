@@ -10,9 +10,9 @@ describe('skyNow', () => {
   it('gives the Full Moon to the minute', () => {
     expect(lines).toContain('Full Moon 2026-10-26 04:12 UTC at 2°46′ Taurus (sky now)');
   });
-  it('knows the long cycles, the cazimi and every planet in both zodiacs', () => {
+  it('knows the long cycles, the Venus conjunction and every planet in both zodiacs', () => {
     expect(lines.some((l) => l.startsWith('Saturn conjunct Neptune') && l.includes('exact 2026-02-20'))).toBe(true);
-    expect(lines.some((l) => l.startsWith('Sun conjunct Venus exact 2026-10-24 (cazimi'))).toBe(true);
+    expect(lines.some((l) => l.startsWith('Sun conjunct Venus exact 2026-10-24 (the inferior conjunction') && l.includes('6.5° south of the Sun, so combust (asta), not cazimi'))).toBe(true);
     expect(lines.some((l) => l.startsWith('Venus now at') && l.includes('(detriment), retrograde; Vedic Libra, Swati'))).toBe(true);
     expect(lines.some((l) => l.startsWith('Next solar eclipse 2027-02-06'))).toBe(true);
   });

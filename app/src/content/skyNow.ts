@@ -61,6 +61,15 @@ function exactTimes(a: (typeof BODIES)[number], b: (typeof BODIES)[number], angl
   return out.sort((x, y) => x - y);
 }
 
+/** A Sun conjunction with Mercury or Venus: cazimi only when the planet is truly within 17′ of the Sun's centre,
+ *  latitude included; otherwise it passes above or below the Sun and is combust (asta in Vedic). */
+function heart(b: 'Mercury' | 'Venus', t: number): string {
+  const lat = (body: Astronomy.Body) => Astronomy.Ecliptic(Astronomy.GeoVector(body, new Date(t), true)).elat;
+  const gap = Math.abs(lat(Astronomy.Body[b]) - lat(Astronomy.Body.Sun)) * 60;
+  const kind = speed(b, t) < 0 ? 'the inferior conjunction at the heart of the retrograde' : 'the superior conjunction';
+  return gap <= 17 ? `cazimi, ${kind}` : `${kind}; ${b} passes ${gap >= 60 ? `${(gap / 60).toFixed(1)}°` : `${Math.round(gap)}′`} ${lat(Astronomy.Body[b]) > lat(Astronomy.Body.Sun) ? 'north' : 'south'} of the Sun, so combust (asta), not cazimi`;
+}
+
 const SLOW = ['Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Pluto'] as const;
 const ASPECTS: [number, string][] = [
   [0, 'conjunct'],
@@ -121,7 +130,7 @@ function compute(now: Date): string[] {
     for (let j = i + 1; j < P.length; j++)
       for (const [a, name] of ASPECTS)
         for (const t of exactTimes(P[i], P[j], a, t0 - 3 * DAY, t0 + 3 * DAY, 3 * 3600000))
-          out.push(`${P[i]} ${name} ${P[j]} exact ${day(t)}${i === 0 && a === 0 && (P[j] === 'Mercury' || P[j] === 'Venus') ? ` (cazimi, ${speed(P[j], t) < 0 ? 'the inferior conjunction at the heart of the retrograde' : 'the superior conjunction'})` : ''} (${at(tropicalLongitude(P[i], new Date(t)))} / ${at(tropicalLongitude(P[j], new Date(t)))}) (sky now)`);
+          out.push(`${P[i]} ${name} ${P[j]} exact ${day(t)}${i === 0 && a === 0 && (P[j] === 'Mercury' || P[j] === 'Venus') ? ` (${heart(P[j] as 'Mercury' | 'Venus', t)})` : ''} (${at(tropicalLongitude(P[i], new Date(t)))} / ${at(tropicalLongitude(P[j], new Date(t)))}) (sky now)`);
 
   // Eclipses: the last one if within six weeks, and the next one of each kind.
   const eclipse = (kind: string, t: number) => `${kind} ${day(t)} at ${at(tropicalLongitude(kind.includes('solar') ? 'Sun' : 'Moon', new Date(t)))} (sky now)`;
