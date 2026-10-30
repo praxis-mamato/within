@@ -912,7 +912,7 @@ function giftPage() {
     h1: 'Give a year with the Oracle',
     body: `<p class="lede">For the person who reads their horoscope twice: a full year of Within, the astrology app that answers their own questions from their exact birth chart, Western and Vedic, with the dates that matter for them.</p>
 <ul><li>Unlimited personal answers from their whole chart</li><li>Talk it through with the Oracle, who remembers them if they let it</li><li>Full readings, timing, relationships and the Moon calendar</li><li>Their birth details stay on their phone</li></ul>
-<p><strong>${offerOn(NOW.getTime()) ? '$85 for a full year (Black Friday price, through Dec 1)' : '$100 for a full year'} · one payment, no renewal · code and printable card delivered instantly</strong></p>
+<p><strong>${offerOn(NOW.getTime()) ? '$85 for a full year (Black Friday price, through Cyber Monday, Nov 30)' : '$100 for a full year'} · one payment, no renewal · code and printable card delivered instantly</strong></p>
 <p class="cta"><a class="btn" href="${SITE}#/gift">Give a year</a></p>`,
     ld: [faqLdOf(faqs)],
   });

@@ -16,7 +16,7 @@ export const CONFIG = {
   plans: {
     monthly: { label: '$9.99 a month', short: '$9.99/month' },
     yearly: offerOn()
-      ? { label: `${BLACK_FRIDAY.price} first year`, short: `${BLACK_FRIDAY.price} for the first year`, note: 'the Black Friday price, through Dec 1; then $100 a year', renews: `${BLACK_FRIDAY.price} for the first year (Black Friday price), then $100 a year` }
+      ? { label: `${BLACK_FRIDAY.price} first year`, short: `${BLACK_FRIDAY.price} for the first year`, note: 'the Black Friday price, through Cyber Monday, Nov 30; then $100 a year', renews: `${BLACK_FRIDAY.price} for the first year (Black Friday price), then $100 a year` }
       : { label: '$100 a year', short: '$100/year', note: 'about $8.33 a month, 17% less', renews: '$100/year' },
     /** Free days on the yearly plan for first-time members (TRIAL_DAYS in the create-checkout function). */
     trialDays: 14,
