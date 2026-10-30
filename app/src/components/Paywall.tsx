@@ -202,7 +202,7 @@ export function Paywall({ children, what, where }: { children: ReactNode; what: 
       </fieldset>
       <p className="small muted">
         {plan === 'yearly'
-          ? `New members pay nothing for ${CONFIG.plans.trialDays} days. Then ${CONFIG.plans.yearly.short}, renewing every year until you cancel. Cancel online in Account before the trial ends and you aren’t charged.`
+          ? `New members pay nothing for ${CONFIG.plans.trialDays} days. Then ${CONFIG.plans.yearly.renews}, renewing every year until you cancel. Cancel online in Account before the trial ends and you aren’t charged.`
           : 'Renews automatically every month at the price shown until you cancel.'}{' '}
         Cancel online any time in Account; you keep access until the end of the period you paid for.
       </p>

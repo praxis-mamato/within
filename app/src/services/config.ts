@@ -1,4 +1,5 @@
 import { IOS_APP, NATIVE_APP } from './native';
+import { BLACK_FRIDAY, offerOn } from './offer';
 /**
  * Live services switch on when the build has these values (GitHub repo variables → Pages build).
  * Without them the app runs in demo mode: every screen works, sign-in and payment are simulated.
@@ -14,7 +15,9 @@ export const CONFIG = {
   bookingUrl: (env.VITE_BOOKING_URL as string | undefined) || '',
   plans: {
     monthly: { label: '$9.99 a month', short: '$9.99/month' },
-    yearly: { label: '$100 a year', short: '$100/year', note: 'about $8.33 a month, 17% less' },
+    yearly: offerOn()
+      ? { label: `${BLACK_FRIDAY.price} first year`, short: `${BLACK_FRIDAY.price} for the first year`, note: 'the Black Friday price, through Dec 1; then $100 a year', renews: `${BLACK_FRIDAY.price} for the first year (Black Friday price), then $100 a year` }
+      : { label: '$100 a year', short: '$100/year', note: 'about $8.33 a month, 17% less', renews: '$100/year' },
     /** Free days on the yearly plan for first-time members (TRIAL_DAYS in the create-checkout function). */
     trialDays: 14,
   },

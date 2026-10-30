@@ -5,6 +5,7 @@
 import { admin, cors, json, SITE_URLS } from '../_shared/clients.ts';
 import { stripe, stripeConfigured } from '../_shared/stripe.ts';
 import { safeReturnUrl } from '../_shared/entitlement.ts';
+import { BLACK_FRIDAY, offerOn } from '../_shared/offer.ts';
 
 const PRICE_CENTS = Number(Deno.env.get('GIFT_PRICE_CENTS') ?? '10000');
 // The HMAC key: GIFT_SECRET if set, otherwise the server-only service key (always present). If the key
@@ -31,7 +32,7 @@ Deno.serve(async (req) => {
     try {
       const session = await stripe.checkout.sessions.create({
         mode: 'payment',
-        line_items: [{ quantity: 1, price_data: { currency: 'usd', unit_amount: PRICE_CENTS, product_data: { name: 'Within: a year with the Oracle (gift)', description: 'A one-year membership to give. You get a gift code to share right after paying.' } } }],
+        line_items: [{ quantity: 1, price_data: { currency: 'usd', unit_amount: offerOn() ? BLACK_FRIDAY.cents : PRICE_CENTS, product_data: { name: 'Within: a year with the Oracle (gift)', description: 'A one-year membership to give. You get a gift code to share right after paying.' } } }],
         metadata: { kind: 'gift' },
         payment_intent_data: { metadata: { kind: 'gift' } },
         success_url: `${back}#/gift?session={CHECKOUT_SESSION_ID}`,

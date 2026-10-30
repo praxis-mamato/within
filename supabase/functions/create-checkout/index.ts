@@ -4,6 +4,7 @@
 import { admin, callingUser, cors, json, SITE_URLS } from '../_shared/clients.ts';
 import { priceMonthly, priceYearly, stripe, stripeConfigured } from '../_shared/stripe.ts';
 import { safeReturnUrl } from '../_shared/entitlement.ts';
+import { blackFridayCoupon, offerOn } from '../_shared/offer.ts';
 
 const TRIAL_DAYS = Number(Deno.env.get('TRIAL_DAYS') ?? '14');
 
@@ -60,7 +61,8 @@ Deno.serve(async (req) => {
       line_items: [{ price, quantity: 1 }],
       payment_method_collection: 'always',
       subscription_data: { metadata: { user_id: user.id, ...affiliate }, ...trial },
-      allow_promotion_codes: true,
+      // Black Friday: $15 off the first yearly payment (Stripe allows a set discount or promotion codes, not both).
+      ...(plan === 'yearly' && offerOn() ? { discounts: [{ coupon: await blackFridayCoupon(stripe) }] } : { allow_promotion_codes: true }),
       success_url: `${back}?checkout=success`,
       cancel_url: back,
     });

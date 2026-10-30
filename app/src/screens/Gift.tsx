@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { LogoMark } from '../components/Illustrations';
 import { IN_PLAY_APP } from '../services/config';
+import { BLACK_FRIDAY, offerOn } from '../services/offer';
 import { buyGift, giftCode } from '../services/gift';
 import { track } from '../services/telemetry';
 
@@ -14,7 +15,7 @@ export const GIFT_TEXT = {
   title: 'Give a year with the Oracle',
   lede: 'For the person who reads their horoscope twice: a full year of Within, the astrology app that answers their own questions from their exact birth chart, Western and Vedic, with the dates that matter for them.',
   includes: ['Unlimited personal answers from their whole chart', 'Talk it through with the Oracle, who remembers them if they let it', 'Full readings, timing, relationships and the Moon calendar', 'Their birth details stay on their phone'],
-  price: '$100 for a full year · one payment, no renewal',
+  price: offerOn() ? `${BLACK_FRIDAY.price} for a full year (Black Friday price, through Dec 1) · one payment, no renewal` : '$100 for a full year · one payment, no renewal',
   card: 'A year with the Oracle',
   how: 'Open withinoracle.app, make your chart, sign in, tap Become a member, and enter this code under “Have a code?”.',
 };
