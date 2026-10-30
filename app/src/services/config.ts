@@ -65,6 +65,9 @@ export const PLAY_APP_TEXT = {
 export const LIVE =
   Boolean(CONFIG.supabaseUrl && CONFIG.supabaseAnonKey) && env.MODE !== 'artifact' && (personalOverride() ?? env.VITE_LIVE === 'true');
 
+/** Gift memberships ($100, a year as a code to pass on): hidden until VITE_GIFTS=true and the GIFTS_ENABLED function secret is set. */
+export const GIFTS = LIVE && env.VITE_GIFTS === 'true';
+
 /** Sign in with Apple needs an Apple Developer account; until VITE_APPLE_SIGN_IN=true, live mode offers Google only. */
 export const APPLE_SIGN_IN = !LIVE || env.VITE_APPLE_SIGN_IN === 'true';
 /**
