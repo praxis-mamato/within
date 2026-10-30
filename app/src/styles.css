@@ -834,3 +834,10 @@ details > summary { cursor: pointer; margin: 8px 0; }
 /* Back from sign-in, on the way to payment */
 .resume-pay { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; background: rgb(11 16 48 / 0.85); color: #fbf5ea; text-align: center; padding: 24px; }
 .google-gis { min-height: 44px; display: flex; justify-content: center; }
+
+/* Gift page and printable card */
+.gift-card { border: 1px solid var(--line, #ccc); border-radius: 16px; padding: 28px 20px; text-align: center; margin: 16px 0; }
+.gift-card .kicker { letter-spacing: 0.2em; font-size: 0.75rem; opacity: 0.7; }
+.gift-code { font-family: ui-monospace, monospace; font-size: 1.4rem; letter-spacing: 0.08em; margin: 16px 0; word-break: break-all; }
+.gift .row { display: flex; gap: 12px; flex-wrap: wrap; }
+@media print { .no-print, .tabbar { display: none !important; } .gift-card { border: 2px solid #000; color: #000; } }

@@ -3,6 +3,7 @@ import { HashRouter, Link, MemoryRouter, Navigate, Route, Routes, useLocation, u
 import { StoreProvider, useStore } from './state';
 import { TabBar } from './components/ui';
 import { LogoMark } from './components/Illustrations';
+import { Gift } from './screens/Gift';
 import Onboarding from './screens/Onboarding';
 import Today from './screens/Today';
 import Oracle from './screens/Oracle';
@@ -95,6 +96,7 @@ function Routed() {
           </Suspense>
         }
       />
+      <Route path="/gift" element={<Gift />} />
       <Route path="*" element={<Shell />} />
     </Routes>
     </>

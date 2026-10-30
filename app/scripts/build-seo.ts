@@ -88,6 +88,7 @@ const pages: Page[] = [];
 
 const NAV: [string, string][] = [
   ['astrology-today/', 'Astrology today'],
+  ['gift/', 'Gift a year'],
   ['birth-chart/', 'Birth chart'],
   ['synastry/', 'Synastry'],
   ['moon-calendar/', 'Moon calendar'],
@@ -895,6 +896,27 @@ ${cta('What does this sky mean for me?')}
   });
 }
 
+
+// ---------- Gift a membership ----------
+function giftPage() {
+  const faqs: [string, string][] = [
+    ['What is a Within gift membership?', 'A full year of Within for someone else, for $100 in one payment with no renewal. You get a gift code and a printable card right after paying.'],
+    ['How does the person use it?', 'They open withinoracle.app, make their chart, sign in, tap Become a member, and enter the code under "Have a code?". The year starts when they use it.'],
+    ['Do I need an account to buy one?', 'No. Pay by card and the code appears on the next page.'],
+  ];
+  pages.push({
+    path: 'gift/',
+    title: 'Astrology gift: a year with the Oracle, for anyone | Within',
+    description: 'The astrology gift for the person who reads their horoscope twice: a year of personal answers from their own birth chart, Western and Vedic. $100, code delivered instantly.',
+    h1: 'Give a year with the Oracle',
+    body: `<p class="lede">For the person who reads their horoscope twice: a full year of Within, the astrology app that answers their own questions from their exact birth chart, Western and Vedic, with the dates that matter for them.</p>
+<ul><li>Unlimited personal answers from their whole chart</li><li>Talk it through with the Oracle, who remembers them if they let it</li><li>Full readings, timing, relationships and the Moon calendar</li><li>Their birth details stay on their phone</li></ul>
+<p><strong>$100 for a full year · one payment, no renewal · code and printable card delivered instantly</strong></p>
+<p class="cta"><a class="btn" href="${SITE}#/gift">Give a year</a></p>`,
+    ld: [faqLdOf(faqs)],
+  });
+}
+
 // ---------- Privacy ----------
 /** The date the privacy policy last changed in substance. Update it when the policy changes. */
 const PRIVACY_UPDATED = new Date('2026-10-14T12:00:00Z');
@@ -979,6 +1001,7 @@ mercuryRetrograde();
 zodiac();
 placements();
 astrologyToday();
+giftPage();
 nakshatraPages();
 elementPages();
 archetypePages();

@@ -34,6 +34,8 @@ export const EVENTS = {
   astrologer_checkout: { package: ['single', 'two-sessions', 'season', 'coaching', 'year'] },
   moon_calendar: { months: 'number' },
   oracle_chat: { turn: 'number' },
+  gift_checkout: {},
+  gift_bought: {},
   oracle_asked: { intent: ['simplify', 'energy', 'archetype', 'elements', 'area', 'decision', 'when', 'return', 'retro', 'lunation', 'together', 'chart', 'patterns', 'feeling', 'cycle', 'week', 'planet', 'sky', 'open'] },
 } as const satisfies Record<string, Record<string, Field>>;
 

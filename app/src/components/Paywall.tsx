@@ -262,7 +262,7 @@ export function ModeBanner() {
   );
 }
 
-/** Tester access: a code gives full access without payment. */
+/** Gift and access codes: a code gives full access without payment. */
 export function RedeemCode() {
   const { refresh } = useAccount();
   const [code, setCode] = useState('');
@@ -284,9 +284,9 @@ export function RedeemCode() {
   return (
     <form className="redeem" onSubmit={submit}>
       <label htmlFor="tester-code">
-        Have a tester code? <span className="hint">Full access without payment</span>
+        Have a code? <span className="hint">A gift or access code</span>
       </label>
-      <input id="tester-code" value={code} onChange={(e) => setCode(e.target.value)} autoComplete="off" autoCapitalize="characters" spellCheck={false} placeholder="WITHIN-XXXX-XXXX-XXXX" />
+      <input id="tester-code" value={code} onChange={(e) => setCode(e.target.value)} autoComplete="off" autoCapitalize="characters" spellCheck={false} placeholder="GIFT-XXXX-XXXX-XXXX" />
       <button type="submit" className="btn quiet" disabled={busy || code.trim().length < 8}>
         {busy ? 'Checking…' : 'Use code'}
       </button>
