@@ -1,11 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Back, ConfirmButton } from '../components/ui';
 import { ModeBanner, Paywall, SignInButtons, VerifyDevice } from '../components/Paywall';
 import { accountService } from '../services/account';
 import { useAccount } from '../services/AccountContext';
 import { useStore } from '../state';
-import { CONFIG, GIFTS, IN_PLAY_APP } from '../services/config';
+import { CONFIG, IN_PLAY_APP } from '../services/config';
 
 const fmt = (iso: string | null) => (iso ? new Date(iso).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }) : '');
 
@@ -14,10 +14,6 @@ export default function AccountScreen() {
   const { dispatch } = useStore();
   const nav = useNavigate();
   const [error, setError] = useState('');
-  const [gifts, setGifts] = useState<string[]>([]);
-  useEffect(() => {
-    if (GIFTS && account) accountService().myGifts().then(setGifts).catch(() => setGifts([]));
-  }, [account]);
   const run = (fn: () => Promise<void>) => async () => {
     setError('');
     try {
@@ -84,26 +80,6 @@ export default function AccountScreen() {
           <Paywall where="account" what="Everything beyond your first reflection">{null}</Paywall>
         )}
       </section>
-
-      {GIFTS && account && !IN_PLAY_APP && (
-        <section aria-labelledby="gift-h">
-          <h2 id="gift-h">Give a year of Within</h2>
-          <div className="card">
-            <p style={{ margin: 0 }}>A full year for someone you choose, $100 once. You get a code to pass on; they redeem it under Account after signing in. Nothing renews.</p>
-            <button type="button" className="btn" style={{ marginTop: 10 }} onClick={run(() => accountService().startGift())}>
-              Buy a gift · $100
-            </button>
-            {gifts.length > 0 && (
-              <div style={{ marginTop: 12 }}>
-                <p className="small muted" style={{ margin: '0 0 4px' }}>Your gift codes (each works once):</p>
-                {gifts.map((g) => (
-                  <p key={g} style={{ margin: '2px 0', fontFamily: 'monospace' }}>{g}</p>
-                ))}
-              </div>
-            )}
-          </div>
-        </section>
-      )}
 
       {account && (
         <section aria-labelledby="del-h">

@@ -44,9 +44,6 @@ export interface AccountService {
   manageSubscription(): Promise<void>;
   /** Tester access: redeems a code for full access without payment. */
   redeemCode(code: string): Promise<string>;
-  /** Gift memberships (off until VITE_GIFTS=true): buy a year for someone, and read the codes you have bought. */
-  startGift(): Promise<void>;
-  myGifts(): Promise<string[]>;
 }
 
 // ─── Device trust (the email link as a second factor on each new device) ──────────────────
@@ -181,16 +178,6 @@ function live(): AccountService {
       if (error) throw new Error(await serverMessage(error, 'The code couldn’t be checked right now. Try again.'));
       return (data?.message as string) ?? 'Tester access is on.';
     },
-    startGift: async () => {
-      const { data, error } = await sb.functions.invoke('create-gift-checkout', { body: { returnUrl: siteUrl() } });
-      if (error) throw new Error(await serverMessage(error, 'Checkout couldn’t start. Try again.'));
-      if (!data?.url) throw new Error('Checkout couldn’t start. Try again.');
-      location.assign(data.url);
-    },
-    myGifts: async () => {
-      const { data } = await sb.from('gifts').select('code').order('created_at', { ascending: false });
-      return (data ?? []).map((r) => r.code as string);
-    },
   };
 }
 
@@ -260,10 +247,6 @@ function demo(): AccountService {
       emit();
       return 'Tester access is on (demo).';
     },
-    startGift: async () => {
-      throw new Error('Gift memberships aren’t available in the demo.');
-    },
-    myGifts: async () => [],
   };
 }
 

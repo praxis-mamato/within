@@ -3,7 +3,6 @@ import Stripe from 'npm:stripe@17';
 import { admin } from '../_shared/clients.ts';
 import { priceYearly, stripe, stripeConfigured, webhookSecret } from '../_shared/stripe.ts';
 import { toEntitlement, type StripeSubscriptionLike } from '../_shared/entitlement.ts';
-import { GIFT_DAYS, hashCode, newGiftCode } from '../_shared/gift.ts';
 
 const crypto = Stripe.createSubtleCryptoProvider();
 
@@ -71,18 +70,6 @@ Deno.serve(async (req) => {
           const { error } = await admin.from('astrologer_bookings').update({ status: 'paid', paid_at: new Date().toISOString() }).eq('stripe_session_id', s.id);
           if (error) throw error;
           console.log('astrologer booking paid', JSON.stringify({ session: s.id, package: s.metadata.package_id }));
-          break;
-        }
-        // Gift memberships: a paid gift becomes a single-use access code the buyer can pass on.
-        if (s.metadata?.kind === 'gift' && s.payment_status === 'paid') {
-          const { data: done } = await admin.from('gifts').select('stripe_session_id').eq('stripe_session_id', s.id).maybeSingle();
-          if (done) break; // a resent event
-          const code = newGiftCode();
-          const { error: codeError } = await admin.from('access_codes').insert({ code_hash: await hashCode(code), label: `gift ${s.id}`, days: GIFT_DAYS, max_uses: 1 });
-          if (codeError) throw codeError;
-          const { error } = await admin.from('gifts').insert({ stripe_session_id: s.id, buyer_id: s.metadata.user_id, code, amount: s.amount_total ?? 0 });
-          if (error) throw error;
-          console.log('gift created', JSON.stringify({ session: s.id }));
           break;
         }
         if (s.subscription) await record(await stripe.subscriptions.retrieve(typeof s.subscription === 'string' ? s.subscription : s.subscription.id));
