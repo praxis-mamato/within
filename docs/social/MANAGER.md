@@ -44,6 +44,13 @@ Every reel, post, and story must teach or tell something **true and specific fro
 Before writing anything, print the prominent transits: `cd app && npx tsx -e "import('./src/content/skyNow.ts').then(m => console.log(m.skyNow().join('\n')))"`.
 Lead with whichever is biggest this week (a station, a New or Full Moon, an exact aspect, a retrograde), using its exact date and degree from that list, and say in plain words how it may feel by sign or house. Comment replies name the transit that fits the person's question. The app's Oracle answers and conversations get the same list, so the account and the app agree.
 
+## More push while the sky is active (main session, 2026-10-30)
+- **Sky today story, every day at 13:00 UTC:** a third story with the day's biggest line from `skyNow` and "What does it mean for you? withinoracle.app" as the last scene. Source: `docs/social/reels-sky-stories.json` (entries `sky-<date>`), rendered with `render-reel.mjs reels ... app/public/social/stories`. Queued Oct 31 – Nov 16; keep 10 days ahead.
+- **Extra reels around the big dates, 21:30 UTC the evening before in US time** (`docs/social/reels-bigdates.json`, files `big-<date>`), plus carousels at 20:00 UTC where it fits (`carousels-bigdates.json`). Queued: Nov 3 (Sun meets Mercury, combust not cazimi), Nov 8 (New Moon in Scorpio), Nov 12 (Mercury direct), Nov 13 (Venus direct), Nov 15 (Mars conjunct Jupiter 25°53′ Leo), Nov 28 (Uranus trine Pluto exact Nov 29); carousels Nov 3 and Nov 15. Next big dates from `skyNow`.
+- **Link the matching page in captions** as text (Instagram captions do not make links): `withinoracle.app/astrology-today`, `/mercury-in-scorpio`, `/moon-in-scorpio`, `/leo-rising`, `/nakshatras/vishakha`, `/new-moon-in-scorpio-november-2026`.
+- **Cazimi only within 17′ of the Sun in every direction.** Mercury on Nov 4 is 22′ away: say combust (asta), not cazimi.
+- **Comment replies** name the transit that fits the person's question (from `skyNow`) and point to the Oracle.
+
 ## Every Monday
 - Read last week's numbers from `social_posts` (reach, plays, average watch time, shares, saves, likes, comments) and which posts led to app visits if the growth lead's tracking shows it. Write `docs/social/report-<date>.md`: what worked, what didn't, what you change.
 - Adjust the mix toward what earns: shares per reach and watch time decide which reel formats stay (PLAN.md). Feed images keep the old mix: sky timing, teaching (signs, elements, houses), an Oracle question prompt, a live-reading or membership post, and a community question.
