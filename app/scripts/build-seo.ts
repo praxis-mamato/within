@@ -7,10 +7,11 @@
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import * as Astronomy from 'astronomy-engine';
-import { lahiriAyanamsa, NAKSHATRAS, SIGNS, tropicalLongitude } from '../src/astro/chart';
+import { DASHA_LORDS, lahiriAyanamsa, NAKSHATRAS, SIGNS, tropicalLongitude } from '../src/astro/chart';
 import { westernDignity } from '../src/astro/progressions';
 import { SIGN_ELEMENT, VEDIC_RASHI, WESTERN_SIGN } from '../src/content/templates';
-import { PLANET_IN_SIGN, RISING, RULER, SIGN_KEYWORD, SIGN_MODALITY } from '../src/content/western';
+import { PLANET_FUNCTION, PLANET_IN_SIGN, RISING, RULER, SIGN_KEYWORD, SIGN_MODALITY } from '../src/content/western';
+import { NAKSHATRA_DETAIL } from '../src/content/vedic';
 import { PLANET_HIGH, PLANET_LOW } from '../src/content/energy';
 import { computeNatal, type BirthInput } from '../src/astro/natal';
 import { consultOracle } from '../src/content/oracleEngine';
@@ -91,6 +92,8 @@ const NAV: [string, string][] = [
   ['mercury-retrograde/', 'Mercury retrograde'],
   ['retrogrades/', 'Retrogrades'],
   ['zodiac/', 'Zodiac signs'],
+  ['placements/', 'Planets in signs'],
+  ['nakshatras/', 'Nakshatras'],
   ['elements/', 'Elements and modes'],
   ['archetypes/', 'Archetypes'],
 ];
@@ -705,6 +708,129 @@ ${cta('Compare two charts')}
   });
 }
 
+
+// ---------- Placements: every planet in every sign, and every rising sign ----------
+const faqLdOf = (faqs: [string, string][]) => ({ '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: faqs.map(([q, a]) => ({ '@type': 'Question', name: q, acceptedAnswer: { '@type': 'Answer', text: a } })) });
+const The = (p: string) => (p === 'Sun' || p === 'Moon' ? `The ${p}` : p);
+const DIGNITY_LINE: Record<string, (p: string, s: string) => string> = {
+  Domicile: (p, s) => `${The(p)} rules ${s}, so it is at home here: its qualities come through clearly and with ease.`,
+  Exaltation: (p, s) => `${The(p)} is exalted in ${s}: traditional astrology counts this among its strongest, most honoured places.`,
+  Detriment: (p, s) => `${The(p)} is in its detriment in ${s}, the sign opposite its home: it works against the grain, which can build real skill over time.`,
+  Fall: (p, s) => `${The(p)} is in its fall in ${s}, opposite its exaltation: its gifts tend to arrive through effort and maturity rather than ease.`,
+};
+function placements() {
+  const PL = Object.keys(PLANET_IN_SIGN);
+  for (const p of PL)
+    for (const s of SIGNS) {
+      const dig = westernDignity(p, s);
+      const arch = SIGN_ARCHETYPE[s];
+      const faqs: [string, string][] = [
+        [`What does ${p} in ${s} mean?`, PLANET_IN_SIGN[p][s]],
+        [`What does ${p} show in a birth chart?`, `${The(p)} shows ${PLANET_FUNCTION[p]}.`],
+        [`Is ${p} strong in ${s}?`, dig ? DIGNITY_LINE[dig](p, s) : `${The(p)} has no traditional dignity or debility in ${s}; it takes its colour from ${RULER[s]}, the ruler of ${s}.`],
+      ];
+      pages.push({
+        path: `${slug(p)}-in-${slug(s)}/`,
+        title: `${p} in ${s}: meaning in your birth chart | Within`,
+        description: `${p} in ${s} in astrology: ${PLANET_IN_SIGN[p][s].slice(0, 110)}`,
+        h1: `${p} in ${s}`,
+        body: `<p class="lede">${The(p)} shows ${PLANET_FUNCTION[p]}. In ${s}, a ${SIGN_MODALITY[s]} ${SIGN_ELEMENT[s]} sign of ${SIGN_KEYWORD[s]}, it takes on ${esc(arch.name)}'s colour.</p>
+<h2>What it means</h2><p>${PLANET_IN_SIGN[p][s]}</p>
+<h2>Its strength here</h2><p>${dig ? DIGNITY_LINE[dig](p, s) : `${The(p)} has no traditional dignity or debility in ${s}, so it works through ${RULER[s]}, the ruler of ${s}: where ${RULER[s]} sits in your chart shows where this ${p} finds its footing.`} At its best, ${The(p).toLowerCase().replace(/^the (sun|moon)$/, (_m, x) => `the ${cap(x)}`)} is ${PLANET_HIGH[p] ?? 'clear and alive'}; under strain, it can be ${PLANET_LOW[p] ?? 'restless'}.</p>
+<h2>The archetype</h2><p>${esc(s)} is ${esc(arch.name)}: ${esc(arch.essence)} The gift: ${esc(arch.gift)} The shadow: ${esc(arch.shadow)}</p>
+<h2>It depends on the rest of your chart</h2><p>The same ${p} in ${s} reads differently by house, by the aspects it makes, and in Vedic astrology, where about 24° of difference can put it in ${SIGNS[(SIGNS.indexOf(s) + 11) % 12]} instead. The Oracle reads yours whole, from your exact birth time and place.</p>
+${cta(`Read my ${p} sign`)}
+<h2>${p} in the other signs</h2><ul class="grid">${SIGNS.filter((x) => x !== s).map((x) => `<li><a href="${SITE}${slug(p)}-in-${slug(x)}/">${p} in ${x}</a></li>`).join('')}</ul>
+<p><a href="${SITE}zodiac/${slug(s)}/">${s}: the whole sign ›</a></p>`,
+        ld: [faqLdOf(faqs)],
+      });
+    }
+  for (const s of SIGNS) {
+    const faqs: [string, string][] = [
+      [`What does ${s} rising mean?`, RISING[s]],
+      [`What is the ruler of a ${s} rising chart?`, `${RULER[s]}. The chart ruler's sign and house shape the whole life story.`],
+      [`How do I know if I am ${s} rising?`, 'Your rising sign needs your birth time and place: it changes about every two hours.'],
+    ];
+    pages.push({
+      path: `${slug(s)}-rising/`,
+      title: `${s} rising: what your ascendant means | Within`,
+      description: `${s} rising (ascendant) in astrology: ${RISING[s]} With ${RULER[s]} as the chart ruler.`,
+      h1: `${s} rising`,
+      body: `<p class="lede">Your rising sign, the ascendant, is the sign coming up on the eastern horizon at your birth: the doorway of your chart, how you meet the world and begin things.</p>
+<h2>What ${s} rising means</h2><p>${RISING[s]} ${s} is a ${SIGN_MODALITY[s]} ${SIGN_ELEMENT[s]} sign of ${SIGN_KEYWORD[s]}.</p>
+<h2>Your chart ruler: ${RULER[s]}</h2><p>With ${s} rising, ${RULER[s]} rules your whole chart. It shows ${PLANET_FUNCTION[RULER[s]] ?? 'a core thread of your life'}, and the sign and house it sits in tell where your life's story is most at stake. Read it next: <a href="${SITE}${slug(RULER[s])}-in-${slug(s)}/">${RULER[s]} in ${s}</a> is one of twelve possibilities.</p>
+<h2>Your houses</h2><p>With ${s} rising in whole-sign houses, ${SIGNS[(SIGNS.indexOf(s) + 6) % 12]} rules your 7th house of partners and ${SIGNS[(SIGNS.indexOf(s) + 9) % 12]} your 10th house of work and reputation. Placidus houses, which Within uses, shift these by degree, so check your own chart.</p>
+${cta('Find my rising sign')}
+<h2>Other rising signs</h2><ul class="grid">${SIGNS.filter((x) => x !== s).map((x) => `<li><a href="${SITE}${slug(x)}-rising/">${x} rising</a></li>`).join('')}</ul>`,
+      ld: [faqLdOf(faqs)],
+    });
+  }
+  pages.push({
+    path: 'placements/',
+    title: 'Every planet in every sign: Sun, Moon, Mercury, Venus, Mars, Jupiter, Saturn | Within',
+    description: 'What each planet means in each zodiac sign, plus all twelve rising signs: 96 placements explained.',
+    h1: 'Planets in signs',
+    body: `<p class="lede">Every planet in your chart sits in a sign. Find yours.</p>${PL.map((p) => `<h2>${p}</h2><ul class="grid">${SIGNS.map((x) => `<li><a href="${SITE}${slug(p)}-in-${slug(x)}/">${p} in ${x}</a></li>`).join('')}</ul>`).join('')}
+<h2>Rising signs</h2><ul class="grid">${SIGNS.map((x) => `<li><a href="${SITE}${slug(x)}-rising/">${x} rising</a></li>`).join('')}</ul>${cta()}`,
+  });
+}
+
+// ---------- Nakshatras: the 27 lunar mansions ----------
+const NAK_DEITY: Record<string, [string, string]> = {
+  Ashwini: ['the Ashwini Kumaras, the twin healers', "a horse's head"], Bharani: ['Yama, lord of death and dharma', 'the yoni, the womb'],
+  Krittika: ['Agni, the sacred fire', 'a razor or flame'], Rohini: ['Brahma (Prajapati), the creator', 'an ox cart'],
+  Mrigashira: ['Soma, the Moon god', "a deer's head"], Ardra: ['Rudra, the storm', 'a teardrop'],
+  Punarvasu: ['Aditi, mother of the gods', 'a quiver of arrows'], Pushya: ['Brihaspati, teacher of the gods', "a cow's udder"],
+  Ashlesha: ['the Nagas, serpent beings', 'a coiled serpent'], Magha: ['the Pitris, the ancestors', 'a royal throne'],
+  'Purva Phalguni': ['Bhaga, god of delight and good fortune', 'the front legs of a bed'], 'Uttara Phalguni': ['Aryaman, god of contracts and friendship', 'the back legs of a bed'],
+  Hasta: ['Savitar, the Sun as giver of life', 'a hand'], Chitra: ['Tvashtar, the celestial architect', 'a bright jewel'],
+  Swati: ['Vayu, the wind', 'a young shoot swaying in the wind'], Vishakha: ['Indra and Agni together', 'a triumphal arch'],
+  Anuradha: ['Mitra, god of friendship', 'a lotus'], Jyeshtha: ['Indra, king of the gods', 'a round earring'],
+  Mula: ['Nirriti, goddess of dissolution', 'a bunch of roots'], 'Purva Ashadha': ['Apas, the waters', 'a winnowing fan'],
+  'Uttara Ashadha': ['the Vishvedevas, the universal gods', "an elephant's tusk"], Shravana: ['Vishnu, the preserver', 'an ear'],
+  Dhanishta: ['the eight Vasus, gods of abundance', 'a drum'], Shatabhisha: ['Varuna, lord of the cosmic waters', 'an empty circle'],
+  'Purva Bhadrapada': ['Aja Ekapada, the one-footed goat', 'the front of a funeral cot'], 'Uttara Bhadrapada': ['Ahir Budhnya, serpent of the deep', 'the back of a funeral cot'],
+  Revati: ['Pushan, guardian of travellers', 'a fish'],
+};
+function nakshatraPages() {
+  const span = 360 / 27;
+  const dm = (x: number) => `${Math.floor(x % 30)}°${String(Math.round(((x % 30) % 1) * 60)).padStart(2, '0')}′ ${SIGNS[Math.floor(x / 30)]}`;
+  NAKSHATRAS.forEach((n, i) => {
+    const d = NAKSHATRA_DETAIL[n];
+    const [deity, symbol] = NAK_DEITY[n];
+    const lord = DASHA_LORDS[i % 9];
+    const from = i * span;
+    const to = from + span - 1e-6;
+    const faqs: [string, string][] = [
+      [`What is ${n} nakshatra?`, `${n} is the ${ordinal(i + 1)} of the 27 nakshatras, the lunar mansions of Vedic astrology, from ${dm(from)} to ${dm(to + 1e-6)} in the sidereal zodiac. Its deity is ${deity} and its symbol ${symbol}.`],
+      [`Who rules ${n} nakshatra?`, `${lord}. A Moon in ${n} at birth starts life in the ${lord} dasha (Vimshottari period).`],
+      [`What are ${n}'s qualities?`, `${cap(d.quality)}; ${d.gana} gana, ${d.yoni} yoni.`],
+    ];
+    pages.push({
+      path: `nakshatras/${slug(n)}/`,
+      title: `${n} nakshatra: meaning, deity, ruler and Moon | Within`,
+      description: `${n}, the ${ordinal(i + 1)} nakshatra (${dm(from)} to ${dm(to + 1e-6)} sidereal): ruled by ${lord}, deity ${deity.split(',')[0]}, symbol ${symbol}. ${cap(d.quality)}.`,
+      h1: `${n} nakshatra`,
+      body: `<p class="lede">${n} is the ${ordinal(i + 1)} of the 27 nakshatras, the lunar mansions of Vedic astrology. It spans <strong>${dm(from)} to ${dm(to + 1e-6)}</strong> in the sidereal zodiac.</p>
+<h2>Its nature</h2><p>${cap(d.quality)}. ${n} is of ${d.gana} gana (temperament: ${d.gana === 'Deva' ? 'gentle and giving' : d.gana === 'Manushya' ? 'human, balanced between ideals and needs' : 'fierce, independent and protective'}), and its animal (yoni) is the ${d.yoni}.</p>
+<h2>Deity and symbol</h2><p>Its presiding deity is ${deity}, and its symbol is ${symbol}. In Jyotish the deity names the power the nakshatra carries.</p>
+<h2>Ruler and dasha</h2><p>${lord} rules ${n}. If your Moon was in ${n} at birth, your life opened in the ${lord} mahadasha of the Vimshottari system, and ${lord}'s condition in your chart colours your mind and timing.</p>
+<h2>The four padas</h2><p>Each nakshatra divides into four padas of 3°20′, each in a different navamsa sign: ${[0, 1, 2, 3].map((k) => SIGNS[(i * 4 + k) % 12]).join(', ')}.</p>
+${cta('Find my Moon nakshatra')}
+<h2>All 27 nakshatras</h2><ul class="grid">${NAKSHATRAS.map((x) => `<li><a href="${SITE}nakshatras/${slug(x)}/">${x}</a></li>`).join('')}</ul>`,
+      ld: [faqLdOf(faqs)],
+    });
+  });
+  pages.push({
+    path: 'nakshatras/',
+    title: 'The 27 nakshatras: lunar mansions of Vedic astrology | Within',
+    description: 'All 27 nakshatras with their degrees, ruling planets, deities and symbols. Find your Moon nakshatra.',
+    h1: 'The 27 nakshatras',
+    body: `<p class="lede">The nakshatras divide the sky into 27 lunar mansions of 13°20′. Your Moon's nakshatra is one of the most personal facts in a Vedic chart.</p>
+<div class="scroll"><table class="tbl"><thead><tr><th>#</th><th>Nakshatra</th><th>Ruler</th><th>Deity</th></tr></thead><tbody>${NAKSHATRAS.map((x, i) => `<tr><td>${i + 1}</td><td><a href="${SITE}nakshatras/${slug(x)}/">${x}</a></td><td>${DASHA_LORDS[i % 9]}</td><td>${NAK_DEITY[x][0].split(',')[0]}</td></tr>`).join('')}</tbody></table></div>${cta('Find my Moon nakshatra')}`,
+  });
+}
+
 // ---------- Privacy ----------
 /** The date the privacy policy last changed in substance. Update it when the policy changes. */
 const PRIVACY_UPDATED = new Date('2026-10-14T12:00:00Z');
@@ -787,6 +913,8 @@ moonCalendar();
 retrogrades();
 mercuryRetrograde();
 zodiac();
+placements();
+nakshatraPages();
 elementPages();
 archetypePages();
 guides();
