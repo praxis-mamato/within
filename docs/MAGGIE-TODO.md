@@ -13,7 +13,7 @@ Kept by Claude. Things only Maggie can do (account-owner steps), most urgent fir
 - **Claude in Chrome on your computer:** tell it "Yes, go. Start with Pinterest." Pinterest profile is up (pinterest.com/withintheoracle); next it does YouTube, Facebook Page, Threads, TikTok, AlternativeTo and 6 directories; you do passwords, codes and robot checks.
 - **Pinterest:** the tag is live on the site: tap **Verify** in Pinterest → Settings → Claimed accounts.
 - **Send Claude:** which accounts got made (for automatic reel posting).
-- **Instagram partners:** check the top 5 in docs/sales/instagram-partners.md (handle, US, 2k–100k followers, posted lately), fill the [blank] in each message, and send them yourself.
+- **Instagram partners (Claude runs social; only the sending is yours because Instagram blocks bots from starting DMs):** check the top 5 in docs/sales/instagram-partners.md (handle, US, 2k–100k followers, posted lately), fill the [blank] in each message, and send them yourself.
 
 ## When there's time
 4. Microsoft Store: **developer account done (Maggie, before Oct 29)**; if the app isn't submitted yet, next is the PWABuilder package. Product Hunt and AlternativeTo: steps in `docs/growth/launch/LAUNCH-KIT.md`.
