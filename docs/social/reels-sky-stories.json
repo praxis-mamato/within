@@ -1,0 +1,342 @@
+[
+ {
+  "date": "sky-2026-10-31",
+  "format": "scenes",
+  "hook": "Sky today|Oct 31",
+  "items": [
+   {
+    "word": "MERCURY|RX",
+    "title": "SKY TODAY · OCT 31",
+    "line": "Mercury retrograde at 17°09' Scorpio.|Direct Nov 13 at 5°02' Scorpio.",
+    "dur": 4.4
+   },
+   {
+    "word": "YOU?",
+    "title": "WHAT DOES IT MEAN",
+    "line": "What does it mean for you?|withinoracle.app",
+    "dur": 3.0
+   }
+  ],
+  "caption": ""
+ },
+ {
+  "date": "sky-2026-11-01",
+  "format": "scenes",
+  "hook": "Sky today|Nov 1",
+  "items": [
+   {
+    "word": "LAST|QUARTER",
+    "title": "SKY TODAY · NOV 1",
+    "line": "Last Quarter Moon tonight, 20:29 UTC,|at 9°26' Leo.",
+    "dur": 4.4
+   },
+   {
+    "word": "YOU?",
+    "title": "WHAT DOES IT MEAN",
+    "line": "What does it mean for you?|withinoracle.app",
+    "dur": 3.0
+   }
+  ],
+  "caption": ""
+ },
+ {
+  "date": "sky-2026-11-02",
+  "format": "scenes",
+  "hook": "Sky today|Nov 2",
+  "items": [
+   {
+    "word": "MERCURY|+ SUN",
+    "title": "SKY TODAY · NOV 2",
+    "line": "Mercury at 14°50' Scorpio meets the Sun|on Nov 4, at 12°10' Scorpio.",
+    "dur": 4.4
+   },
+   {
+    "word": "YOU?",
+    "title": "WHAT DOES IT MEAN",
+    "line": "What does it mean for you?|withinoracle.app",
+    "dur": 3.0
+   }
+  ],
+  "caption": ""
+ },
+ {
+  "date": "sky-2026-11-03",
+  "format": "scenes",
+  "hook": "Sky today|Nov 3",
+  "items": [
+   {
+    "word": "SUN +|MERCURY",
+    "title": "SKY TODAY · NOV 3",
+    "line": "Tomorrow: Sun conjunct Mercury at 12°10'|Scorpio. Venus sextile Jupiter 24°43'.",
+    "dur": 4.4
+   },
+   {
+    "word": "YOU?",
+    "title": "WHAT DOES IT MEAN",
+    "line": "What does it mean for you?|withinoracle.app",
+    "dur": 3.0
+   }
+  ],
+  "caption": ""
+ },
+ {
+  "date": "sky-2026-11-04",
+  "format": "scenes",
+  "hook": "Sky today|Nov 4",
+  "items": [
+   {
+    "word": "SUN +|MERCURY",
+    "title": "SKY TODAY · NOV 4",
+    "line": "Sun conjunct Mercury at 12°10' Scorpio:|combust, not cazimi (22' apart).",
+    "dur": 4.4
+   },
+   {
+    "word": "YOU?",
+    "title": "WHAT DOES IT MEAN",
+    "line": "What does it mean for you?|withinoracle.app",
+    "dur": 3.0
+   }
+  ],
+  "caption": ""
+ },
+ {
+  "date": "sky-2026-11-05",
+  "format": "scenes",
+  "hook": "Sky today|Nov 5",
+  "items": [
+   {
+    "word": "TWO|RETROGRADES",
+    "title": "SKY TODAY · NOV 5",
+    "line": "Mercury retrograde at 10°57' Scorpio.|Venus retrograde at 24°19' Libra.",
+    "dur": 4.4
+   },
+   {
+    "word": "YOU?",
+    "title": "WHAT DOES IT MEAN",
+    "line": "What does it mean for you?|withinoracle.app",
+    "dur": 3.0
+   }
+  ],
+  "caption": ""
+ },
+ {
+  "date": "sky-2026-11-06",
+  "format": "scenes",
+  "hook": "Sky today|Nov 6",
+  "items": [
+   {
+    "word": "ONE|WEEK",
+    "title": "SKY TODAY · NOV 6",
+    "line": "A week until Mercury turns direct|at 5°02' Scorpio. Now at 9°43'.",
+    "dur": 4.4
+   },
+   {
+    "word": "YOU?",
+    "title": "WHAT DOES IT MEAN",
+    "line": "What does it mean for you?|withinoracle.app",
+    "dur": 3.0
+   }
+  ],
+  "caption": ""
+ },
+ {
+  "date": "sky-2026-11-07",
+  "format": "scenes",
+  "hook": "Sky today|Nov 7",
+  "items": [
+   {
+    "word": "15°|SCORPIO",
+    "title": "SKY TODAY · NOV 7",
+    "line": "The Sun reaches 15° Scorpio, 10:00 UTC:|halfway from equinox to solstice.",
+    "dur": 4.4
+   },
+   {
+    "word": "YOU?",
+    "title": "WHAT DOES IT MEAN",
+    "line": "What does it mean for you?|withinoracle.app",
+    "dur": 3.0
+   }
+  ],
+  "caption": ""
+ },
+ {
+  "date": "sky-2026-11-08",
+  "format": "scenes",
+  "hook": "Sky today|Nov 8",
+  "items": [
+   {
+    "word": "NEW|MOON",
+    "title": "SKY TODAY · NOV 8",
+    "line": "Tonight in the US: New Moon at 16°53'|Scorpio, exact 07:02 UTC Nov 9.",
+    "dur": 4.4
+   },
+   {
+    "word": "YOU?",
+    "title": "WHAT DOES IT MEAN",
+    "line": "What does it mean for you?|withinoracle.app",
+    "dur": 3.0
+   }
+  ],
+  "caption": ""
+ },
+ {
+  "date": "sky-2026-11-09",
+  "format": "scenes",
+  "hook": "Sky today|Nov 9",
+  "items": [
+   {
+    "word": "NEW|MOON",
+    "title": "SKY TODAY · NOV 9",
+    "line": "New Moon at 16°53' Scorpio, exact|at 07:02 UTC today.",
+    "dur": 4.4
+   },
+   {
+    "word": "YOU?",
+    "title": "WHAT DOES IT MEAN",
+    "line": "What does it mean for you?|withinoracle.app",
+    "dur": 3.0
+   }
+  ],
+  "caption": ""
+ },
+ {
+  "date": "sky-2026-11-10",
+  "format": "scenes",
+  "hook": "Sky today|Nov 10",
+  "items": [
+   {
+    "word": "VENUS +|MARS",
+    "title": "SKY TODAY · NOV 10",
+    "line": "Venus sextile Mars today:|23°08' Libra and 23°08' Leo.",
+    "dur": 4.4
+   },
+   {
+    "word": "YOU?",
+    "title": "WHAT DOES IT MEAN",
+    "line": "What does it mean for you?|withinoracle.app",
+    "dur": 3.0
+   }
+  ],
+  "caption": ""
+ },
+ {
+  "date": "sky-2026-11-11",
+  "format": "scenes",
+  "hook": "Sky today|Nov 11",
+  "items": [
+   {
+    "word": "2 DAYS",
+    "title": "SKY TODAY · NOV 11",
+    "line": "Mercury turns direct Friday at 5°02'|Scorpio. Venus follows on Saturday.",
+    "dur": 4.4
+   },
+   {
+    "word": "YOU?",
+    "title": "WHAT DOES IT MEAN",
+    "line": "What does it mean for you?|withinoracle.app",
+    "dur": 3.0
+   }
+  ],
+  "caption": ""
+ },
+ {
+  "date": "sky-2026-11-12",
+  "format": "scenes",
+  "hook": "Sky today|Nov 12",
+  "items": [
+   {
+    "word": "MERCURY|DIRECT",
+    "title": "SKY TODAY · NOV 12",
+    "line": "Tomorrow: Mercury turns direct at|5°02' Scorpio, 15:30 UTC.",
+    "dur": 4.4
+   },
+   {
+    "word": "YOU?",
+    "title": "WHAT DOES IT MEAN",
+    "line": "What does it mean for you?|withinoracle.app",
+    "dur": 3.0
+   }
+  ],
+  "caption": ""
+ },
+ {
+  "date": "sky-2026-11-13",
+  "format": "scenes",
+  "hook": "Sky today|Nov 13",
+  "items": [
+   {
+    "word": "MERCURY|DIRECT",
+    "title": "SKY TODAY · NOV 13",
+    "line": "Mercury turns direct today at 5°02'|Scorpio, 15:30 UTC.",
+    "dur": 4.4
+   },
+   {
+    "word": "YOU?",
+    "title": "WHAT DOES IT MEAN",
+    "line": "What does it mean for you?|withinoracle.app",
+    "dur": 3.0
+   }
+  ],
+  "caption": ""
+ },
+ {
+  "date": "sky-2026-11-14",
+  "format": "scenes",
+  "hook": "Sky today|Nov 14",
+  "items": [
+   {
+    "word": "VENUS|DIRECT",
+    "title": "SKY TODAY · NOV 14",
+    "line": "Venus turns direct today at 22°51'|Libra.",
+    "dur": 4.4
+   },
+   {
+    "word": "YOU?",
+    "title": "WHAT DOES IT MEAN",
+    "line": "What does it mean for you?|withinoracle.app",
+    "dur": 3.0
+   }
+  ],
+  "caption": ""
+ },
+ {
+  "date": "sky-2026-11-15",
+  "format": "scenes",
+  "hook": "Sky today|Nov 15",
+  "items": [
+   {
+    "word": "MARS +|JUPITER",
+    "title": "SKY TODAY · NOV 15",
+    "line": "Tomorrow: Mars conjunct Jupiter|at 25°53' Leo.",
+    "dur": 4.4
+   },
+   {
+    "word": "YOU?",
+    "title": "WHAT DOES IT MEAN",
+    "line": "What does it mean for you?|withinoracle.app",
+    "dur": 3.0
+   }
+  ],
+  "caption": ""
+ },
+ {
+  "date": "sky-2026-11-16",
+  "format": "scenes",
+  "hook": "Sky today|Nov 16",
+  "items": [
+   {
+    "word": "MARS +|JUPITER",
+    "title": "SKY TODAY · NOV 16",
+    "line": "Mars conjunct Jupiter today|at 25°53' Leo.",
+    "dur": 4.4
+   },
+   {
+    "word": "YOU?",
+    "title": "WHAT DOES IT MEAN",
+    "line": "What does it mean for you?|withinoracle.app",
+    "dur": 3.0
+   }
+  ],
+  "caption": ""
+ }
+]
