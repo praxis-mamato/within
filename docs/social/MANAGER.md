@@ -53,6 +53,13 @@ Lead with whichever is biggest this week (a station, a New or Full Moon, an exac
 - **Cazimi only within 17′ of the Sun in every direction.** Mercury on Nov 4 is 22′ away: say combust (asta), not cazimi.
 - **Comment replies** name the transit that fits the person's question (from `skyNow`) and point to the Oracle.
 
+## Gift promotion, Nov 1 – Dec 24 (main session, 2026-10-30)
+"Give a year with the Oracle": $100, one payment, no renewal; the buyer gets a code and a printable card at once; no account needed to buy; the recipient enters the code under "Have a code?" after making a chart and signing in, and the year starts when they use it. Page: `withinoracle.app/gift`. Within rules apply: no pushy sales, no fake urgency, no discount claims.
+- **Weekly:** one feed post (19:00 UTC, `docs/social/posts-gifts.json`, files `gift-<n>`) and a gift story every 3rd day (19:05 UTC; `reels-gift-stories.json`, files `gift-a/b/c`). Queued Nov 1 – Nov 30, including Thanksgiving (Nov 26), Black Friday (Nov 27) and Cyber Monday (Nov 30).
+- **December:** write and queue by Nov 20: the weekly post plus a post every 2–3 days Dec 15–24 (and Dec 24 as the last), each with a new angle, and a story every 3rd day.
+- **Captions:** add a gift line where it fits naturally (done for Nov 4, the Venus–Jupiter generosity day).
+- **Bio link:** keep `withinoracle.app/links/` and ask the main session to make that page feature both Astrology today and Gift; changing the Instagram bio itself needs a human.
+
 ## Every Monday
 - Read last week's numbers from `social_posts` (reach, plays, average watch time, shares, saves, likes, comments) and which posts led to app visits if the growth lead's tracking shows it. Write `docs/social/report-<date>.md`: what worked, what didn't, what you change.
 - Adjust the mix toward what earns: shares per reach and watch time decide which reel formats stay (PLAN.md). Feed images keep the old mix: sky timing, teaching (signs, elements, houses), an Oracle question prompt, a live-reading or membership post, and a community question.
