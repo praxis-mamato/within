@@ -979,6 +979,8 @@ ${CONTACT ? `<h2>Contact</h2><p>Questions or requests: <a href="mailto:${CONTACT
 function links() {
   const L: [string, string][] = [
     [SITE, 'Ask the Oracle, free'],
+    [`${SITE}astrology-today/`, 'Astrology today: the planets right now'],
+    [`${SITE}#/gift`, 'Give a year with the Oracle (gift)'],
     [`${SITE}mercury-retrograde/`, 'Mercury retrograde: dates and your rising sign'],
     [`${SITE}moon-calendar/`, 'New and Full Moon calendar'],
     [`${SITE}synastry/`, 'Compare two charts'],

@@ -1,6 +1,7 @@
 // Runs @withintheoracle through Meta's official Instagram API (Instagram Login), every 15 minutes by pg_cron
 // with the key stored in social_auth: publishes the next due post, sends the replies the social manager
-// approved, collects new comments, and refreshes each recent post's likes, comments, reach, and saves.
+// approved, collects new comments, refreshes each recent post's likes, comments, reach, and saves, and keeps
+// the account's daily numbers (followers, reach, profile views, follows) in social_account_daily.
 // The access token comes from the INSTAGRAM_TOKEN secret the first time, then lives in social_auth and is
 // refreshed weekly so it does not expire. Nothing here logs or returns the token.
 import { admin, json } from '../_shared/clients.ts';
@@ -99,6 +100,10 @@ Deno.serve(async (req) => {
           Object.assign(form, { media_type: 'CAROUSEL', children: ids.join(',') });
         } else form.image_url = post.image_url;
         if (kind !== 'STORIES' && post.caption) form.caption = post.caption;
+        // Optional tags, filled only for verified accounts: people tagged in the media, and collab invites
+        // (the post also appears on their profile once they accept).
+        if ((kind === 'IMAGE' || kind === 'REELS') && Array.isArray(post.user_tags) && post.user_tags.length) form.user_tags = JSON.stringify(post.user_tags);
+        if ((kind === 'IMAGE' || kind === 'REELS' || kind === 'CAROUSEL') && Array.isArray(post.collaborators) && post.collaborators.length) form.collaborators = JSON.stringify(post.collaborators.slice(0, 3));
         container = (await graph(`/${igUser}/media`, tok, { form })).id as string;
         await admin.from('social_posts').update({ container_id: container }).eq('id', post.id);
       }
@@ -182,5 +187,42 @@ Deno.serve(async (req) => {
     }
   }
   report.new_comments = fresh;
+
+  // 5. The account's own numbers, once every six hours, kept one row per day for the daily report.
+  const today = new Date().toISOString().slice(0, 10);
+  const { data: day } = await admin.from('social_account_daily').select('updated_at').eq('day', today).maybeSingle();
+  if (!day || Date.now() - new Date(day.updated_at).getTime() > 6 * 3600000) {
+    try {
+      const me = await graph(`/${igUser}?fields=followers_count,follows_count,media_count`, tok);
+      // One metric per call, so a metric Instagram doesn't offer this account can't blank the others.
+      const metric = async (name: string, extra = '') => {
+        try {
+          const r = await graph(`/${igUser}/insights?metric=${name}&period=day&metric_type=total_value${extra}`, tok);
+          return r.data?.[0]?.total_value ?? null;
+        } catch (e) {
+          console.warn(`account insight ${name} skipped:`, e instanceof Error ? e.message : e);
+          return null;
+        }
+      };
+      const [reach, views, clicks, engaged, fu] = await Promise.all([metric('reach'), metric('profile_views'), metric('website_clicks'), metric('accounts_engaged'), metric('follows_and_unfollows', '&breakdown=follow_type')]);
+      const total = (v: { value?: number } | null) => v?.value ?? null;
+      const followsGained = fu?.breakdowns?.[0]?.results?.find((r: { dimension_values?: string[] }) => r.dimension_values?.[0] === 'FOLLOWER')?.value ?? null;
+      await admin.from('social_account_daily').upsert({
+        day: today,
+        followers: me.followers_count ?? null,
+        following: me.follows_count ?? null,
+        media: me.media_count ?? null,
+        reach: total(reach),
+        profile_views: total(views),
+        follows: followsGained ?? null,
+        website_clicks: total(clicks),
+        accounts_engaged: total(engaged),
+        updated_at: new Date().toISOString(),
+      });
+      report.followers = me.followers_count ?? null;
+    } catch (e) {
+      console.warn('account numbers skipped:', e instanceof Error ? e.message : e);
+    }
+  }
   return json(report);
 });
