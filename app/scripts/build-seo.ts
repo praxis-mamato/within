@@ -7,6 +7,7 @@
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import * as Astronomy from 'astronomy-engine';
+import { skyNow } from '../src/content/skyNow';
 import { DASHA_LORDS, lahiriAyanamsa, NAKSHATRAS, SIGNS, tropicalLongitude } from '../src/astro/chart';
 import { westernDignity } from '../src/astro/progressions';
 import { SIGN_ELEMENT, VEDIC_RASHI, WESTERN_SIGN } from '../src/content/templates';
@@ -86,6 +87,7 @@ interface Page {
 const pages: Page[] = [];
 
 const NAV: [string, string][] = [
+  ['astrology-today/', 'Astrology today'],
   ['birth-chart/', 'Birth chart'],
   ['synastry/', 'Synastry'],
   ['moon-calendar/', 'Moon calendar'],
@@ -568,7 +570,7 @@ const MOON_DIGNITY: Record<string, string> = {
 const zoneTime = (d: Date, tz: string) => d.toLocaleString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZone: tz });
 
 const PLANET_THEME: Record<string, string> = {
-  Sun: 'purpose and visibility', Mercury: 'words, plans and news', Venus: 'love, money and what you value', Mars: 'drive, anger and courage',
+  Sun: 'purpose and visibility', Moon: 'feelings and needs', Mercury: 'words, plans and news', Venus: 'love, money and what you value', Mars: 'drive, anger and courage',
   Jupiter: 'growth, faith and luck', Saturn: 'limits, duty and what lasts', Uranus: 'sudden change and freedom', Neptune: 'dreams, longing and blurred lines', Pluto: 'power, endings and rebirth',
 };
 const ASPECT_SENSE: [number, string, string][] = [
@@ -831,6 +833,68 @@ ${cta('Find my Moon nakshatra')}
   });
 }
 
+
+// ---------- Astrology today: the live sky, rebuilt every day ----------
+function astrologyToday() {
+  const clean = (l: string) => l.replace(/ \(sky now\)$/, '').replace(/; a long cycle$/, '');
+  const pretty = (l: string) => clean(l).replace(/\b(\d{4})-(\d{2})-(\d{2})\b/g, (_m, y, mo, d) => new Date(Date.UTC(+y, +mo - 1, +d)).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' }));
+  const now = skyNow(NOW);
+  const dated = new Map<string, number>();
+  for (let k = -1; k <= 24; k += 3)
+    for (const l of skyNow(new Date(NOW.getTime() + k * DAY))) {
+      const m = /^(.+?) (?:exact |stations (?:retrograde|direct) |enters \w+ )?(\d{4}-\d{2}-\d{2})/.exec(l);
+      if (!m || / now/.test(l.split(' ').slice(0, 3).join(' ')) || /^(Next|Last) /.test(l) || /long cycle/.test(l)) continue;
+      if (!/ exact | stations | enters |^(New|Full) Moon /.test(l)) continue;
+      const t = Date.parse(m[2]);
+      if (t >= NOW.getTime() - 2 * DAY && t <= NOW.getTime() + 24 * DAY) dated.set(clean(l), t);
+    }
+  const meaning = (l: string) => {
+    const a = /^(\w+) (conjunct|sextile|square|trine|opposite) (\w+) exact/.exec(l);
+    if (a && PLANET_THEME[a[1]] && PLANET_THEME[a[3]]) {
+      const sense = a[2] === 'conjunct' ? 'fuses the two' : (ASPECT_SENSE.find(([, n]) => n.startsWith(a[2].slice(0, 4)))?.[2] ?? '');
+      return `: ${PLANET_THEME[a[1]]} meets ${PLANET_THEME[a[3]]}, and the ${a[2] === 'opposite' ? 'opposition' : a[2] === 'conjunct' ? 'conjunction' : a[2]} ${sense}.`;
+    }
+    if (/stations direct/.test(l)) return ': the planet turns forward; what was reviewed can move again.';
+    if (/stations retrograde/.test(l)) return ': the planet turns back; a time to review, not rush.';
+    if (/^New Moon/.test(l)) return ': a beginning; set an intention.';
+    if (/^Full Moon/.test(l)) return ': a culmination; something comes to light.';
+    if (/ enters /.test(l)) return `: a change of season for ${PLANET_THEME[l.split(' ')[0]] ?? 'that planet'}.`;
+    return '';
+  };
+  const upcoming = [...dated.entries()].sort((a, b) => a[1] - b[1]).map(([l]) => l);
+  const retro = now.filter((l) => / retrograde now/.test(l));
+  const planets = now.filter((l) => / now at /.test(l));
+  const cycles = now.filter((l) => /long cycle/.test(l));
+  const eclipses = now.filter((l) => /eclipse/.test(l));
+  const extra = now.filter((l) => /^North Node|^The Moon is/.test(l));
+  const retroNames = retro.map((l) => l.split(' ')[0]);
+  const isMerc = retroNames.includes('Mercury');
+  const dateLabel = NOW.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric', timeZone: 'America/New_York' });
+  const faqs: [string, string][] = [
+    ['Is Mercury retrograde right now?', isMerc ? pretty(retro.find((l) => l.startsWith('Mercury'))!) + '.' : 'No. Mercury is moving direct right now.'],
+    ['What planets are retrograde right now?', retroNames.length ? `${retroNames.join(', ')} ${retroNames.length > 1 ? 'are' : 'is'} retrograde as of ${dateLabel}.` : `None of the planets is retrograde as of ${dateLabel}.`],
+    ['What sign is the Moon in today?', pretty(planets.find((l) => l.startsWith('Moon'))!) + '.'],
+    ['What is the next New or Full Moon?', upcoming.find((l) => /^(New|Full) Moon/.test(l)) ? pretty(upcoming.find((l) => /^(New|Full) Moon/.test(l))!) + '.' : 'See the Moon calendar for the next lunation.'],
+  ];
+  pages.push({
+    path: 'astrology-today/',
+    title: `Astrology today: what's happening in the planets right now (${NOW.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC' })}) | Within`,
+    description: `The sky right now: ${retroNames.length ? `${retroNames.join(', ')} retrograde, ` : ''}${upcoming.slice(0, 2).map(pretty).join('; ')}. Every planet's sign in Western and Vedic astrology, updated daily.`,
+    h1: 'Astrology today: the planets right now',
+    body: `<p class="lede">Updated <strong>${esc(dateLabel)}</strong>. Calculated from the planets' real positions, the same way Within reads your chart.</p>
+<h2>The big moments, the next three weeks</h2><ul>${upcoming.map((l) => `<li>${esc(pretty(l))}${esc(meaning(l))}</li>`).join('') || '<li>A quiet stretch: no stations, lunations or exact aspects.</li>'}</ul>
+<h2>Retrograde now</h2><ul>${retro.map((l) => `<li>${esc(pretty(l))}</li>`).join('') || '<li>No planet is retrograde.</li>'}</ul>
+<p><a href="${SITE}retrogrades/">Every retrograde date ›</a> · <a href="${SITE}mercury-retrograde/">Mercury retrograde ›</a></p>
+<h2>Where every planet is today</h2><ul>${[...planets, ...extra].map((l) => `<li>${esc(pretty(l))}</li>`).join('')}</ul>
+<h2>The long cycles of this era</h2><p>The slow planets set the background of these years.</p><ul>${cycles.map((l) => `<li>${esc(pretty(l))}</li>`).join('')}</ul>
+<h2>Eclipses</h2><ul>${eclipses.map((l) => `<li>${esc(pretty(l))}</li>`).join('')}</ul>
+<h2>What it means for you</h2><p>This is the sky for everyone. What it stirs in your life depends on where it lands in your own chart: which house, and which of your planets it touches. The Oracle reads that from your exact birth time and place, and names the dates.</p>
+${cta('What does this sky mean for me?')}
+<p><a href="${SITE}moon-calendar/">Moon calendar ›</a> · <a href="${SITE}placements/">Planets in signs ›</a> · <a href="${SITE}nakshatras/">Nakshatras ›</a></p>`,
+    ld: [faqLdOf(faqs), { '@context': 'https://schema.org', '@type': 'Article', headline: 'Astrology today: the planets right now', dateModified: TODAY, author: { '@type': 'Organization', name: 'Within' } }],
+  });
+}
+
 // ---------- Privacy ----------
 /** The date the privacy policy last changed in substance. Update it when the policy changes. */
 const PRIVACY_UPDATED = new Date('2026-10-14T12:00:00Z');
@@ -914,6 +978,7 @@ retrogrades();
 mercuryRetrograde();
 zodiac();
 placements();
+astrologyToday();
 nakshatraPages();
 elementPages();
 archetypePages();
