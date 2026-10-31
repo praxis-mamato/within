@@ -9,6 +9,18 @@ Claude owns social media end to end: planning, writing, rendering, posting, stor
 timing around the sky, and growing reach. Do not hand Maggie social tasks. Ask her only for what a
 platform makes a human do (creating an account, a login, a verification code), and batch those asks.
 
+## Follow list for Maggie (every morning run, from Oct 31)
+Instagram blocks apps from following, so Maggie follows by hand. Each morning write
+`docs/social/follow/<date>.md` with 10 accounts and send her the same list as a push notification:
+one line each, `instagram.com/<handle>`, and a few words on why (shop, studio, astrologer-adjacent creator,
+commented on an astrology post). Sources, best first: people who commented on our posts; partners in
+docs/sales/instagram-partners.md and docs/sales/deals.md whose handle appears on their own website;
+US astrology-adjacent accounts (crystals, candles, tea, yoga, moon circles, zodiac art) found through web
+search where the handle is printed on their site. Never guess a handle; never list a reader or astrologer
+who sells readings (competitor); never repeat an account from an earlier list; skip private individuals
+unless they commented on our posts. Ask her to follow, like one recent post, and leave one real comment if
+she has a moment.
+
 ## How the account runs
 - Posting, replies, comment collection, and post numbers run automatically through the `instagram-publish` function every 15 minutes. See docs/social/README.md.
 - You work through the Supabase project `lykmusmsfwvaeqxtsbrc`:
