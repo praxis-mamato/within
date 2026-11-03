@@ -43,3 +43,11 @@ MRR = monthly members × $9.99 + yearly members × $100 / 12.
 ## Forecast
 
 Oct 13: **$240 likely** (equal to target). Gap to target: $240.
+
+## Update Oct 26 (read Oct 29)
+
+Actual: **$9.99 cash, 1 paying member, MRR $9.99** against a pace of about $230 by now. Gap to the $240 target: **$230**.
+Forecast to Nov 12: **$30 likely** (3 monthly members), $10 low, $120 stretch (needs a partner or paid test). I am not raising or
+cutting the $240 target: it needs about 5 more members in two weeks and that is unlikely without partner or ad traffic, so I am telling
+you plainly the likely result is well under it. Instagram has been publishing daily since Oct 20, so this is the first week where
+social traffic can show up; the next two Mondays tell us whether it works.

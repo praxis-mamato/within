@@ -7,6 +7,8 @@ import { applyApprovedEdits } from './content/registry';
 import { keepFresh } from './lib/freshness';
 import { captureReferral } from './lib/referral';
 import { moveIn } from './lib/moveIn';
+import { startNative } from './services/native';
+import { supabase } from './services/supabase';
 
 installCrashHandlers();
 keepFresh();
@@ -17,6 +19,8 @@ if (/[?&]booking=success/.test(location.search) && !location.hash.startsWith('#/
 // Readings use the approver's edited wording from content/approvals.json.
 applyApprovedEdits();
 
+// In the iPhone app: finish sign-in when Safari hands back, and match the status bar to the sky.
+void startNative(async (code) => supabase()?.auth.exchangeCodeForSession(code));
 // The app's old GitHub Pages address hands its saved data to withinoracle.app, like the old workers.dev link.
 if (location.hostname.endsWith('github.io') && !location.search) location.replace('./bridge.html');
 // Arriving from an old address with saved data: store it before the app loads its state.

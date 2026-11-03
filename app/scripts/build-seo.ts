@@ -7,9 +7,13 @@
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import * as Astronomy from 'astronomy-engine';
-import { SIGNS, tropicalLongitude } from '../src/astro/chart';
+import { skyNow } from '../src/content/skyNow';
+import { offerOn } from '../src/services/offer';
+import { DASHA_LORDS, lahiriAyanamsa, NAKSHATRAS, SIGNS, tropicalLongitude } from '../src/astro/chart';
+import { westernDignity } from '../src/astro/progressions';
 import { SIGN_ELEMENT, VEDIC_RASHI, WESTERN_SIGN } from '../src/content/templates';
-import { PLANET_IN_SIGN, RISING, RULER, SIGN_KEYWORD, SIGN_MODALITY } from '../src/content/western';
+import { PLANET_FUNCTION, PLANET_IN_SIGN, RISING, RULER, SIGN_KEYWORD, SIGN_MODALITY } from '../src/content/western';
+import { NAKSHATRA_DETAIL } from '../src/content/vedic';
 import { PLANET_HIGH, PLANET_LOW } from '../src/content/energy';
 import { computeNatal, type BirthInput } from '../src/astro/natal';
 import { consultOracle } from '../src/content/oracleEngine';
@@ -84,12 +88,16 @@ interface Page {
 const pages: Page[] = [];
 
 const NAV: [string, string][] = [
+  ['astrology-today/', 'Astrology today'],
+  ['gift/', 'Gift a year'],
   ['birth-chart/', 'Birth chart'],
   ['synastry/', 'Synastry'],
   ['moon-calendar/', 'Moon calendar'],
   ['mercury-retrograde/', 'Mercury retrograde'],
   ['retrogrades/', 'Retrogrades'],
   ['zodiac/', 'Zodiac signs'],
+  ['placements/', 'Planets in signs'],
+  ['nakshatras/', 'Nakshatras'],
   ['elements/', 'Elements and modes'],
   ['archetypes/', 'Archetypes'],
 ];
@@ -194,7 +202,8 @@ function moonCalendar() {
   eclipses.sort((a, b) => +a.t - +b.t);
   for (const e of events) {
     const ecl = eclipses.find((x) => Math.abs(+x.t - +e.t) < 2 * DAY);
-    rows.push(`<tr><td>${fmt(e.t)}</td><td>${fmtTime(e.t)} UTC</td><td>${e.kind}${ecl ? ` · <strong>${ecl.kind}</strong>` : ''}</td><td>${e.sign}</td></tr>`);
+    const page = LUNATIONS.find((x) => Math.abs(+x.t - +e.t) < DAY);
+    rows.push(`<tr><td>${fmt(e.t)}</td><td>${fmtTime(e.t)} UTC</td><td>${page ? `<a href="${SITE}${page.href}">${e.kind}</a>` : e.kind}${ecl ? ` · <strong>${ecl.kind}</strong>` : ''}</td><td>${e.sign}</td></tr>`);
   }
   const first = events[0];
   const yrs = `${Y}–${Y + 1}`;
@@ -510,6 +519,140 @@ ${cta('Find my archetype')}`,
   });
 }
 
+// ---------- Each New and Full Moon: its own page, the weeks around it ----------
+const HOUSE_THEME = [
+  'you: your body, your presence, how you begin',
+  'money, possessions, and what you value',
+  'conversations, siblings, neighbors, and short trips',
+  'home, family, roots, and your private life',
+  'romance, play, creativity, and children',
+  'daily work, routines, health habits, and service',
+  'partners, close one-to-one relationships, and agreements',
+  'shared money, debts, intimacy, and deep change',
+  'travel, study, beliefs, and the bigger picture',
+  'career, reputation, and your public life',
+  'friends, groups, community, and hopes for the future',
+  'rest, solitude, endings, and what is hidden',
+];
+const FULL_IN_HOUSE = [
+  'How you show up is in the spotlight; notice what you are ready to stop performing.',
+  'A money or worth question comes to a head: what you pay for, and what you are worth.',
+  'A conversation you have been circling may finally happen; say it plainly.',
+  'Home and family feelings rise to the surface; give them room before you act.',
+  'A creative project or a romance reaches a turning point; enjoy what has bloomed.',
+  'Routines and the body ask for attention; finish what is half-done and rest.',
+  'A partnership asks what each of you needs; listen as much as you speak.',
+  'Shared money or a deep bond reaches a reckoning; honesty clears the air.',
+  'A belief, a course of study, or a journey comes to completion or a new view.',
+  'Work and reputation peak: a result, a visibility moment, or a decision about your path.',
+  'Friendships and hopes come into focus; notice who truly supports you.',
+  'Something hidden surfaces, or you need deep rest; let an old chapter close quietly.',
+];
+const NEW_IN_HOUSE = [
+  'Begin something for yourself: a new look, habit, or way of showing up.',
+  'Set an intention about money or self-worth; start one small, steady habit.',
+  'Start the conversation, the class, or the writing you have been putting off.',
+  'Plant something at home: a ritual, a repair, a family intention.',
+  'Begin a creative project or let yourself play; romance can start small.',
+  'A fresh routine for body and work; begin with one small daily step.',
+  'A new start in a partnership or agreement; say what you hope for.',
+  'Begin a deeper honesty about shared money, trust, or intimacy.',
+  'Plan the trip, the study, or the bigger question; let the horizon open.',
+  'Set a career intention; quietly begin the first step toward it.',
+  'Reach out to a friend or a group; name a hope for the future.',
+  'Rest, reflect, and let a quiet intention form before you share it.',
+];
+const ordinal = (n: number) => `${n}${n === 1 ? 'st' : n === 2 ? 'nd' : n === 3 ? 'rd' : 'th'}`;
+const MOON_DIGNITY: Record<string, string> = {
+  Taurus: 'The Moon is exalted in Taurus: tradition counts this its happiest sign, steady, sensual, and calm.',
+  Cancer: 'The Moon rules Cancer, its home sign: feelings run deep and close to home.',
+  Scorpio: 'The Moon is in its fall in Scorpio: feelings run deep and private, and nothing stays on the surface.',
+  Capricorn: 'The Moon is in its detriment in Capricorn: feelings are held in and turned into work.',
+};
+const zoneTime = (d: Date, tz: string) => d.toLocaleString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', timeZone: tz });
+
+const PLANET_THEME: Record<string, string> = {
+  Sun: 'purpose and visibility', Moon: 'feelings and needs', Mercury: 'words, plans and news', Venus: 'love, money and what you value', Mars: 'drive, anger and courage',
+  Jupiter: 'growth, faith and luck', Saturn: 'limits, duty and what lasts', Uranus: 'sudden change and freedom', Neptune: 'dreams, longing and blurred lines', Pluto: 'power, endings and rebirth',
+};
+const ASPECT_SENSE: [number, string, string][] = [
+  [0, 'conjoins', 'fuses its theme with the lunation'],
+  [60, 'sextiles', 'opens an easy door'],
+  [90, 'squares', 'adds friction that asks for action'],
+  [120, 'trines', 'lends support and flow'],
+  [180, 'opposes', 'pulls from the other side, asking for balance'],
+];
+const atDeg = (lon: number) => { const x = ((lon % 30) + 30) % 30; return `${Math.floor(x)}°${String(Math.floor((x % 1) * 60)).padStart(2, '0')}′ ${signOf(lon)}`; };
+const isRetro = (b: string, d: Date) => { const a = tropicalLongitude(b as never, new Date(d.getTime() - 6 * 3600000)); const c = tropicalLongitude(b as never, new Date(d.getTime() + 6 * 3600000)); return ((c - a + 540) % 360) - 180 < 0; };
+/** The planets a lunation touches, its ruler's condition, and the retrogrades in force: different for every lunation. */
+function lunationSky(d: Date, lon: number, kind: string): string {
+  const items: string[] = [];
+  for (const b of ['Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Pluto']) {
+    const pl = tropicalLongitude(b as never, d);
+    const sep = Math.abs(((pl - lon + 540) % 360) - 180);
+    const hit = ASPECT_SENSE.find(([a]) => Math.abs(sep - a) <= 6);
+    if (hit) items.push(`<li><strong>${b}</strong> at ${atDeg(pl)}${isRetro(b, d) ? ', retrograde,' : ''} ${hit[1]} the ${kind === 'Full Moon' ? 'Moon' : 'Sun and Moon'} (${Math.abs(sep - hit[0]).toFixed(1)}° from exact): ${PLANET_THEME[b]} ${hit[2]}.</li>`);
+  }
+  const sign = signOf(lon);
+  const ruler = RULER[sign];
+  const rl = tropicalLongitude(ruler as never, d);
+  const dig = westernDignity(ruler, signOf(rl));
+  const retro = ['Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn', 'Uranus', 'Neptune', 'Pluto'].filter((b) => isRetro(b, d));
+  return `<h2>The sky around it</h2>${items.length ? `<ul>${items.join('')}</ul>` : '<p>No planet makes a close aspect to this lunation, so it speaks mostly through its sign and house.</p>'}
+<p>${esc(sign)} is ruled by <strong>${ruler}</strong>, which is at ${atDeg(rl)}${ruler !== 'Sun' && ruler !== 'Moon' && isRetro(ruler, d) ? ', retrograde' : ''}${dig ? `, in its ${dig.toLowerCase()}` : ''}: where ${ruler} stands shows where this ${kind}'s story plays out next.${retro.length ? ` Retrograde at the time: ${retro.join(', ')}.` : ''}</p>`;
+}
+
+function lunationPages(): { t: Date; href: string }[] {
+  const out: { t: Date; href: string }[] = [];
+  const from = new Date(NOW.getTime() - 20 * DAY);
+  const to = new Date(NOW.getTime() + 100 * DAY);
+  for (const [angle, kind] of [[0, 'New Moon'], [180, 'Full Moon']] as const) {
+    let t = Astronomy.SearchMoonPhase(angle, from, 40);
+    while (t && t.date < to) {
+      const d = t.date;
+      const lon = tropicalLongitude('Moon', d);
+      const sign = signOf(lon);
+      const deg = Math.floor(((lon % 30) + 30) % 30);
+      const min = Math.floor((((lon % 30) + 30) % 30 - deg) * 60);
+      const sid = (((lon - lahiriAyanamsa(d)) % 360) + 360) % 360;
+      const nak = NAKSHATRAS[Math.floor(sid / (360 / 27))];
+      const month = d.toLocaleDateString('en-US', { month: 'long', timeZone: 'UTC' });
+      const year = d.getUTCFullYear();
+      const sunSign = signOf(tropicalLongitude('Sun', d));
+      const path = `${slug(kind.replace(' ', '-'))}-in-${slug(sign)}-${slug(month)}-${year}/`;
+      const si = SIGNS.indexOf(sign);
+      const perSign = SIGNS.map((x, i) => {
+        const h = ((si - i + 12) % 12) + 1;
+        return `<li><strong>${x}</strong>: your ${ordinal(h)} house, ${HOUSE_THEME[h - 1]}. ${(kind === 'Full Moon' ? FULL_IN_HOUSE : NEW_IN_HOUSE)[h - 1]} ${RULER[sign]}, its ruler, is in your ${ordinal(((SIGNS.indexOf(signOf(tropicalLongitude(RULER[sign] as never, d))) - i + 12) % 12) + 1)} house, so the story continues there.</li>`;
+      });
+      const faqs: [string, string][] = [
+        [`When is the ${kind} in ${sign} in ${month} ${year}?`, `It is exact at ${fmtTime(d)} UTC on ${fmt(d)}: ${zoneTime(d, 'America/Los_Angeles')} Pacific, ${zoneTime(d, 'America/New_York')} Eastern, ${zoneTime(d, 'Europe/London')} in London.`],
+        [`What does the ${kind} in ${sign} mean?`, `${kind === 'Full Moon' ? `The Moon in ${sign} opposes the Sun in ${sunSign}` : `The Sun and Moon meet in ${sign}`}: a time of ${SIGN_KEYWORD[sign]}. ${kind === 'Full Moon' ? 'Full Moons bring things to light and to completion.' : 'New Moons are for beginnings and intentions.'}`],
+        [`What is the ${kind} in ${sign} in Vedic astrology?`, `In the sidereal zodiac the Moon is in ${signOf(sid)}, in the nakshatra ${nak}.`],
+      ];
+      pages.push({
+        path,
+        title: `${kind} in ${sign} ${month} ${year}: meaning, time, and what it means for your sign | Within`,
+        description: `The ${kind} in ${sign} on ${fmt(d)} at ${deg}° ${sign}: exact times, what it means, the house it lights for each sign, and the Vedic view.`,
+        h1: `${kind} in ${sign}, ${month} ${d.getUTCDate()}, ${year}`,
+        body: `<p class="lede">${kind === 'Full Moon' ? 'The Full Moon' : 'The New Moon'} is exact at <strong>${deg}°${String(min).padStart(2, '0')}′ ${esc(sign)}</strong> on ${fmt(d)} at ${fmtTime(d)} UTC: <strong>${zoneTime(d, 'America/Los_Angeles')}</strong> Pacific and <strong>${zoneTime(d, 'America/New_York')}</strong> Eastern.</p>
+<h2>What it means</h2><p>${kind === 'Full Moon' ? `The Moon in ${esc(sign)} faces the Sun in ${esc(sunSign)}, so two needs pull against each other and something comes to light.` : `The Sun and Moon meet in ${esc(sign)}, the dark of the Moon, the start of a new cycle.`} ${esc(sign)} is ${esc(SIGN_KEYWORD[sign])}. ${MOON_DIGNITY[sign] ? esc(MOON_DIGNITY[sign]) : ''}</p>
+${lunationSky(d, lon, kind)}
+<h2>What it lights up for your sign</h2><p>Read your Sun sign, then your rising sign for the closer answer.</p><ul>${perSign.join('')}</ul>
+<h2>The Vedic view</h2><p>In the sidereal zodiac used in Vedic astrology, the Moon is in ${esc(signOf(sid))}, in the nakshatra <strong>${esc(nak)}</strong>.</p>
+<h2>For your own chart</h2><p>Where this ${kind} falls in your birth chart, and which of your planets it touches, is personal. The Oracle reads it from your exact birth time and place.</p>
+${cta(`What does this ${kind} mean for me?`)}
+<p><a href="${SITE}moon-calendar/">Every New and Full Moon this year ›</a></p>`,
+        ld: [{ '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: faqs.map(([q, a]) => ({ '@type': 'Question', name: q, acceptedAnswer: { '@type': 'Answer', text: a } })) }],
+      });
+      out.push({ t: d, href: path });
+      t = Astronomy.SearchMoonPhase(angle, new Date(d.getTime() + DAY), 40);
+    }
+  }
+  return out;
+}
+const LUNATIONS = lunationPages();
+
 // ---------- Guides ----------
 function guides() {
   const faqLd = (faqs: [string, string][]) => ({ '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: faqs.map(([q, a]) => ({ '@type': 'Question', name: q, acceptedAnswer: { '@type': 'Answer', text: a } })) });
@@ -569,6 +712,212 @@ ${cta('Compare two charts')}
   });
 }
 
+
+// ---------- Placements: every planet in every sign, and every rising sign ----------
+const faqLdOf = (faqs: [string, string][]) => ({ '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: faqs.map(([q, a]) => ({ '@type': 'Question', name: q, acceptedAnswer: { '@type': 'Answer', text: a } })) });
+const The = (p: string) => (p === 'Sun' || p === 'Moon' ? `The ${p}` : p);
+const DIGNITY_LINE: Record<string, (p: string, s: string) => string> = {
+  Domicile: (p, s) => `${The(p)} rules ${s}, so it is at home here: its qualities come through clearly and with ease.`,
+  Exaltation: (p, s) => `${The(p)} is exalted in ${s}: traditional astrology counts this among its strongest, most honoured places.`,
+  Detriment: (p, s) => `${The(p)} is in its detriment in ${s}, the sign opposite its home: it works against the grain, which can build real skill over time.`,
+  Fall: (p, s) => `${The(p)} is in its fall in ${s}, opposite its exaltation: its gifts tend to arrive through effort and maturity rather than ease.`,
+};
+function placements() {
+  const PL = Object.keys(PLANET_IN_SIGN);
+  for (const p of PL)
+    for (const s of SIGNS) {
+      const dig = westernDignity(p, s);
+      const arch = SIGN_ARCHETYPE[s];
+      const faqs: [string, string][] = [
+        [`What does ${p} in ${s} mean?`, PLANET_IN_SIGN[p][s]],
+        [`What does ${p} show in a birth chart?`, `${The(p)} shows ${PLANET_FUNCTION[p]}.`],
+        [`Is ${p} strong in ${s}?`, dig ? DIGNITY_LINE[dig](p, s) : `${The(p)} has no traditional dignity or debility in ${s}; it takes its colour from ${RULER[s]}, the ruler of ${s}.`],
+      ];
+      pages.push({
+        path: `${slug(p)}-in-${slug(s)}/`,
+        title: `${p} in ${s}: meaning in your birth chart | Within`,
+        description: `${p} in ${s} in astrology: ${PLANET_IN_SIGN[p][s].slice(0, 110)}`,
+        h1: `${p} in ${s}`,
+        body: `<p class="lede">${The(p)} shows ${PLANET_FUNCTION[p]}. In ${s}, a ${SIGN_MODALITY[s]} ${SIGN_ELEMENT[s]} sign of ${SIGN_KEYWORD[s]}, it takes on ${esc(arch.name)}'s colour.</p>
+<h2>What it means</h2><p>${PLANET_IN_SIGN[p][s]}</p>
+<h2>Its strength here</h2><p>${dig ? DIGNITY_LINE[dig](p, s) : `${The(p)} has no traditional dignity or debility in ${s}, so it works through ${RULER[s]}, the ruler of ${s}: where ${RULER[s]} sits in your chart shows where this ${p} finds its footing.`} At its best, ${The(p).toLowerCase().replace(/^the (sun|moon)$/, (_m, x) => `the ${cap(x)}`)} is ${PLANET_HIGH[p] ?? 'clear and alive'}; under strain, it can be ${PLANET_LOW[p] ?? 'restless'}.</p>
+<h2>The archetype</h2><p>${esc(s)} is ${esc(arch.name)}: ${esc(arch.essence)} The gift: ${esc(arch.gift)} The shadow: ${esc(arch.shadow)}</p>
+<h2>It depends on the rest of your chart</h2><p>The same ${p} in ${s} reads differently by house, by the aspects it makes, and in Vedic astrology, where about 24° of difference can put it in ${SIGNS[(SIGNS.indexOf(s) + 11) % 12]} instead. The Oracle reads yours whole, from your exact birth time and place.</p>
+${cta(`Read my ${p} sign`)}
+<h2>${p} in the other signs</h2><ul class="grid">${SIGNS.filter((x) => x !== s).map((x) => `<li><a href="${SITE}${slug(p)}-in-${slug(x)}/">${p} in ${x}</a></li>`).join('')}</ul>
+<p><a href="${SITE}zodiac/${slug(s)}/">${s}: the whole sign ›</a></p>`,
+        ld: [faqLdOf(faqs)],
+      });
+    }
+  for (const s of SIGNS) {
+    const faqs: [string, string][] = [
+      [`What does ${s} rising mean?`, RISING[s]],
+      [`What is the ruler of a ${s} rising chart?`, `${RULER[s]}. The chart ruler's sign and house shape the whole life story.`],
+      [`How do I know if I am ${s} rising?`, 'Your rising sign needs your birth time and place: it changes about every two hours.'],
+    ];
+    pages.push({
+      path: `${slug(s)}-rising/`,
+      title: `${s} rising: what your ascendant means | Within`,
+      description: `${s} rising (ascendant) in astrology: ${RISING[s]} With ${RULER[s]} as the chart ruler.`,
+      h1: `${s} rising`,
+      body: `<p class="lede">Your rising sign, the ascendant, is the sign coming up on the eastern horizon at your birth: the doorway of your chart, how you meet the world and begin things.</p>
+<h2>What ${s} rising means</h2><p>${RISING[s]} ${s} is a ${SIGN_MODALITY[s]} ${SIGN_ELEMENT[s]} sign of ${SIGN_KEYWORD[s]}.</p>
+<h2>Your chart ruler: ${RULER[s]}</h2><p>With ${s} rising, ${RULER[s]} rules your whole chart. It shows ${PLANET_FUNCTION[RULER[s]] ?? 'a core thread of your life'}, and the sign and house it sits in tell where your life's story is most at stake. Read it next: <a href="${SITE}${slug(RULER[s])}-in-${slug(s)}/">${RULER[s]} in ${s}</a> is one of twelve possibilities.</p>
+<h2>Your houses</h2><p>With ${s} rising in whole-sign houses, ${SIGNS[(SIGNS.indexOf(s) + 6) % 12]} rules your 7th house of partners and ${SIGNS[(SIGNS.indexOf(s) + 9) % 12]} your 10th house of work and reputation. Placidus houses, which Within uses, shift these by degree, so check your own chart.</p>
+${cta('Find my rising sign')}
+<h2>Other rising signs</h2><ul class="grid">${SIGNS.filter((x) => x !== s).map((x) => `<li><a href="${SITE}${slug(x)}-rising/">${x} rising</a></li>`).join('')}</ul>`,
+      ld: [faqLdOf(faqs)],
+    });
+  }
+  pages.push({
+    path: 'placements/',
+    title: 'Every planet in every sign: Sun, Moon, Mercury, Venus, Mars, Jupiter, Saturn | Within',
+    description: 'What each planet means in each zodiac sign, plus all twelve rising signs: 96 placements explained.',
+    h1: 'Planets in signs',
+    body: `<p class="lede">Every planet in your chart sits in a sign. Find yours.</p>${PL.map((p) => `<h2>${p}</h2><ul class="grid">${SIGNS.map((x) => `<li><a href="${SITE}${slug(p)}-in-${slug(x)}/">${p} in ${x}</a></li>`).join('')}</ul>`).join('')}
+<h2>Rising signs</h2><ul class="grid">${SIGNS.map((x) => `<li><a href="${SITE}${slug(x)}-rising/">${x} rising</a></li>`).join('')}</ul>${cta()}`,
+  });
+}
+
+// ---------- Nakshatras: the 27 lunar mansions ----------
+const NAK_DEITY: Record<string, [string, string]> = {
+  Ashwini: ['the Ashwini Kumaras, the twin healers', "a horse's head"], Bharani: ['Yama, lord of death and dharma', 'the yoni, the womb'],
+  Krittika: ['Agni, the sacred fire', 'a razor or flame'], Rohini: ['Brahma (Prajapati), the creator', 'an ox cart'],
+  Mrigashira: ['Soma, the Moon god', "a deer's head"], Ardra: ['Rudra, the storm', 'a teardrop'],
+  Punarvasu: ['Aditi, mother of the gods', 'a quiver of arrows'], Pushya: ['Brihaspati, teacher of the gods', "a cow's udder"],
+  Ashlesha: ['the Nagas, serpent beings', 'a coiled serpent'], Magha: ['the Pitris, the ancestors', 'a royal throne'],
+  'Purva Phalguni': ['Bhaga, god of delight and good fortune', 'the front legs of a bed'], 'Uttara Phalguni': ['Aryaman, god of contracts and friendship', 'the back legs of a bed'],
+  Hasta: ['Savitar, the Sun as giver of life', 'a hand'], Chitra: ['Tvashtar, the celestial architect', 'a bright jewel'],
+  Swati: ['Vayu, the wind', 'a young shoot swaying in the wind'], Vishakha: ['Indra and Agni together', 'a triumphal arch'],
+  Anuradha: ['Mitra, god of friendship', 'a lotus'], Jyeshtha: ['Indra, king of the gods', 'a round earring'],
+  Mula: ['Nirriti, goddess of dissolution', 'a bunch of roots'], 'Purva Ashadha': ['Apas, the waters', 'a winnowing fan'],
+  'Uttara Ashadha': ['the Vishvedevas, the universal gods', "an elephant's tusk"], Shravana: ['Vishnu, the preserver', 'an ear'],
+  Dhanishta: ['the eight Vasus, gods of abundance', 'a drum'], Shatabhisha: ['Varuna, lord of the cosmic waters', 'an empty circle'],
+  'Purva Bhadrapada': ['Aja Ekapada, the one-footed goat', 'the front of a funeral cot'], 'Uttara Bhadrapada': ['Ahir Budhnya, serpent of the deep', 'the back of a funeral cot'],
+  Revati: ['Pushan, guardian of travellers', 'a fish'],
+};
+function nakshatraPages() {
+  const span = 360 / 27;
+  const dm = (x: number) => `${Math.floor(x % 30)}°${String(Math.round(((x % 30) % 1) * 60)).padStart(2, '0')}′ ${SIGNS[Math.floor(x / 30)]}`;
+  NAKSHATRAS.forEach((n, i) => {
+    const d = NAKSHATRA_DETAIL[n];
+    const [deity, symbol] = NAK_DEITY[n];
+    const lord = DASHA_LORDS[i % 9];
+    const from = i * span;
+    const to = from + span - 1e-6;
+    const faqs: [string, string][] = [
+      [`What is ${n} nakshatra?`, `${n} is the ${ordinal(i + 1)} of the 27 nakshatras, the lunar mansions of Vedic astrology, from ${dm(from)} to ${dm(to + 1e-6)} in the sidereal zodiac. Its deity is ${deity} and its symbol ${symbol}.`],
+      [`Who rules ${n} nakshatra?`, `${lord}. A Moon in ${n} at birth starts life in the ${lord} dasha (Vimshottari period).`],
+      [`What are ${n}'s qualities?`, `${cap(d.quality)}; ${d.gana} gana, ${d.yoni} yoni.`],
+    ];
+    pages.push({
+      path: `nakshatras/${slug(n)}/`,
+      title: `${n} nakshatra: meaning, deity, ruler and Moon | Within`,
+      description: `${n}, the ${ordinal(i + 1)} nakshatra (${dm(from)} to ${dm(to + 1e-6)} sidereal): ruled by ${lord}, deity ${deity.split(',')[0]}, symbol ${symbol}. ${cap(d.quality)}.`,
+      h1: `${n} nakshatra`,
+      body: `<p class="lede">${n} is the ${ordinal(i + 1)} of the 27 nakshatras, the lunar mansions of Vedic astrology. It spans <strong>${dm(from)} to ${dm(to + 1e-6)}</strong> in the sidereal zodiac.</p>
+<h2>Its nature</h2><p>${cap(d.quality)}. ${n} is of ${d.gana} gana (temperament: ${d.gana === 'Deva' ? 'gentle and giving' : d.gana === 'Manushya' ? 'human, balanced between ideals and needs' : 'fierce, independent and protective'}), and its animal (yoni) is the ${d.yoni}.</p>
+<h2>Deity and symbol</h2><p>Its presiding deity is ${deity}, and its symbol is ${symbol}. In Jyotish the deity names the power the nakshatra carries.</p>
+<h2>Ruler and dasha</h2><p>${lord} rules ${n}. If your Moon was in ${n} at birth, your life opened in the ${lord} mahadasha of the Vimshottari system, and ${lord}'s condition in your chart colours your mind and timing.</p>
+<h2>The four padas</h2><p>Each nakshatra divides into four padas of 3°20′, each in a different navamsa sign: ${[0, 1, 2, 3].map((k) => SIGNS[(i * 4 + k) % 12]).join(', ')}.</p>
+${cta('Find my Moon nakshatra')}
+<h2>All 27 nakshatras</h2><ul class="grid">${NAKSHATRAS.map((x) => `<li><a href="${SITE}nakshatras/${slug(x)}/">${x}</a></li>`).join('')}</ul>`,
+      ld: [faqLdOf(faqs)],
+    });
+  });
+  pages.push({
+    path: 'nakshatras/',
+    title: 'The 27 nakshatras: lunar mansions of Vedic astrology | Within',
+    description: 'All 27 nakshatras with their degrees, ruling planets, deities and symbols. Find your Moon nakshatra.',
+    h1: 'The 27 nakshatras',
+    body: `<p class="lede">The nakshatras divide the sky into 27 lunar mansions of 13°20′. Your Moon's nakshatra is one of the most personal facts in a Vedic chart.</p>
+<div class="scroll"><table class="tbl"><thead><tr><th>#</th><th>Nakshatra</th><th>Ruler</th><th>Deity</th></tr></thead><tbody>${NAKSHATRAS.map((x, i) => `<tr><td>${i + 1}</td><td><a href="${SITE}nakshatras/${slug(x)}/">${x}</a></td><td>${DASHA_LORDS[i % 9]}</td><td>${NAK_DEITY[x][0].split(',')[0]}</td></tr>`).join('')}</tbody></table></div>${cta('Find my Moon nakshatra')}`,
+  });
+}
+
+
+// ---------- Astrology today: the live sky, rebuilt every day ----------
+function astrologyToday() {
+  const clean = (l: string) => l.replace(/ \(sky now\)$/, '').replace(/; a long cycle$/, '');
+  const pretty = (l: string) => clean(l).replace(/\b(\d{4})-(\d{2})-(\d{2})\b/g, (_m, y, mo, d) => new Date(Date.UTC(+y, +mo - 1, +d)).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' }));
+  const now = skyNow(NOW);
+  const dated = new Map<string, number>();
+  for (let k = -1; k <= 24; k += 3)
+    for (const l of skyNow(new Date(NOW.getTime() + k * DAY))) {
+      const m = /^(.+?) (?:exact |stations (?:retrograde|direct) |enters \w+ )?(\d{4}-\d{2}-\d{2})/.exec(l);
+      if (!m || / now/.test(l.split(' ').slice(0, 3).join(' ')) || /^(Next|Last) /.test(l) || /long cycle/.test(l)) continue;
+      if (!/ exact | stations | enters |^(New|Full) Moon /.test(l)) continue;
+      const t = Date.parse(m[2]);
+      if (t >= NOW.getTime() - 2 * DAY && t <= NOW.getTime() + 24 * DAY) dated.set(clean(l), t);
+    }
+  const meaning = (l: string) => {
+    const a = /^(\w+) (conjunct|sextile|square|trine|opposite) (\w+) exact/.exec(l);
+    if (a && PLANET_THEME[a[1]] && PLANET_THEME[a[3]]) {
+      const sense = a[2] === 'conjunct' ? 'fuses the two' : (ASPECT_SENSE.find(([, n]) => n.startsWith(a[2].slice(0, 4)))?.[2] ?? '');
+      return `: ${PLANET_THEME[a[1]]} meets ${PLANET_THEME[a[3]]}, and the ${a[2] === 'opposite' ? 'opposition' : a[2] === 'conjunct' ? 'conjunction' : a[2]} ${sense}.`;
+    }
+    if (/stations direct/.test(l)) return ': the planet turns forward; what was reviewed can move again.';
+    if (/stations retrograde/.test(l)) return ': the planet turns back; a time to review, not rush.';
+    if (/^New Moon/.test(l)) return ': a beginning; set an intention.';
+    if (/^Full Moon/.test(l)) return ': a culmination; something comes to light.';
+    if (/ enters /.test(l)) return `: a change of season for ${PLANET_THEME[l.split(' ')[0]] ?? 'that planet'}.`;
+    return '';
+  };
+  const upcoming = [...dated.entries()].sort((a, b) => a[1] - b[1]).map(([l]) => l);
+  const retro = now.filter((l) => / retrograde now/.test(l));
+  const planets = now.filter((l) => / now at /.test(l));
+  const cycles = now.filter((l) => /long cycle/.test(l));
+  const eclipses = now.filter((l) => /eclipse/.test(l));
+  const extra = now.filter((l) => /^North Node|^The Moon is/.test(l));
+  const retroNames = retro.map((l) => l.split(' ')[0]);
+  const isMerc = retroNames.includes('Mercury');
+  const dateLabel = NOW.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric', timeZone: 'America/New_York' });
+  const faqs: [string, string][] = [
+    ['Is Mercury retrograde right now?', isMerc ? pretty(retro.find((l) => l.startsWith('Mercury'))!) + '.' : 'No. Mercury is moving direct right now.'],
+    ['What planets are retrograde right now?', retroNames.length ? `${retroNames.join(', ')} ${retroNames.length > 1 ? 'are' : 'is'} retrograde as of ${dateLabel}.` : `None of the planets is retrograde as of ${dateLabel}.`],
+    ['What sign is the Moon in today?', pretty(planets.find((l) => l.startsWith('Moon'))!) + '.'],
+    ['What is the next New or Full Moon?', upcoming.find((l) => /^(New|Full) Moon/.test(l)) ? pretty(upcoming.find((l) => /^(New|Full) Moon/.test(l))!) + '.' : 'See the Moon calendar for the next lunation.'],
+  ];
+  pages.push({
+    path: 'astrology-today/',
+    title: `Astrology today: what's happening in the planets right now (${NOW.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC' })}) | Within`,
+    description: `The sky right now: ${retroNames.length ? `${retroNames.join(', ')} retrograde, ` : ''}${upcoming.slice(0, 2).map(pretty).join('; ')}. Every planet's sign in Western and Vedic astrology, updated daily.`,
+    h1: 'Astrology today: the planets right now',
+    body: `<p class="lede">Updated <strong>${esc(dateLabel)}</strong>. Calculated from the planets' real positions, the same way Within reads your chart.</p>
+<h2>The big moments, the next three weeks</h2><ul>${upcoming.map((l) => `<li>${esc(pretty(l))}${esc(meaning(l))}</li>`).join('') || '<li>A quiet stretch: no stations, lunations or exact aspects.</li>'}</ul>
+<h2>Retrograde now</h2><ul>${retro.map((l) => `<li>${esc(pretty(l))}</li>`).join('') || '<li>No planet is retrograde.</li>'}</ul>
+<p><a href="${SITE}retrogrades/">Every retrograde date ›</a> · <a href="${SITE}mercury-retrograde/">Mercury retrograde ›</a></p>
+<h2>Where every planet is today</h2><ul>${[...planets, ...extra].map((l) => `<li>${esc(pretty(l))}</li>`).join('')}</ul>
+<h2>The long cycles of this era</h2><p>The slow planets set the background of these years.</p><ul>${cycles.map((l) => `<li>${esc(pretty(l))}</li>`).join('')}</ul>
+<h2>Eclipses</h2><ul>${eclipses.map((l) => `<li>${esc(pretty(l))}</li>`).join('')}</ul>
+<h2>What it means for you</h2><p>This is the sky for everyone. What it stirs in your life depends on where it lands in your own chart: which house, and which of your planets it touches. The Oracle reads that from your exact birth time and place, and names the dates.</p>
+${cta('What does this sky mean for me?')}
+<p><a href="${SITE}moon-calendar/">Moon calendar ›</a> · <a href="${SITE}placements/">Planets in signs ›</a> · <a href="${SITE}nakshatras/">Nakshatras ›</a></p>`,
+    ld: [faqLdOf(faqs), { '@context': 'https://schema.org', '@type': 'Article', headline: 'Astrology today: the planets right now', dateModified: TODAY, author: { '@type': 'Organization', name: 'Within' } }],
+  });
+}
+
+
+// ---------- Gift a membership ----------
+function giftPage() {
+  const faqs: [string, string][] = [
+    ['What is a Within gift membership?', 'A full year of Within for someone else, for $100 in one payment with no renewal. You get a gift code and a printable card right after paying.'],
+    ['How does the person use it?', 'They open withinoracle.app, make their chart, sign in, tap Become a member, and enter the code under "Have a code?". The year starts when they use it.'],
+    ['Do I need an account to buy one?', 'No. Pay by card and the code appears on the next page.'],
+  ];
+  pages.push({
+    path: 'gift/',
+    title: 'Astrology gift: a year with the Oracle, for anyone | Within',
+    description: 'The astrology gift for the person who reads their horoscope twice: a year of personal answers from their own birth chart, Western and Vedic. $100, code delivered instantly.',
+    h1: 'Give a year with the Oracle',
+    body: `<p class="lede">For the person who reads their horoscope twice: a full year of Within, the astrology app that answers their own questions from their exact birth chart, Western and Vedic, with the dates that matter for them.</p>
+<ul><li>Unlimited personal answers from their whole chart</li><li>Talk it through with the Oracle, who remembers them if they let it</li><li>Full readings, timing, relationships and the Moon calendar</li><li>Their birth details stay on their phone</li></ul>
+<p><strong>${offerOn(NOW.getTime()) ? '$85 for a full year (Black Friday price, through Cyber Monday, Nov 30)' : '$100 for a full year'} · one payment, no renewal · code and printable card delivered instantly</strong></p>
+<p class="cta"><a class="btn" href="${SITE}#/gift">Give a year</a></p>`,
+    ld: [faqLdOf(faqs)],
+  });
+}
+
 // ---------- Privacy ----------
 /** The date the privacy policy last changed in substance. Update it when the policy changes. */
 const PRIVACY_UPDATED = new Date('2026-10-14T12:00:00Z');
@@ -619,8 +968,8 @@ function privacy() {
 <p>Depending on where you live, including the EU, UK and California, you can ask to access, correct, export or delete your data, or object to how it is used. Most of this you can do yourself in Settings. For anything else, ${ask}. We do not sell personal information.</p>
 <h2>Security</h2>
 <p>Data is encrypted in transit. Account records are protected by access rules, so each person can read only their own.</p>
-<h2>Children</h2>
-<p>Within is not intended for children under 13, and we do not knowingly collect their data. If you believe a child has created an account, ${ask} and we will delete it.</p>
+<h2>Children and teens</h2>
+<p>Within welcomes teens: readings are written to suit any age, and the Oracle points young people toward a trusted adult when something is hard. Teens under 18 need a parent’s or guardian’s permission to buy a membership or a live reading. Within is not intended for children under 13 (in parts of Europe, under 16 without a parent’s consent), and we do not knowingly collect their data. If you believe a child has created an account, ${ask} and we will delete it.</p>
 <h2>Changes</h2>
 <p>If this policy changes, we will update the date at the top. Significant changes will be shown in the app.</p>
 ${CONTACT ? `<h2>Contact</h2><p>Questions or requests: <a href="mailto:${CONTACT}">${CONTACT}</a>.</p>` : ''}`,
@@ -631,6 +980,8 @@ ${CONTACT ? `<h2>Contact</h2><p>Questions or requests: <a href="mailto:${CONTACT
 function links() {
   const L: [string, string][] = [
     [SITE, 'Ask the Oracle, free'],
+    [`${SITE}astrology-today/`, 'Astrology today: the planets right now'],
+    [`${SITE}#/gift`, 'Give a year with the Oracle (gift)'],
     [`${SITE}mercury-retrograde/`, 'Mercury retrograde: dates and your rising sign'],
     [`${SITE}moon-calendar/`, 'New and Full Moon calendar'],
     [`${SITE}synastry/`, 'Compare two charts'],
@@ -651,6 +1002,10 @@ moonCalendar();
 retrogrades();
 mercuryRetrograde();
 zodiac();
+placements();
+astrologyToday();
+giftPage();
+nakshatraPages();
 elementPages();
 archetypePages();
 guides();

@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react';
-import { IN_PLAY_APP } from '../services/config';
+import { IN_PLAY_APP_ONLY as IN_PLAY_APP } from '../services/config';
 import { askLater, markReviewed, PLAY_REVIEW_URL, shouldAsk, submitReview } from '../services/reviews';
 
 export const REVIEW_TEXT = {

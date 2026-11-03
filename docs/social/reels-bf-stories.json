@@ -1,0 +1,80 @@
+[
+ {
+  "date": "bf-a",
+  "format": "scenes",
+  "hook": "Black Friday|at Within",
+  "items": [
+   {
+    "word": "$85",
+    "title": "A YEAR WITH THE ORACLE",
+    "line": "$85 for a year, or to give one,|through Monday, Nov 30.",
+    "dur": 3.8
+   },
+   {
+    "word": "THEN",
+    "title": "AFTER NOV 30",
+    "line": "The price is $100 again.|Monthly stays $9.99.",
+    "dur": 3.2
+   },
+   {
+    "word": "GIFT",
+    "title": "withinoracle.app/gift",
+    "line": "To give one: withinoracle.app/gift|For yourself: withinoracle.app",
+    "dur": 3.2
+   }
+  ],
+  "caption": ""
+ },
+ {
+  "date": "bf-b",
+  "format": "scenes",
+  "hook": "A gift, at $85|through Nov 30",
+  "items": [
+   {
+    "word": "$85",
+    "title": "GIVE A YEAR",
+    "line": "One payment, no renewal.|Through Monday, Nov 30.",
+    "dur": 3.4
+   },
+   {
+    "word": "CODE",
+    "title": "AT ONCE",
+    "line": "A code and a printable card|appear right away.",
+    "dur": 3.2
+   },
+   {
+    "word": "GIFT",
+    "title": "withinoracle.app/gift",
+    "line": "No account needed to buy.|Then $100 after Nov 30.",
+    "dur": 3.2
+   }
+  ],
+  "caption": ""
+ },
+ {
+  "date": "bf-c",
+  "format": "scenes",
+  "hook": "Cyber Monday|$85 through today",
+  "items": [
+   {
+    "word": "$85",
+    "title": "THROUGH TODAY",
+    "line": "A year with the Oracle, or to give|one, ends tonight at midnight PT.",
+    "dur": 3.8
+   },
+   {
+    "word": "THEN",
+    "title": "FROM TOMORROW",
+    "line": "The price is $100 again.|Monthly stays $9.99.",
+    "dur": 3.2
+   },
+   {
+    "word": "GIFT",
+    "title": "withinoracle.app/gift",
+    "line": "To give one: withinoracle.app/gift|For yourself: withinoracle.app",
+    "dur": 3.2
+   }
+  ],
+  "caption": ""
+ }
+]

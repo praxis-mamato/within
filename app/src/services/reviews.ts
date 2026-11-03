@@ -2,7 +2,7 @@
  * Reviews people write in the app. They go to the reviews table for the owner to approve; nothing is
  * shown publicly unless approved and the writer agreed. Works without an account (anon key + RLS).
  */
-import { CONFIG, IN_PLAY_APP } from './config';
+import { CONFIG, IN_PLAY_APP_ONLY as IN_PLAY_APP } from './config';
 
 export const PLAY_PACKAGE = 'dev.workers.withinoracle.within_oracle.twa';
 export const PLAY_REVIEW_URL = `https://play.google.com/store/apps/details?id=${PLAY_PACKAGE}`;

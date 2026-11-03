@@ -1,0 +1,22 @@
+# Within: The Oracle
+
+> An astrology app that answers your questions from your exact birth chart, in both Western (tropical) and Vedic (sidereal, Jyotish) astrology, with the dates that matter for you. 3 free questions a day; membership $9.99/month or $100/year with 14 days free. Birth details and readings stay on the user's phone.
+
+Planet positions match Swiss Ephemeris on 99.97% of checks. Made by Praxis Global LLC, Bozeman, Montana.
+
+## Start
+- [Ask the Oracle](https://withinoracle.app/): free birth chart and personal answers
+- [Birth chart guide](https://withinoracle.app/birth-chart/)
+- [Synastry (two charts together)](https://withinoracle.app/synastry/)
+
+## Reference
+- [The 12 zodiac signs](https://withinoracle.app/zodiac/)
+- [Every planet in every sign, and the 12 rising signs](https://withinoracle.app/placements/)
+- [The 27 nakshatras](https://withinoracle.app/nakshatras/)
+- [Elements and modes](https://withinoracle.app/elements/)
+- [The zodiac archetypes](https://withinoracle.app/archetypes/)
+
+## Timing
+- [Moon calendar: every New and Full Moon](https://withinoracle.app/moon-calendar/)
+- [Retrograde dates](https://withinoracle.app/retrogrades/)
+- [Mercury retrograde](https://withinoracle.app/mercury-retrograde/)

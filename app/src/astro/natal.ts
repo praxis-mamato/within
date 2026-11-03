@@ -9,6 +9,7 @@ import {
   houseOf,
   lahiriAyanamsa,
   meanNode,
+  trueNode,
   nakshatraOf,
   norm,
   placement,
@@ -115,7 +116,8 @@ export function computeNatal(b: BirthInput, now = new Date()): NatalChart {
   const angles = known ? ascendantAndMidheaven(utc, b.lat, b.lon) : null;
   const westernPlanets: WesternPlacement[] = [
     ...tropical.map((p) => ({ ...placement(p.body, p.lon, p.retro ? -1 : 1), house: cusps && b.timePrecision === 'exact' ? houseOf(p.lon, cusps) : undefined })),
-    { ...placement('Node', node), body: 'Node' as const },
+    // Western charts use the true node (Astro.com's default); Vedic Rahu and Ketu keep the mean node.
+    { ...placement('Node', trueNode(utc)), body: 'Node' as const, house: cusps && b.timePrecision === 'exact' ? houseOf(trueNode(utc), cusps) : undefined },
   ];
   const ascSigns = known ? uncertain(window.map((t) => SIGNS[Math.floor(ascendantAndMidheaven(t, b.lat, b.lon).asc / 30)])) : uncertain<string>([]);
 

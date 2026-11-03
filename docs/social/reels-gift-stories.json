@@ -1,0 +1,80 @@
+[
+ {
+  "date": "gift-a",
+  "format": "scenes",
+  "hook": "Give a year|with the Oracle",
+  "items": [
+   {
+    "word": "GIFT",
+    "title": "FOR THE FRIEND WHO",
+    "line": "reads their horoscope twice.|Give them their own chart.",
+    "dur": 3.4
+   },
+   {
+    "word": "$100",
+    "title": "ONE PAYMENT",
+    "line": "A full year. No renewal.|Code and printable card at once.",
+    "dur": 3.4
+   },
+   {
+    "word": "GIFT",
+    "title": "GIVE A YEAR",
+    "line": "withinoracle.app/gift",
+    "dur": 2.8
+   }
+  ],
+  "caption": ""
+ },
+ {
+  "date": "gift-b",
+  "format": "scenes",
+  "hook": "How a gift works|in 3 steps",
+  "items": [
+   {
+    "word": "1",
+    "title": "PAY BY CARD",
+    "line": "No account needed.|$100 for a full year.",
+    "dur": 3.2
+   },
+   {
+    "word": "2",
+    "title": "GET THE CODE",
+    "line": "A code and a printable card|appear right away.",
+    "dur": 3.2
+   },
+   {
+    "word": "3",
+    "title": "THEY REDEEM",
+    "line": "In the app: Become a member,|then 'Have a code?'.",
+    "dur": 3.4
+   }
+  ],
+  "caption": ""
+ },
+ {
+  "date": "gift-c",
+  "format": "scenes",
+  "hook": "Their chart,|not a horoscope",
+  "items": [
+   {
+    "word": "THEIR|CHART",
+    "title": "WESTERN + VEDIC",
+    "line": "Answers from their exact chart,|with the dates that matter.",
+    "dur": 3.4
+   },
+   {
+    "word": "PRIVATE",
+    "title": "STAYS ON THEIR PHONE",
+    "line": "Their birth details stay|on their device.",
+    "dur": 3.2
+   },
+   {
+    "word": "GIFT",
+    "title": "A YEAR · $100",
+    "line": "withinoracle.app/gift|One payment, no renewal.",
+    "dur": 3.2
+   }
+  ],
+  "caption": ""
+ }
+]

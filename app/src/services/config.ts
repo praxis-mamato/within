@@ -1,3 +1,5 @@
+import { IOS_APP, NATIVE_APP } from './native';
+import { BLACK_FRIDAY, offerOn } from './offer';
 /**
  * Live services switch on when the build has these values (GitHub repo variables → Pages build).
  * Without them the app runs in demo mode: every screen works, sign-in and payment are simulated.
@@ -13,7 +15,9 @@ export const CONFIG = {
   bookingUrl: (env.VITE_BOOKING_URL as string | undefined) || '',
   plans: {
     monthly: { label: '$9.99 a month', short: '$9.99/month' },
-    yearly: { label: '$100 a year', short: '$100/year', note: 'about $8.33 a month, 17% less' },
+    yearly: offerOn()
+      ? { label: `${BLACK_FRIDAY.price} first year`, short: `${BLACK_FRIDAY.price} for the first year`, note: 'the Black Friday price, through Cyber Monday, Nov 30; then $100 a year', renews: `${BLACK_FRIDAY.price} for the first year (Black Friday price), then $100 a year` }
+      : { label: '$100 a year', short: '$100/year', note: 'about $8.33 a month, 17% less', renews: '$100/year' },
     /** Free days on the yearly plan for first-time members (TRIAL_DAYS in the create-checkout function). */
     trialDays: 14,
   },
@@ -37,7 +41,7 @@ function personalOverride(): boolean | null {
  * nothing: members sign in there. Kept for the session only, so the same browser on the web still
  * shows purchases.
  */
-export const IN_PLAY_APP = (() => {
+export const IN_PLAY_APP_ONLY = (() => {
   try {
     if (typeof document !== 'undefined' && document.referrer.startsWith('android-app://')) sessionStorage.setItem('within.play', '1');
     return sessionStorage.getItem('within.play') === '1';
@@ -45,6 +49,12 @@ export const IN_PLAY_APP = (() => {
     return typeof document !== 'undefined' && document.referrer.startsWith('android-app://');
   }
 })();
+
+/**
+ * Inside an app store's app (Google Play or the iPhone app): store payment rules cover in-app sales, so
+ * nothing is sold there; members sign in, and memberships and live readings are bought on the web.
+ */
+export const IN_PLAY_APP = IN_PLAY_APP_ONLY || IOS_APP;
 
 export const PLAY_APP_TEXT = {
   membership: 'Memberships aren’t sold in this app. If you’re already a member, sign in to unlock everything.',
@@ -60,6 +70,12 @@ export const LIVE =
 
 /** Sign in with Apple needs an Apple Developer account; until VITE_APPLE_SIGN_IN=true, live mode offers Google only. */
 export const APPLE_SIGN_IN = !LIVE || env.VITE_APPLE_SIGN_IN === 'true';
+/**
+ * Google's own sign-in button, run on Within's address, so Google shows "withinoracle.app" instead of the
+ * Supabase address. Needs https://withinoracle.app listed under the Google client's Authorized JavaScript
+ * origins; until VITE_GOOGLE_GIS=true, sign-in uses the redirect.
+ */
+export const GOOGLE_CLIENT_ID = LIVE && !NATIVE_APP && env.VITE_GOOGLE_GIS === 'true' ? (env.VITE_GOOGLE_CLIENT_ID ?? '') : '';
 
 /** Our own addresses: sign-in and checkout return to whichever one the person is using. */
 const OUR_HOSTS = /(^|\.)withinoracle\.app$|\.workers\.dev$/;

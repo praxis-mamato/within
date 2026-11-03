@@ -19,21 +19,25 @@ import { hasBirthDate } from '../content/askedAbout';
 import { loadPlaces, type Place } from '../geo/places';
 import { useAccount } from '../services/AccountContext';
 import { factSheet, requestDeepReading, type DeepResult } from '../services/aiReading';
-import { writeOracleAnswer, type WrittenAnswer } from '../services/oracleAnswer';
+import { personalAnswer, type AnswerReply } from '../services/oracleAnswer';
+import { skyNow } from '../content/skyNow';
+import { haptic } from '../services/native';
 import { track } from '../services/telemetry';
 import { useStore } from '../state';
+
+/** The engine's answer with the Oracle's own words for this person: the verdict, dates, and board stay. */
+function personalize(a: OracleReply, p: AnswerReply): OracleReply {
+  return {
+    ...a,
+    personal: true,
+    lines: [...p.answer.map((text) => ({ heading: '', text })), ...(p.reflection ? [{ heading: 'To sit with', text: p.reflection }] : [])],
+    deeper: p.deeper.length ? p.deeper.map((d) => ({ heading: d.heading, text: d.text })) : a.deeper,
+  };
+}
 
 /** What a shake asks when no question is written. */
 const SHAKE_QUESTION = 'What do I need to know today?';
 const FREE_PER_DAY = 3;
-/** Around the Oracle's written answer. */
-const WRITTEN = {
-  writing: 'The Oracle is reading your chart and writing to you…',
-  free: 'Written for you by the Oracle with AI help (Claude), from your chart and today’s sky. Not your name or birth details. For reflection, not prediction.',
-  deep: 'Your deep answer, written by the Oracle with AI help (Claude) from your whole chart, what is moving now, and your timing. Not your name or birth details. For reflection, not prediction.',
-  deeper: 'Members get a much deeper answer to every question: the whole chart, what is moving now, and the timing, woven together, and a conversation that remembers you.',
-  read: 'What the Oracle read in your chart',
-};
 const EXAMPLES = [
   'Show my chart’s energy',
   'What’s my archetype?',
@@ -104,9 +108,6 @@ export default function Oracle() {
   const [info, setInfo] = useState<BoardInfo | null>(null);
   const [prompt, setPrompt] = useState<string | undefined>(undefined);
   const [talkPitch, setTalkPitch] = useState(false);
-  // The Oracle's answer in its own words, written by Claude from the chart; the engine's answer is the fallback.
-  const [written, setWritten] = useState<{ key: string; a?: WrittenAnswer | null; busy?: boolean } | null>(null);
-  const writtenCache = useRef(new Map<string, WrittenAnswer>());
   const place = { lat: state.birth.lat, lon: state.birth.lon };
   const day = new Date().toISOString().slice(0, 10);
   const asked = state.oracle.filter((a) => a.day === day);
@@ -160,17 +161,26 @@ export default function Oracle() {
     }
     const a = consultOracle(question, { chart: me, place, profile: state.profile, history: state.oracle, places: places.current, other: who?.birth && theirChart ? { chart: theirChart, place: { lat: who.birth.lat, lon: who.birth.lon }, name: who.nickname } : null });
     if (same) setNote(ORACLE_TEXT.sameDay);
-    else {
-      // History keeps the answer itself; the full reading is recalculated when asked again.
-      dispatch({ type: 'oracle/ask', answer: { ...a, layers: undefined, consulted: undefined } });
-      track('oracle_asked', { intent: a.intent });
-    }
     setAnswer(a);
-    void writeFor(a);
     setPhase('seeking');
     setInfo(null);
     board.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    window.setTimeout(() => setPhase('answered'), window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ? 0 : 2600);
+    // While the ball turns, the Oracle writes the answer for this person from their whole chart. The same
+    // question on the same day keeps its answer; if writing fails or is slow, the engine's own answer stands.
+    const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    const turning = new Promise((r) => window.setTimeout(r, reduce ? 0 : 2600));
+    const writing = same?.personal || !state.aiAnswers || a.intent === 'energy' ? Promise.resolve(null) : personalAnswer({ question, label: a.label, notes: answerText(a), facts: wholeChart(), about: aboutMe() });
+    void Promise.all([writing, turning]).then(([p]) => {
+      const final: OracleReply = same?.personal ? { ...a, lines: same.lines, deeper: same.deeper, personal: true } : p ? personalize(a, p) : a;
+      if (!same) {
+        // History keeps the answer itself; the full reading is recalculated when asked again.
+        dispatch({ type: 'oracle/ask', answer: { ...final, layers: undefined, consulted: undefined } });
+        track('oracle_asked', { intent: a.intent });
+      }
+      setAnswer((cur) => (cur === a ? final : cur));
+      setPhase('answered');
+      void haptic('answer');
+    });
   };
   // Shake with a question to ask it; shake with none for today's message, like an oracle's ball.
   const enableShake = useShake(() => (q.trim() ? ask() : ask(SHAKE_QUESTION)));
@@ -204,26 +214,18 @@ export default function Oracle() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [me]);
 
-  /** Everything the AI may draw on: natal Western and Vedic, plus timing (today's sky, progressions, periods). */
-  const wholeChart = () => (me ? [...factSheet('western', me, place), ...factSheet('vedic', me, place), ...factSheet('timing', me, place)].slice(0, 220) : []);
-  const answerText = (a: OracleReply) => [...a.lines, ...a.deeper].map((l) => `${l.heading}${l.heading && l.text ? ': ' : ''}${l.text}`.slice(0, 600)).filter(Boolean);
-
-  /** Asks Claude to write the answer to this question, from the chart and what the engine found. */
-  const writeFor = async (a: OracleReply) => {
-    if (!me || a.limit || a.intent === 'simplify') return setWritten(null);
-    const key = `${a.day}|${a.question.toLowerCase()}|${entitlement.active ? 'm' : 'f'}`;
-    const cached = writtenCache.current.get(key);
-    if (cached) return setWritten({ key, a: cached });
-    setWritten({ key, busy: true });
-    const asked = state.oracle.filter((h) => h.question.toLowerCase() !== a.question.toLowerCase()).slice(-8).map((h) => `${h.day}: ${h.question} (the Oracle said: ${h.label})`);
-    const { on, notes } = state.oracleMemory;
-    const memory = entitlement.active && on ? notes.map((n) => `${n.at.slice(0, 10)}: ${n.text}`) : [];
-    const w = await writeOracleAnswer(a.question, wholeChart(), [a.label, ...answerText(a)], asked, memory, entitlement.active);
-    if (w) writtenCache.current.set(key, w);
-    track('oracle_answer', { depth: entitlement.active ? 'member' : 'free', ok: !!w });
-    setWritten((cur) => (cur?.key === key ? { key, a: w } : cur));
+  /** What the person has told Within, and the Oracle's notes from earlier talks if they allowed memory. */
+  const aboutMe = () => {
+    const p = state.profile;
+    return [
+      ...(p ? [`Season of life: ${p.season}`, ...(p.onMind.length ? [`On their mind: ${p.onMind.join(', ')}`] : []), ...(p.recharge ? [`Recharges by: ${p.recharge}`] : [])] : []),
+      ...(state.oracleMemory.on ? state.oracleMemory.notes.map((n) => `Remembered (${n.at.slice(0, 10)}): ${n.text}`) : []),
+    ];
   };
-  const writtenNow = answer && written?.key.startsWith(`${answer.day}|${answer.question.toLowerCase()}|`) ? written : null;
+
+  /** Everything the AI may draw on: natal Western and Vedic, plus timing (today's sky, progressions, periods). */
+  const wholeChart = () => (me ? [...skyNow(), ...factSheet('western', me, place), ...factSheet('vedic', me, place), ...factSheet('timing', me, place)].slice(0, 220) : []);
+  const answerText = (a: OracleReply) => [...a.lines, ...a.deeper].map((l) => `${l.heading}${l.heading && l.text ? ': ' : ''}${l.text}${l.basis ? ` (${l.basis})` : ''}`.slice(0, 600)).filter(Boolean);
 
   const runConsult = async (a: OracleReply) => {
     if (!me) return;
@@ -285,45 +287,15 @@ export default function Oracle() {
       {answer && phase === 'answered' && (
         <section className="oracle-answer" aria-live="polite" aria-labelledby="oa-h">
           <p className="small oracle-muted">“{answer.question}”</p>
-          {writtenNow?.a ? (
-            <>
-              <p className="kicker">{answer.label}</p>
-              <h2 id="oa-h">{writtenNow.a.headline}</h2>
-              {answer.intent === 'energy' && energy && <EnergyWheel planets={me.western.planets} aspects={energy.aspects} asc={energy.asc} />}
-              <div className="oracle-written">
-                {writtenNow.a.paragraphs.map((p, i) => (
-                  <p key={i}>{p}</p>
-                ))}
-              </div>
-              {writtenNow.a.followups.length > 0 && (
-                <div className="chips">
-                  {writtenNow.a.followups.map((f) => (
-                    <button key={f} type="button" className="chip" onClick={() => (setQ(f), ask(f))}>
-                      {f}
-                    </button>
-                  ))}
-                </div>
-              )}
-              <p className="small oracle-muted">{writtenNow.a.depth === 'member' ? WRITTEN.deep : WRITTEN.free}</p>
-              {writtenNow.a.depth === 'free' && !entitlement.active && <p className="small">{WRITTEN.deeper}</p>}
-              <details className="oracle-layer">
-                <summary>{WRITTEN.read}</summary>
-                <Lines items={answer.lines} />
-              </details>
-            </>
-          ) : (
-            <>
-              <h2 id="oa-h">{answer.label}</h2>
-              {answer.intent !== 'simplify' && (
-                <button type="button" className="chip say-simply" onClick={() => sayItSimply()}>
-                  Say it simply
-                </button>
-              )}
-              {writtenNow?.busy && <p className="small oracle-muted chat-thinking">{WRITTEN.writing}</p>}
-              {answer.intent === 'energy' && energy && <EnergyWheel planets={me.western.planets} aspects={energy.aspects} asc={energy.asc} />}
-              {!writtenNow?.busy && <Lines items={answer.lines} />}
-            </>
+          <h2 id="oa-h">{answer.label}</h2>
+          {answer.intent !== 'simplify' && (
+            <button type="button" className="chip say-simply" onClick={() => sayItSimply()}>
+              Say it simply
+            </button>
           )}
+          {answer.intent === 'energy' && energy && <EnergyWheel planets={me.western.planets} aspects={energy.aspects} asc={energy.asc} />}
+          <Lines items={answer.lines} />
+          {answer.personal && <p className="small oracle-muted">Written for you from your whole chart, with AI help, and checked against Within’s rules.</p>}
           {answer.consulted && (
             <div className="oracle-consulted">
               <p className="small">The Oracle read</p>
@@ -413,7 +385,7 @@ export default function Oracle() {
           <h2 id="ot-h">Talk it through with the Oracle</h2>
           <p className="small oracle-muted">Tell it what’s really going on, and it answers you, not just your chart.</p>
           {entitlement.active ? (
-            <OracleChat question={answer.question} answer={writtenNow?.a ? writtenNow.a.paragraphs : answerText(answer)} facts={wholeChart} />
+            <OracleChat question={answer.question} answer={answerText(answer)} facts={wholeChart} />
           ) : talkPitch ? (
             <Paywall where="reading" what="Talking with the Oracle">
               {null}
@@ -466,6 +438,11 @@ export default function Oracle() {
           <p className="small oracle-muted">
             Or shake your phone: with a question to ask it, or with none for today’s message. {Number.isFinite(left) ? `${left} of ${FREE_PER_DAY} free questions left today.` : 'Unlimited questions with your subscription.'}
           </p>
+          {state.aiAnswers && (
+            <p className="small oracle-muted">
+              Each answer is written for you by AI from your chart’s positions: never your name or birth details, and nothing is stored. <Link to="/settings">Settings</Link>
+            </p>
+          )}
           {note && <p className="small oracle-note">{note}</p>}
         </form>
       )}

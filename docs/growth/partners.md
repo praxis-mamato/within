@@ -61,3 +61,4 @@ Subject: A perk for your members: their birth chart, read in full
 | Date | Partner | Action | Result |
 |---|---|---|---|
 | 2026-10-13 | all | list and drafts started | awaiting Maggie's yes on offers A–D |
+| 2026-10-26 | all | Deal-maker now at 56 prospects, 30 pitches drafted; brief set: stop adding, get sends done | 0 sent, 0 replies |

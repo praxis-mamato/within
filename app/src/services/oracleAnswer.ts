@@ -1,43 +1,31 @@
 /**
- * Client side of the Oracle's written answer. Sends the question, the calculated chart facts, what Within's own
- * engine found, and earlier questions (plus the Oracle's notes from earlier talks for members with memory on);
- * never the name, birth date, time, or place. Returns null whenever the written answer isn't available, so the
- * Oracle shows its own answer instead.
+ * Personal Oracle answers. The engine works out the astrology; the oracle-answer function writes the words for
+ * this person from their whole chart. Sends the question, the engine's verdict and notes, and calculated chart
+ * facts, never a name or birth details. Returns null (keep the engine's own answer) on any problem or delay.
  */
-import type { AnswerReply, Depth } from '../../../supabase/functions/_shared/oracleAnswer.ts';
+import type { AnswerReply } from '../../../supabase/functions/_shared/oracleAnswer.ts';
 import { ANSWER_LIMITS } from '../../../supabase/functions/_shared/oracleAnswer.ts';
 import { LIVE } from './config';
 import { supabase } from './supabase';
 
-export type WrittenAnswer = AnswerReply & { depth: Depth };
+export type { AnswerReply };
 
-export async function writeOracleAnswer(question: string, facts: string[], found: string[], asked: string[], memory: string[] = [], member = false): Promise<WrittenAnswer | null> {
-  if (!LIVE) {
-    // Demo mode: no AI call. Show the shape of an answer.
-    await new Promise((r) => setTimeout(r, 700));
-    return {
-      depth: member ? 'member' : 'free',
-      headline: 'Here is what your chart says',
-      paragraphs: [
-        `In live mode the Oracle writes this answer to “${question}” itself, from your chart and today’s sky: it starts with what you asked, then shows which of your placements and transits bear on it, with the dates.`,
-        member ? 'As a member you get the deep version: your birth chart, what is moving now, your progressions and Vedic period, and the best days ahead, woven into one answer.' : 'Members get a much deeper answer, woven from the whole chart.',
-      ],
-      followups: ['What could help me this week?', 'When is a better day for this?'],
-    };
-  }
-  try {
-    const { data, error } = await supabase()!.functions.invoke('oracle-answer', {
-      body: {
-        question: question.slice(0, ANSWER_LIMITS.question),
-        facts: facts.slice(0, ANSWER_LIMITS.facts).map((f) => f.slice(0, ANSWER_LIMITS.factChars)),
-        found: found.slice(0, ANSWER_LIMITS.found).map((a) => a.slice(0, ANSWER_LIMITS.foundChars)),
-        asked: asked.slice(-ANSWER_LIMITS.asked).map((a) => a.slice(0, ANSWER_LIMITS.askedChars)),
-        memory: memory.slice(-ANSWER_LIMITS.memory).map((m) => m.slice(0, ANSWER_LIMITS.memoryChars)),
-      },
-    });
-    if (error || !data?.paragraphs?.length) return null;
-    return data as WrittenAnswer;
-  } catch {
-    return null;
-  }
+const clip = (xs: string[], n: number, chars: number) => xs.filter(Boolean).slice(0, n).map((x) => x.slice(0, chars));
+
+export async function personalAnswer(input: { question: string; label: string; notes: string[]; facts: string[]; about: string[] }, timeoutMs = 12000): Promise<AnswerReply | null> {
+  if (!LIVE) return null;
+  const L = ANSWER_LIMITS;
+  const body = {
+    question: input.question.slice(0, L.question),
+    label: input.label.slice(0, L.label),
+    notes: clip(input.notes, L.notes, L.noteChars),
+    facts: clip(input.facts, L.facts, L.factChars),
+    about: clip(input.about, L.about, L.aboutChars),
+  };
+  const call = supabase()!
+    .functions.invoke('oracle-answer', { body })
+    .then(({ data, error }) => (error || !data || data.fallback || !Array.isArray(data.answer) || !data.answer.length ? null : (data as AnswerReply)))
+    .catch(() => null);
+  const late = new Promise<null>((r) => setTimeout(() => r(null), timeoutMs));
+  return Promise.race([call, late]);
 }

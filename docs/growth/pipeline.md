@@ -37,3 +37,14 @@ Subject: Thank you, and a small request
 > months, and we'd pick up right where we left off.
 
 Never offer anything in exchange for a positive review.
+
+## Week of Oct 26, 2026
+
+| Stage | Count | Value | Oldest (days) |
+|---|---|---|---|
+| Booked, not paid | 0 | $0 | – |
+| Paid, not scheduled | 0 | $0 | – |
+| Scheduled | 0 | $0 | – |
+| Completed | 0 | $0 | – |
+
+Revenue to date: **$0**. No bookings. Follow-up drafts above are unchanged.

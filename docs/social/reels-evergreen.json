@@ -2,197 +2,257 @@
  {
   "date": "evergreen-01",
   "format": "pause",
-  "hook": "Pause the crystal ball.|That's your message today.",
+  "hook": "Pause on a planet.|Meet what it rules.",
   "open": "PAUSE",
   "items": [
    {
-    "word": "REST",
-    "line": "Your energy is precious.|Spend it on what matters."
+    "word": "SUN",
+    "line": "The Hero. Identity and vitality:|the part of you that says 'I am'."
    },
    {
-    "word": "SPEAK UP",
-    "line": "Your voice belongs|in the room."
+    "word": "MOON",
+    "line": "The Inner Child. Feelings, habits:|what you need to feel safe."
    },
    {
-    "word": "LET IT|BE",
-    "line": "Not everything needs|fixing today."
+    "word": "MERCURY",
+    "line": "The Trickster. How you think,|talk, learn and decide."
    },
    {
-    "word": "BEGIN",
-    "line": "The first small step|is the whole secret."
+    "word": "VENUS",
+    "line": "The Lover. What you value and|how you give and receive love."
    },
    {
-    "word": "GRATITUDE",
-    "line": "Name three good things|before bed tonight."
+    "word": "MARS",
+    "line": "The Warrior. Drive and desire:|how you go after what you want."
    },
    {
-    "word": "PATIENCE",
-    "line": "It's ripening.|Give it time."
+    "word": "JUPITER",
+    "line": "The Sage. Growth and meaning:|where life feels generous."
+   },
+   {
+    "word": "SATURN",
+    "line": "The Teacher. Discipline and limits:|where you build slowly, for good."
    }
   ],
-  "caption": "Pause the crystal ball: your oracle message for today. 🔮\n\nWhatever it stops on is yours. Which one did you get?\n\nAsk the Oracle your own question: link in bio.\n\n#oracle #crystalball #astrology #dailymessage #zodiac"
+  "caption": "Pause on a planet to meet what it rules in your chart. ✦\n\nEach planet is a part of you with its own voice. The sign and house it sits in show how and where it speaks.\n\nSend this to the friend who keeps asking what their Moon is.\n\nAsk the Oracle where each one sits in your chart: link in bio.\n\n#planets #birthchart #astrology101 #astrology #zodiac"
  },
  {
   "date": "evergreen-02",
   "format": "pick",
-  "hook": "Pick a crystal ball:|1, 2 or 3",
+  "hook": "Pick a crystal ball:|which house?",
   "open": "1 · 2 · 3",
   "items": [
    {
-    "word": "NEW DOOR",
-    "line": "Something you didn't plan for|may be worth a yes."
+    "word": "2ND",
+    "line": "Money, possessions, what you value.|Where you build security."
    },
    {
-    "word": "CLEAR",
-    "line": "Clear one space: a drawer,|a calendar, a conversation."
+    "word": "7TH",
+    "line": "Partners and one-to-one bonds:|marriage, clients, close rivals."
    },
    {
-    "word": "COURAGE",
-    "line": "Ask for the thing.|The worst answer is not yet."
+    "word": "10TH",
+    "line": "Career, reputation, public life:|what you are known for."
    }
   ],
-  "caption": "Pick a crystal ball: 1, 2 or 3? ✦\n\nPause, choose, then watch the reveal.\n\nSend this to the friend who'd pick the same one.\n\n#pickacard #oracle #crystalball #astrology #spiritualmessage"
+  "caption": "Pick a crystal ball to learn what a house rules: 1, 2 or 3? 🏠\n\nThere are 12 houses. Each is an area of life, and the planets in yours show what is active there.\n\nSend this to the friend who asks about their 7th house.\n\nAsk the Oracle for your houses: link in bio.\n\n#astrologyhouses #birthchart #astrology101 #learnastrology #oracle"
  },
  {
   "date": "evergreen-03",
-  "format": "pause",
-  "hook": "Which element runs you?|Pause the ball.",
-  "open": "FIRE|EARTH|AIR|WATER",
-  "each": 0.6,
+  "format": "scenes",
+  "hook": "Why your Vedic sign|is different",
   "items": [
    {
-    "word": "FIRE",
-    "title": "ARIES · LEO · SAGITTARIUS",
-    "line": "You need something to look forward to."
+    "word": "TROPICAL",
+    "title": "WESTERN ASTROLOGY",
+    "line": "The zodiac starts at the spring equinox,|so the signs follow the seasons.",
+    "dur": 3.8
    },
    {
-    "word": "EARTH",
-    "title": "TAURUS · VIRGO · CAPRICORN",
-    "line": "You need proof, then you're all in."
+    "word": "SIDEREAL",
+    "title": "VEDIC ASTROLOGY",
+    "line": "The zodiac is fixed to the stars.|It sits about 24° behind the Western one.",
+    "dur": 4.0
    },
    {
-    "word": "AIR",
-    "title": "GEMINI · LIBRA · AQUARIUS",
-    "line": "You need a good conversation."
+    "word": "24°",
+    "title": "THE AYANAMSA",
+    "line": "That gap is the ayanamsa. It is why many|Western Scorpios are Vedic Libras.",
+    "dur": 4.0
    },
    {
-    "word": "WATER",
-    "title": "CANCER · SCORPIO · PISCES",
-    "line": "You need to feel it first."
+    "word": "BOTH",
+    "title": "WITHIN READS BOTH",
+    "line": "Western shows psychology and timing.|Vedic adds the Moon star and life periods.",
+    "dur": 4.0
    }
   ],
-  "caption": "Fire, earth, air or water: which element runs you? Pause the crystal ball. 🔥🌍💨🌊\n\nYour Sun sign is one element; your whole chart is a mix. The Oracle shows you yours: link in bio.\n\n#elements #zodiacsigns #astrology #firesign #watersign"
+  "caption": "Why your Vedic sign is different from your Western sign. ✦\n\nWestern astrology (tropical) starts the zodiac at the spring equinox. Vedic astrology (sidereal) fixes it to the stars, about 24° behind. That gap is the ayanamsa.\n\nSend this to the friend who says 'but I'm a different sign in Vedic'.\n\nAsk the Oracle for both charts: link in bio.\n\n#vedicastrology #westernastrology #astrology101 #jyotish #zodiac"
  },
  {
   "date": "evergreen-04",
-  "format": "pause",
-  "hook": "Pause the ball:|what your heart needs",
-  "open": "PAUSE",
+  "format": "scenes",
+  "hook": "How to read|your rising sign",
   "items": [
    {
-    "word": "HONESTY",
-    "line": "Say the true thing, kindly."
+    "word": "RISING",
+    "title": "THE EASTERN HORIZON",
+    "line": "Your rising sign is the sign on the|eastern horizon at your birth minute.",
+    "dur": 4.2
    },
    {
-    "word": "SPACE",
-    "line": "A little room to miss someone."
+    "word": "1ST HOUSE",
+    "title": "IT SETS YOUR HOUSES",
+    "line": "The 1st house begins at your rising sign.|The other houses follow in order.",
+    "dur": 4.0
    },
    {
-    "word": "TENDERNESS",
-    "line": "Be held, even by yourself."
+    "word": "2 HOURS",
+    "title": "WHY BIRTH TIME MATTERS",
+    "line": "A new sign rises about every two hours,|so a few minutes can change it.",
+    "dur": 4.0
    },
    {
-    "word": "PLAY",
-    "line": "Something silly, just for joy."
-   },
-   {
-    "word": "CLOSURE",
-    "line": "Write the letter you won't send."
-   },
-   {
-    "word": "FAITH",
-    "line": "Trust the timing a little longer."
+    "word": "THE BIG|THREE",
+    "title": "HOW TO READ THEM",
+    "line": "Sun: who you are. Moon: what you need.|Rising: how you meet the world.",
+    "dur": 4.2
    }
   ],
-  "caption": "Pause the crystal ball: what does your heart need right now? 💫\n\nTell us which one you got.\n\nFor an answer from your own birth chart, ask the Oracle: link in bio.\n\n#lovereading #oracle #crystalball #astrology #selflove"
+  "caption": "How to read your rising sign, in 20 seconds. ✦\n\nIt is the sign on the eastern horizon at your birth minute, and it sets your houses. A new sign rises about every two hours, so birth time matters.\n\nSend this to the friend who does not know their rising sign.\n\nAsk the Oracle for yours: link in bio.\n\n#risingsign #ascendant #birthchart #astrology101 #zodiac"
  },
  {
   "date": "evergreen-05",
-  "format": "pick",
-  "hook": "Pick a crystal ball|for your week",
-  "open": "1 · 2 · 3",
+  "format": "scenes",
+  "hook": "The Vedic star sign|almost nobody knows",
   "items": [
    {
-    "word": "SLOW",
-    "line": "Do fewer things, better.|Protect your mornings."
+    "word": "27",
+    "title": "THE NAKSHATRAS",
+    "line": "Vedic astrology splits the zodiac|into 27 lunar stars, 13°20' each.",
+    "dur": 4.0
    },
    {
-    "word": "CONNECT",
-    "line": "One real conversation|changes the whole week."
+    "word": "YOUR MOON",
+    "title": "WHICH ONE IS YOURS",
+    "line": "The star your Moon was in at birth|shapes temperament and life periods.",
+    "dur": 4.0
    },
    {
-    "word": "CREATE",
-    "line": "Make something, even small.|It's medicine."
+    "word": "EXAMPLES",
+    "title": "THREE OF THE 27",
+    "line": "Ashwini, the healer. Rohini, the growing|one. Magha, the throne.",
+    "dur": 4.0
+   },
+   {
+    "word": "DASHA",
+    "title": "THE TIMING",
+    "line": "Your Moon star sets your dasha:|the order of your life chapters.",
+    "dur": 4.0
    }
   ],
-  "caption": "Pick a crystal ball for your week: 1, 2 or 3? ✦\n\nPause, choose, then watch the reveal.\n\nSend this to someone who needs ball 2.\n\n#pickacard #weeklyreading #oracle #crystalball #astrology"
+  "caption": "What is a nakshatra? The Vedic star sign almost nobody knows. ✦\n\nThere are 27 lunar stars, each 13°20' wide. The one your Moon was in at birth shapes your temperament and your dasha, the order of your life chapters.\n\nSend this to the friend who loves the Moon.\n\nAsk the Oracle for your Moon nakshatra: link in bio.\n\n#nakshatra #vedicastrology #jyotish #moonsign #astrology"
  },
  {
   "date": "evergreen-06",
-  "format": "pause",
-  "hook": "Cardinal, fixed or mutable?|Pause the ball.",
-  "open": "MODES",
-  "each": 0.6,
+  "format": "scenes",
+  "hook": "What is a|retrograde station?",
   "items": [
    {
-    "word": "CARDINAL",
-    "title": "ARIES · CANCER · LIBRA · CAPRICORN",
-    "line": "You start things."
+    "word": "STATION",
+    "title": "THE PAUSE",
+    "line": "A planet seems to stand still|against the stars, then reverse.",
+    "dur": 3.8
    },
    {
-    "word": "FIXED",
-    "title": "TAURUS · LEO · SCORPIO · AQUARIUS",
-    "line": "You see things through."
+    "word": "ILLUSION",
+    "title": "WHY IT HAPPENS",
+    "line": "Planets overtake each other in orbit,|so one seems to slide backward.",
+    "dur": 4.0
    },
    {
-    "word": "MUTABLE",
-    "title": "GEMINI · VIRGO · SAGITTARIUS · PISCES",
-    "line": "You adapt and connect."
+    "word": "HOW OFTEN",
+    "title": "THE RHYTHM",
+    "line": "Mercury 3 or 4 times a year, Venus about|every 19 months, Saturn every year.",
+    "dur": 4.2
+   },
+   {
+    "word": "TWO VIEWS",
+    "title": "WEST AND EAST",
+    "line": "Western: a time to review and revisit.|Vedic: vakri, a planet gaining strength.",
+    "dur": 4.2
    }
   ],
-  "caption": "Every sign has a mode: cardinal starts, fixed sustains, mutable adapts. Pause on yours. ✦\n\nWhich one sounds like you? Send this to your opposite.\n\n#zodiacsigns #astrology101 #astrology #zodiac #horoscope"
+  "caption": "What is a retrograde station? ☿\n\nA station is when a planet seems to stand still against the stars before it reverses. It is a trick of perspective, as planets overtake each other. Western astrology reads review and revisiting; Vedic astrology calls it vakri and reads strength.\n\nSend this to the friend who blames everything on Mercury.\n\nAsk the Oracle which house a retrograde falls in for you: link in bio.\n\n#retrograde #mercuryretrograde #astrology101 #vedicastrology #astrology"
  },
  {
   "date": "evergreen-07",
-  "format": "pause",
-  "hook": "Pause the crystal ball.|Your sign from the stars.",
-  "open": "PAUSE",
+  "format": "signs",
+  "hook": "The 12 houses.|Pause on one.",
+  "open": "THE 12|HOUSES",
+  "openLine": "Areas of life in your chart",
   "items": [
    {
-    "word": "YES",
-    "line": "The answer you're hoping for|is worth asking about."
+    "word": "1ST HOUSE",
+    "title": "THE 1ST HOUSE",
+    "line": "Self, body and how you come|across to others."
    },
    {
-    "word": "LISTEN",
-    "line": "Someone is telling you something.|Hear it fully."
+    "word": "2ND HOUSE",
+    "title": "THE 2ND HOUSE",
+    "line": "Money, possessions and|what you value."
    },
    {
-    "word": "MOVE",
-    "line": "Your body knows.|Walk it out."
+    "word": "3RD HOUSE",
+    "title": "THE 3RD HOUSE",
+    "line": "Communication, siblings,|neighbors, short trips."
    },
    {
-    "word": "FORGIVE",
-    "line": "Starting with yourself."
+    "word": "4TH HOUSE",
+    "title": "THE 4TH HOUSE",
+    "line": "Home, roots and family."
    },
    {
-    "word": "DREAM|BIG",
-    "line": "Write the wish down today."
+    "word": "5TH HOUSE",
+    "title": "THE 5TH HOUSE",
+    "line": "Creativity, romance,|children and play."
    },
    {
-    "word": "HOME",
-    "line": "Make one corner of it|feel like you."
+    "word": "6TH HOUSE",
+    "title": "THE 6TH HOUSE",
+    "line": "Work, health habits|and daily routine."
+   },
+   {
+    "word": "7TH HOUSE",
+    "title": "THE 7TH HOUSE",
+    "line": "Partners and one-to-one|bonds."
+   },
+   {
+    "word": "8TH HOUSE",
+    "title": "THE 8TH HOUSE",
+    "line": "Shared money, intimacy,|endings and change."
+   },
+   {
+    "word": "9TH HOUSE",
+    "title": "THE 9TH HOUSE",
+    "line": "Beliefs, travel and|higher learning."
+   },
+   {
+    "word": "10TH HOUSE",
+    "title": "THE 10TH HOUSE",
+    "line": "Career, reputation|and public life."
+   },
+   {
+    "word": "11TH HOUSE",
+    "title": "THE 11TH HOUSE",
+    "line": "Friends, groups and|hopes for the future."
+   },
+   {
+    "word": "12TH HOUSE",
+    "title": "THE 12TH HOUSE",
+    "line": "Rest, solitude and|what is hidden."
    }
   ],
-  "caption": "Pause the crystal ball: a sign from the stars for today. 🔮\n\nWhatever it stops on is yours. Which one did you get?\n\nAsk the Oracle your own question: link in bio.\n\n#oracle #crystalball #astrology #dailymessage #zodiac"
+  "caption": "The 12 houses of astrology, in 20 seconds: pause on one to see what it rules. 🏠\n\nYour houses come from your rising sign. A planet in a house shows where it acts.\n\nSend this to the friend who is learning their chart.\n\nAsk the Oracle for yours: link in bio.\n\n#astrologyhouses #birthchart #astrology101 #learnastrology #zodiac"
  }
 ]

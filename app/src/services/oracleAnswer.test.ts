@@ -1,44 +1,29 @@
-import { answerMessage, answerProblems, cleanAnswer, validateAnswer } from '../../../supabase/functions/_shared/oracleAnswer.ts';
+import { answerMessage, answerProblems, validateAnswer } from '../../../supabase/functions/_shared/oracleAnswer.ts';
 
-const facts = ['Moon in Cancer 12°04′, house 4 (Western, tropical)', '2026-10-21: transiting Saturn square natal Moon (12°04′ Cancer), within 0°40′ (Western)'];
-const req = { question: 'Why do I feel so lonely lately?', facts, found: ['About feeling lonely'] };
+const facts = ['Venus in Libra 12°10′, house 7 (Western, tropical)', 'Saturn in Aries 12°40′, house 1 (Western, tropical)', 'Venus opposition Saturn, orb 0°30′ (Western)'];
+const req = { question: 'Should I reach out to them?', label: 'Not yet: wait for Nov 14', notes: ['Venus turns direct Nov 14 (Western)'], facts, about: [] };
 
-describe('validateAnswer', () => {
-  it('accepts a question with chart facts', () => {
-    expect(validateAnswer(req)).toMatchObject({ question: 'Why do I feel so lonely lately?', asked: [], memory: [] });
+describe('personal answers', () => {
+  it('accepts a well-formed request and rejects bad ones', () => {
+    expect(validateAnswer(req)).toMatchObject({ question: 'Should I reach out to them?', about: [] });
+    expect(validateAnswer({ ...req, facts: [] })).toMatch(/facts/);
+    expect(validateAnswer({ ...req, question: '' })).toMatch(/question/);
   });
-  it.each([
-    [null, /Missing/],
-    [{ ...req, question: ' ' }, /one question/],
-    [{ ...req, question: 'x'.repeat(301) }, /one question/],
-    [{ ...req, facts: [] }, /facts/],
-    [{ ...req, asked: Array(9).fill('q') }, /earlier questions/],
-    [{ ...req, memory: Array(13).fill('m') }, /memory/],
-  ])('rejects %j', (r, msg) => expect(validateAnswer(r)).toMatch(msg as RegExp));
-});
-
-describe('answerMessage', () => {
-  it('carries the question, the chart, what Within found, and earlier questions', () => {
-    const m = answerMessage({ ...req, asked: ['2026-10-18: Should I quit my job?'], memory: [] });
-    expect(m.startsWith('QUESTION: Why do I feel so lonely lately?')).toBe(true);
-    expect(m).toContain('CHART FACTS:\n- Moon in Cancer');
-    expect(m).toContain('WHAT WITHIN FOUND FOR THIS QUESTION:\n- About feeling lonely');
-    expect(m).toContain('EARLIER QUESTIONS ON THIS DEVICE:\n- 2026-10-18: Should I quit my job?');
-    expect(m).not.toContain('WHAT YOU REMEMBER');
+  it('tells the model the verdict, the notes, the chart, and whether to go deeper', () => {
+    const m = answerMessage(req, false);
+    expect(m).toContain('THE VERDICT: Not yet: wait for Nov 14');
+    expect(m).toContain('- Venus opposition Saturn, orb 0°30′ (Western)');
+    expect(m).toContain('leave "deeper" empty');
+    expect(answerMessage(req, true)).toContain('write "deeper"');
   });
-});
-
-describe('answerProblems and cleanAnswer', () => {
-  it('passes a warm answer grounded in the facts', () => {
-    expect(answerProblems({ headline: 'A heavy Moon, not a flaw in you', paragraphs: ['Loneliness can sit with you even in a full room. Your Moon in Cancer sits at 12°04′, and Saturn is pressing on it today.'], followups: [] }, facts)).toEqual([]);
+  it('passes a personal answer grounded in the chart', () => {
+    const ok = { answer: ['Not yet. Your Venus in Libra sits opposite Saturn, so love may ask for patience before words.', 'Wait for Nov 14, when Venus turns direct.'], deeper: [], reflection: 'What would make reaching out feel safe?' };
+    expect(answerProblems(ok, req)).toEqual([]);
   });
-  it('catches certainty, invented placements, and an empty answer', () => {
-    expect(answerProblems({ headline: 'You will find love', paragraphs: ['x'], followups: [] }, facts).length).toBeGreaterThan(0);
-    expect(answerProblems({ headline: 'h', paragraphs: ['Your Venus in Leo glows.'], followups: [] }, facts).length).toBeGreaterThan(0);
-    expect(answerProblems({ headline: 'h', paragraphs: [' '], followups: [] }, facts)).toContain('has no answer');
-  });
-  it('drops empty paragraphs and follow-ups that break the rules', () => {
-    const c = cleanAnswer({ headline: ' h ', paragraphs: ['a', ' ', 'b'], followups: ['Will he come back?', 'What helps me sleep?', 'x'.repeat(100)] });
-    expect(c).toEqual({ headline: 'h', paragraphs: ['a', 'b'], followups: ['What helps me sleep?'] });
+  it('catches certainty, mind-reading, invented placements, and empty answers', () => {
+    expect(answerProblems({ answer: ['They will come back.'], deeper: [], reflection: '' }, req).length).toBeGreaterThan(0);
+    expect(answerProblems({ answer: ['She wants you to call.'], deeper: [], reflection: '' }, req).length).toBeGreaterThan(0);
+    expect(answerProblems({ answer: ['Your Mars in Leo burns.'], deeper: [], reflection: '' }, req)).toEqual([expect.stringContaining('Mars in Leo')]);
+    expect(answerProblems({ answer: [], deeper: [], reflection: '' }, req)).toContain('the answer is empty');
   });
 });

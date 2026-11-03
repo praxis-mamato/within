@@ -73,6 +73,23 @@ export function meanNode(date: Date): number {
   return norm(125.0445479 - 1934.1362891 * T + 0.0020754 * T * T + (T * T * T) / 467441 - (T * T * T * T) / 60616000);
 }
 
+/** True (osculating) lunar node: where the Moon's instantaneous orbit crosses the ecliptic of date. Astro.com's default. */
+export function trueNode(date: Date): number {
+  const vec = (t: number) => {
+    const e = Astronomy.EclipticGeoMoon(new Date(t));
+    const lon = (e.lon * Math.PI) / 180;
+    const lat = (e.lat * Math.PI) / 180;
+    return [Math.cos(lat) * Math.cos(lon) * e.dist, Math.cos(lat) * Math.sin(lon) * e.dist, Math.sin(lat) * e.dist];
+  };
+  const t = date.getTime();
+  const r = vec(t);
+  const a = vec(t - 600000);
+  const b = vec(t + 600000);
+  const v = [b[0] - a[0], b[1] - a[1], b[2] - a[2]];
+  const h = [r[1] * v[2] - r[2] * v[1], r[2] * v[0] - r[0] * v[2], r[0] * v[1] - r[1] * v[0]];
+  return norm((Math.atan2(h[0], -h[1]) * 180) / Math.PI);
+}
+
 /** Lahiri ayanamsa (mean, without nutation), anchored at J2000 and advanced by IAU 2006 general precession. */
 export function lahiriAyanamsa(date: Date): number {
   const T = julianCenturies(date);

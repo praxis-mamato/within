@@ -1,9 +1,9 @@
-// Redeems a tester access code for the signed-in person: full access for the code's number of days.
+// Redeems an access code (tester, comp or gift) for the signed-in person: full access for the code's number of days.
 // Codes are long and random; only their SHA-256 hash is stored.
 import { admin, callingUser, cors, json } from '../_shared/clients.ts';
 
 const MESSAGES: Record<string, [string, number]> = {
-  ok: ['Tester access is on.', 200],
+  ok: ['Your membership is on. Enjoy the Oracle.', 200],
   invalid: ['That code isn’t valid.', 400],
   used_up: ['That code has been used the maximum number of times.', 400],
   already: ['You’ve already used this code.', 409],

@@ -5,7 +5,7 @@ import { ModeBanner, Paywall, SignInButtons, VerifyDevice } from '../components/
 import { accountService } from '../services/account';
 import { useAccount } from '../services/AccountContext';
 import { useStore } from '../state';
-import { CONFIG } from '../services/config';
+import { CONFIG, IN_PLAY_APP } from '../services/config';
 
 const fmt = (iso: string | null) => (iso ? new Date(iso).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }) : '');
 
@@ -68,9 +68,13 @@ export default function AccountScreen() {
               <strong>Active{entitlement.plan ? ` · ${entitlement.plan === 'yearly' ? CONFIG.plans.yearly.short : CONFIG.plans.monthly.short}` : ''}</strong>
               {entitlement.renewsAt && (entitlement.cancelAtPeriodEnd ? ` · ends ${fmt(entitlement.renewsAt)}, won’t renew` : ` · renews ${fmt(entitlement.renewsAt)}`)}
             </p>
+            {IN_PLAY_APP ? (
+              <p className="small muted" style={{ margin: '8px 0 0' }}>Your membership is managed on withinoracle.app.</p>
+            ) : (
             <button type="button" className="btn quiet" style={{ marginTop: 10 }} onClick={run(() => accountService().manageSubscription())}>
               {entitlement.source === 'demo' ? (entitlement.cancelAtPeriodEnd ? 'Resume subscription' : 'Cancel subscription') : 'Manage or cancel subscription'}
             </button>
+            )}
           </div>
         ) : (
           <Paywall where="account" what="Everything beyond your first reflection">{null}</Paywall>

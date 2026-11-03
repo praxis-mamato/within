@@ -1,19 +1,26 @@
-import { useEffect, useState, type FormEvent, type ReactNode } from 'react';
+import { useCallback, useEffect, useState, type FormEvent, type ReactNode } from 'react';
 import { track } from '../services/telemetry';
 import { Link } from 'react-router-dom';
 import { accountService, type Plan, type Provider } from '../services/account';
 import { useAccount } from '../services/AccountContext';
-import { APPLE_SIGN_IN, CONFIG, IN_PLAY_APP, PLAY_APP_TEXT } from '../services/config';
+import { APPLE_SIGN_IN, CONFIG, GOOGLE_CLIENT_ID, IN_PLAY_APP, PLAY_APP_TEXT } from '../services/config';
+import { GoogleButton } from './GoogleButton';
 import { useStore } from '../state';
 import { MiniOrb } from './OracleBoard';
 import { WorthIt } from './SalesCloser';
+import { rememberReturn } from '../services/afterSignIn';
 
-export function SignInButtons() {
+/** Google and Apple sign-in. With `plan`, the person goes straight on to payment once signed in. */
+export function SignInButtons({ plan }: { plan?: Plan } = {}) {
   const [busy, setBusy] = useState<Provider | null>(null);
   const [error, setError] = useState('');
+  // Google's own button when it is switched on; the redirect if it isn't, or if it fails to load.
+  const [gis, setGis] = useState(Boolean(GOOGLE_CLIENT_ID));
+  const noGis = useCallback(() => setGis(false), []);
   const go = async (p: Provider) => {
     setBusy(p);
     setError('');
+    rememberReturn(plan);
     try {
       await accountService().signIn(p);
     } catch (e) {
@@ -32,6 +39,14 @@ export function SignInButtons() {
           {busy === 'apple' ? 'Opening Apple…' : 'Continue with Apple'}
         </button>
       )}
+      {gis ? (
+        <>
+          <GoogleButton plan={plan} onFail={noGis} />
+          <button type="button" className="link small" disabled={!!busy} onClick={() => go('google')}>
+            Google button not working? Sign in another way
+          </button>
+        </>
+      ) : (
       <button type="button" className="btn auth google" disabled={!!busy} onClick={() => go('google')}>
         <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
           <path fill="#4285F4" d="M22.6 12.2c0-.8-.1-1.5-.2-2.2H12v4.2h5.9c-.3 1.4-1 2.5-2.2 3.3v2.7h3.6c2.1-1.9 3.3-4.8 3.3-8z" />
@@ -41,6 +56,7 @@ export function SignInButtons() {
         </svg>
         {busy === 'google' ? 'Opening Google…' : 'Continue with Google'}
       </button>
+      )}
       {error && (
         <p role="alert" className="small">
           {error}
@@ -186,15 +202,16 @@ export function Paywall({ children, what, where }: { children: ReactNode; what: 
       </fieldset>
       <p className="small muted">
         {plan === 'yearly'
-          ? `New members pay nothing for ${CONFIG.plans.trialDays} days. Then ${CONFIG.plans.yearly.short}, renewing every year until you cancel. Cancel online in Account before the trial ends and you aren’t charged.`
+          ? `New members pay nothing for ${CONFIG.plans.trialDays} days. Then ${CONFIG.plans.yearly.renews}, renewing every year until you cancel. Cancel online in Account before the trial ends and you aren’t charged.`
           : 'Renews automatically every month at the price shown until you cancel.'}{' '}
         Cancel online any time in Account; you keep access until the end of the period you paid for.
       </p>
       <WorthIt />
       {!account ? (
         <>
-          <p className="small muted">Sign in first, so your subscription follows you to your other devices.</p>
-          <SignInButtons />
+          <p className="small muted">Sign in first, so your subscription follows you to your other devices. You’ll go straight on to payment after.</p>
+          <SignInButtons plan={plan} />
+          <p className="small muted">Google or Apple asks to share only your name and email address with Within, and may send you a notice that you signed in. That is all Within receives: never your contacts, files, or password. Your chart stays on your phone.</p>
         </>
       ) : (
         <div className="btn-row">
@@ -245,7 +262,7 @@ export function ModeBanner() {
   );
 }
 
-/** Tester access: a code gives full access without payment. */
+/** Gift and access codes: a code gives full access without payment. */
 export function RedeemCode() {
   const { refresh } = useAccount();
   const [code, setCode] = useState('');
@@ -267,9 +284,9 @@ export function RedeemCode() {
   return (
     <form className="redeem" onSubmit={submit}>
       <label htmlFor="tester-code">
-        Have a tester code? <span className="hint">Full access without payment</span>
+        Have a code? <span className="hint">A gift or access code</span>
       </label>
-      <input id="tester-code" value={code} onChange={(e) => setCode(e.target.value)} autoComplete="off" autoCapitalize="characters" spellCheck={false} placeholder="WITHIN-XXXX-XXXX-XXXX" />
+      <input id="tester-code" value={code} onChange={(e) => setCode(e.target.value)} autoComplete="off" autoCapitalize="characters" spellCheck={false} placeholder="GIFT-XXXX-XXXX-XXXX" />
       <button type="submit" className="btn quiet" disabled={busy || code.trim().length < 8}>
         {busy ? 'Checking…' : 'Use code'}
       </button>

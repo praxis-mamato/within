@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type Ref } from 'react';
 import { tropicalLongitude } from '../astro/chart';
 import type { Tone } from '../content/oracle';
+import { haptic } from '../services/native';
 import { CrystalOrb } from './CrystalOrb';
 
 const SIZE = 360;
@@ -342,6 +343,7 @@ export function useShake(onShake: () => void) {
       const g = Math.sqrt((a.x ?? 0) ** 2 + (a.y ?? 0) ** 2 + (a.z ?? 0) ** 2);
       if (g > 22 && Date.now() - last > 1500) {
         last = Date.now();
+        void haptic('shake');
         cb.current();
       }
     };

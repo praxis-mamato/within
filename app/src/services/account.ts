@@ -4,6 +4,7 @@
  */
 import { LIVE, siteUrl } from './config';
 import { supabase } from './supabase';
+import { APP_RETURN_URL, NATIVE_APP, openInBrowser } from './native';
 import { referralCode } from '../lib/referral';
 
 export type Provider = 'google' | 'apple';
@@ -33,6 +34,8 @@ export interface AccountService {
   current(): Promise<Account | null>;
   onChange(cb: (a: Account | null) => void): () => void;
   signIn(provider: Provider): Promise<void>;
+  /** Signs in with the ID token from Google's own button (no redirect). */
+  signInWithGoogle(idToken: string, nonce: string): Promise<void>;
   sendEmailLink(): Promise<{ sentTo: string }>;
   signOut(): Promise<void>;
   deleteAccount(): Promise<void>;
@@ -113,14 +116,26 @@ function live(): AccountService {
     onChange: (cb) => sb.auth.onAuthStateChange((_e, s) => cb(toAccount(s))).data.subscription.unsubscribe,
     signIn: async (provider) => {
       // Always show Google's account chooser, so people with several accounts can pick the right one.
-      const { error } = await sb.auth.signInWithOAuth({ provider, options: { redirectTo: siteUrl(), queryParams: provider === 'google' ? { prompt: 'select_account' } : undefined } });
+      const queryParams = provider === 'google' ? { prompt: 'select_account' } : undefined;
+      if (NATIVE_APP) {
+        // In the iPhone app, sign-in happens in Safari (Google doesn't allow it inside apps) and comes back by link.
+        const { data, error } = await sb.auth.signInWithOAuth({ provider, options: { redirectTo: APP_RETURN_URL, skipBrowserRedirect: true, queryParams } });
+        if (error) throw error;
+        if (data.url) await openInBrowser(data.url);
+        return;
+      }
+      const { error } = await sb.auth.signInWithOAuth({ provider, options: { redirectTo: siteUrl(), queryParams } });
+      if (error) throw error;
+    },
+    signInWithGoogle: async (token, nonce) => {
+      const { error } = await sb.auth.signInWithIdToken({ provider: 'google', token, nonce });
       if (error) throw error;
     },
     sendEmailLink: async () => {
       const { data } = await sb.auth.getUser();
       if (!data.user?.email) throw new Error('This account has no email address to send a link to.');
       ls.set(PENDING, data.user.id);
-      const { error } = await sb.auth.signInWithOtp({ email: data.user.email, options: { shouldCreateUser: false, emailRedirectTo: siteUrl() } });
+      const { error } = await sb.auth.signInWithOtp({ email: data.user.email, options: { shouldCreateUser: false, emailRedirectTo: NATIVE_APP ? APP_RETURN_URL : siteUrl() } });
       if (error) throw error;
       return { sentTo: data.user.email };
     },
@@ -184,6 +199,10 @@ function demo(): AccountService {
     onChange: (cb) => (listeners.add(cb), () => listeners.delete(cb)),
     signIn: async (provider) => {
       ls.set(DEMO, JSON.stringify({ id: `demo-${provider}`, email: provider === 'apple' ? 'demo@privaterelay.appleid.com' : 'demo@gmail.com', provider, deviceVerified: false }));
+      emit();
+    },
+    signInWithGoogle: async () => {
+      ls.set(DEMO, JSON.stringify({ id: 'demo-google', email: 'demo@gmail.com', provider: 'google', deviceVerified: false }));
       emit();
     },
     sendEmailLink: async () => {

@@ -37,7 +37,7 @@ export function validateRequest(x: unknown): DeepRequest | string {
 }
 
 // Stable text: keep it byte-identical between requests so prompt caching applies.
-export const SYSTEM_PROMPT = `You write astrology readings for Within, an app for self-understanding and relationships. Readers are adults. Within offers two separate traditions, Western (tropical) and Vedic (Jyotish, sidereal), as interpretive lenses, never as proof or prediction.
+export const SYSTEM_PROMPT = `You write astrology readings for Within, an app for self-understanding and relationships. Readers may be any age from teenagers up, so keep every reading suitable for a young person: nothing sexual, and a trusted adult suggested for anything heavy. Within offers two separate traditions, Western (tropical) and Vedic (Jyotish, sidereal), as interpretive lenses, never as proof or prediction.
 
 You receive:
 - CHART FACTS: placements calculated by the app. They are the only facts you may use.

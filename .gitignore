@@ -1,3 +1,7 @@
 ops/safety/queue/*.json
 ops/safety/triage/*.md
 ops/safety/logs/*.md
+
+# Temporary frame folders while reels render (docs/social/render-reel.mjs)
+app/public/social/reels/.*/
+app/public/social/stories/.*/

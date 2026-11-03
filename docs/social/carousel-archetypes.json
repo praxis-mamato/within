@@ -1,0 +1,112 @@
+[
+ {
+  "date": "arch-sun",
+  "kicker": "PLANET ARCHETYPES · 1 OF 10",
+  "title": "The Hero",
+  "lines": [
+   "Sun, the Self: Confidence, warmth, purpose, and the drive to grow."
+  ],
+  "glyph": "✦",
+  "orb": "SUN",
+  "caption": ""
+ },
+ {
+  "date": "arch-moon",
+  "kicker": "PLANET ARCHETYPES · 2 OF 10",
+  "title": "The Inner Child",
+  "lines": [
+   "Moon, the Mother: Sensitivity, care, instinct, and emotional memory."
+  ],
+  "glyph": "✦",
+  "orb": "MOON",
+  "caption": ""
+ },
+ {
+  "date": "arch-mercury",
+  "kicker": "PLANET ARCHETYPES · 3 OF 10",
+  "title": "The Trickster",
+  "lines": [
+   "Mercury, the Messenger: Cleverness, humor, curiosity, and a way with words."
+  ],
+  "glyph": "✦",
+  "orb": "MERCURY",
+  "caption": ""
+ },
+ {
+  "date": "arch-venus",
+  "kicker": "PLANET ARCHETYPES · 4 OF 10",
+  "title": "The Lover",
+  "lines": [
+   "Venus, the Artist: Affection, charm, taste, harmony, and the ability to enjoy life."
+  ],
+  "glyph": "✦",
+  "orb": "VENUS",
+  "caption": ""
+ },
+ {
+  "date": "arch-mars",
+  "kicker": "PLANET ARCHETYPES · 5 OF 10",
+  "title": "The Warrior",
+  "lines": [
+   "Mars, the Champion: Courage, passion, decisiveness, and protecting what matters."
+  ],
+  "glyph": "✦",
+  "orb": "MARS",
+  "caption": ""
+ },
+ {
+  "date": "arch-jupiter",
+  "kicker": "PLANET ARCHETYPES · 6 OF 10",
+  "title": "The Sage",
+  "lines": [
+   "Jupiter, the Benefactor: Generosity, optimism, teaching, and a sense of meaning."
+  ],
+  "glyph": "✦",
+  "orb": "JUPITER",
+  "caption": ""
+ },
+ {
+  "date": "arch-saturn",
+  "kicker": "PLANET ARCHETYPES · 7 OF 10",
+  "title": "The Teacher",
+  "lines": [
+   "Saturn, the Timekeeper: Discipline, endurance, integrity, and wisdom that lasts."
+  ],
+  "glyph": "✦",
+  "orb": "SATURN",
+  "caption": ""
+ },
+ {
+  "date": "arch-uranus",
+  "kicker": "PLANET ARCHETYPES · 8 OF 10",
+  "title": "The Awakener",
+  "lines": [
+   "Uranus, the Rebel: Originality, independence, invention, and courage to be different."
+  ],
+  "glyph": "✦",
+  "orb": "URANUS",
+  "caption": ""
+ },
+ {
+  "date": "arch-neptune",
+  "kicker": "PLANET ARCHETYPES · 9 OF 10",
+  "title": "The Dreamer",
+  "lines": [
+   "Neptune, the Mystic: Inspiration, empathy, art, and faith."
+  ],
+  "glyph": "✦",
+  "orb": "NEPTUNE",
+  "caption": ""
+ },
+ {
+  "date": "arch-pluto",
+  "kicker": "PLANET ARCHETYPES · 10 OF 10",
+  "title": "The Phoenix",
+  "lines": [
+   "Pluto, the Transformer: Resilience, depth, honesty, and the power to begin again."
+  ],
+  "glyph": "✦",
+  "orb": "PLUTO",
+  "caption": ""
+ }
+]
