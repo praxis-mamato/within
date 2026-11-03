@@ -50,7 +50,7 @@ Every reel, post, and story must teach or tell something **true and specific fro
 - **Teach one real thing.** Why retrogrades look backward, what a station is, the myth behind Scorpio, what a nakshatra is, how Vedic and Western differ. Within reads both traditions: use the Vedic angle; few accounts can.
 - **Hook = a true promise the reel pays off** ("The 3 days this month to sign nothing", "Why Scorpio season feels heavy"), never clickbait.
 - **Pause and pick reels:** every message is tied to the actual transit of the day and says so in the caption (e.g. Mercury retrograde: REVISIT / REPAIR / RECONNECT). No generic "BEGIN / REST / TRUST".
-- **The Oracle's voice:** warm, wise, concrete, from an astrologer with five years of readings. Short sentences. No filler adjectives.
+- **The Oracle's voice:** warm, wise, concrete, from an astrologer with seven years of study who has read thousands of charts (Maggie, Nov 3; say it unnamed, "the reader"). Short sentences. No filler adjectives.
 - **Every story every day:** the daily message story plus the day's reel shared as a story (both are queued automatically with the reel). Video, never a still.
 - **Check before queueing:** would an astrologer learn nothing from this? Rewrite it.
 
