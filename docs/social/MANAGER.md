@@ -25,6 +25,8 @@ she has a moment.
 
 > Follow these 10 Instagram accounts while logged in as @withintheoracle. For each one: open the link and check it looks like a real shop, studio or wellness business; skip it if it looks off, is private, or sells psychic or astrology readings. Otherwise tap Follow and like their most recent post. Go at a normal human pace, a few seconds between actions. Stop at once if Instagram shows any warning or 'try again later' message. When done, tell me which you followed and which you skipped.
 
+**Timing (main session, Nov 6):** Maggie's Claude desktop task opens `docs/social/follow/<today>.md` on GitHub (branch claude/epic-gates-6t5iqb) every day at 9:00am her local time, follows the 10, likes each latest post and drafts 2-3 comments for her to approve. So write TOMORROW's file in the evening run (18:13 ET / 23:13 UTC) and push it, so it is there before 9am. If an evening run was missed, write the file first thing in the morning run. Do NOT send the follow list as a push notification any more; notify her only when something needs her attention. Every file starts with the ready-to-paste prompt and the 10 numbered lines, with reasons below a `---` line.
+
 ## How the account runs
 - Posting, replies, comment collection, and post numbers run automatically through the `instagram-publish` function every 15 minutes. See docs/social/README.md.
 - You work through the Supabase project `lykmusmsfwvaeqxtsbrc`:
