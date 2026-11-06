@@ -51,3 +51,7 @@ Forecast to Nov 12: **$30 likely** (3 monthly members), $10 low, $120 stretch (n
 cutting the $240 target: it needs about 5 more members in two weeks and that is unlikely without partner or ad traffic, so I am telling
 you plainly the likely result is well under it. Instagram has been publishing daily since Oct 20, so this is the first week where
 social traffic can show up; the next two Mondays tell us whether it works.
+
+## Update Nov 2 (read Nov 6)
+
+Actual still **$9.99, 1 member**; about $230 behind pace with 6 days left. Forecast to Nov 12: **$10–30**. The month-one target will be missed and stays on the record as $240. I'll set month two on Nov 16 once we know whether the sends, the ad test and Black Friday ($85 offer, Nov 27 – 30) move anything. The gift product (live Oct 30) and Black Friday are the best chances for December cash.
