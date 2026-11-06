@@ -21,6 +21,10 @@ who sells readings (competitor); never repeat an account from an earlier list; s
 unless they commented on our posts. Ask her to follow, like one recent post, and leave one real comment if
 she has a moment.
 
+**Format (main session, Nov 6): Maggie follows with Claude in Chrome, which cannot open this repository.** From Nov 7 the notification and the top of the file are one ready-to-paste prompt, then the 10 numbered `instagram.com/<handle>` lines, with the reasons only in the file below the prompt:
+
+> Follow these 10 Instagram accounts while logged in as @withintheoracle. For each one: open the link and check it looks like a real shop, studio or wellness business; skip it if it looks off, is private, or sells psychic or astrology readings. Otherwise tap Follow and like their most recent post. Go at a normal human pace, a few seconds between actions. Stop at once if Instagram shows any warning or 'try again later' message. When done, tell me which you followed and which you skipped.
+
 ## How the account runs
 - Posting, replies, comment collection, and post numbers run automatically through the `instagram-publish` function every 15 minutes. See docs/social/README.md.
 - You work through the Supabase project `lykmusmsfwvaeqxtsbrc`:
