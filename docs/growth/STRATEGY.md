@@ -96,7 +96,7 @@ pays.* Repeat it once from a second channel. Everything below serves that.
 - Reels are our only format with reach (about 66 avg vs about 4 for images). Make fewer feed images and more reels
   built around one answer, hook in the first 3 seconds, on-screen captions [reported: Instagram guidance].
 - Keep the sky calendar as a light layer for search and credibility, not the main course.
-- Comments are only 0 so far: reply to every one and ask a question in the caption. Do not use "comment YES" bait
+- We have almost no comments so far: reply to every one and ask a question in the caption. Do not use "comment YES" bait
   [reported: demoted by Instagram].
 - **Owner: the social manager, with my brief. Maggie approves the first week of formats.**
 
@@ -108,7 +108,7 @@ pays.* Repeat it once from a second channel. Everything below serves that.
 - **Maggie sends the first messages** (Instagram does not allow bots to start conversations; the operating plan says no first DMs
   from agents). Pace: 3 a day, logged in `docs/sales/replies/sent-log.md`. Emails carry the postal address (done).
 - Expected result: **unknown**. I have no reliable reply-rate data for this niche. Plan on a 10% reply rate and 1 in 5 replies
-  becoming an active partner **[assumption]**: that is 10 messages to 1 reply to 0.2 partners, so I need about 30 sends for one live partner.
+  becoming an active partner **[assumption]**: that is 10 messages to 1 reply to 0.2 partners, so I need about 50 sends for one live partner.
   That is why the send volume matters.
 
 ### What I would deliberately not do now
@@ -137,14 +137,14 @@ Reference points: RevenueCat reports median install-to-trial about 7% in North A
 around 35–40% [reported, secondary write-ups conflict; I could not read RevenueCat's page]. Our free tier asks nothing
 before the first answer, so I'd plan on **0.5–1%** of visitors until we measure.
 
-Today's website visits are unknown; Instagram sends about 2 a week. So 10 paying members in 4 weeks would need about 100x
-today's traffic. That is why I am resetting:
+Today's website visits are unknown; Instagram sends about 2 a week. So 10 paying members in 4 weeks would need roughly 100 times
+today's Instagram-sourced traffic (total traffic is unknown). That is why I am resetting:
 
 | By Dec 12 | Paying members | Cash (memberships) | What has to be true |
 |---|---|---|---|
-| Low | 2 | ~$20–110 | 3 DMs sent, 1 partner trial |
-| **Likely (the target)** | **4** | **~$40–300** | Bet 2 lifts clicks to about 10 a day, 1–2 partners live, Black Friday gift or yearly sale |
-| Stretch | 10 | ~$400–1,000 | One partner with a real audience, plus the $150 test works |
+| Low | 2 | ~$20–200 | 3 DMs sent, 1 partner trial |
+| **Likely (the target)** | **4** | **~$40–400** | Bet 2 lifts clicks to about 10 a day, 1–2 partners live, Black Friday gift or yearly sale |
+| Stretch | 10 | ~$100–1,000 | One partner with a real audience, plus the $150 test works |
 
 Cash depends on the monthly/yearly mix (yearly = $100, or $85 on Black Friday). Gifts at $100 ($85 on Black Friday) count as cash,
 not members. Live readings: $0 in the likely case. One $350 reading is worth about 35 months of a $9.99 member, so a single
@@ -199,7 +199,7 @@ baby-chart and new-year ("year ahead") gift pages if gifts sold; ask first buyer
   servers keep only sign-in and subscription status, which is true of what is *stored*, but the question is *sent*. We should say:
   *"Your birth details and journal stay on your device. Your question and chart facts are sent to write your answer, and not stored."*
   Privacy is our wedge, so a wrong claim here is the biggest risk in this document. **I have not changed any copy; this is on the yes/no list.**
-- **B. The operating plan target is not defensible.** 10 paying by Nov 30 would need about a fivefold jump in 3 weeks from a base of 1.
+- **B. The operating plan target is not defensible.** 10 paying by Nov 30 would need a tenfold jump in 3 weeks from a base of 1.
 - **C. My own earlier advice needs correcting:** I recommended the $150 ad test point at the Mercury retrograde page (it ends Nov 13) and later
   at the Moon calendar. The right target is a page or reel that shows a personal answer; sky pages are a weak landing for a subscription.
   I also asked for 7 approvals in one list when the real issue was one: sends.
