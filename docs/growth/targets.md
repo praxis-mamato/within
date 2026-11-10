@@ -55,3 +55,8 @@ social traffic can show up; the next two Mondays tell us whether it works.
 ## Update Nov 2 (read Nov 6)
 
 Actual still **$9.99, 1 member**; about $230 behind pace with 6 days left. Forecast to Nov 12: **$10–30**. The month-one target will be missed and stays on the record as $240. I'll set month two on Nov 16 once we know whether the sends, the ad test and Black Friday ($85 offer, Nov 27 – 30) move anything. The gift product (live Oct 30) and Black Friday are the best chances for December cash.
+
+## Month two: Nov 13 – Dec 12, 2026 (set Nov 10)
+
+Month one closed at **$9.99 cash, 1 paying member** against $240 and 6. Month two, from `STRATEGY.md`: **likely 4 paying members, about $40–400 cash** (monthly or yearly mix; gifts count as cash, not members), low 2, stretch 10. Stated plainly: the likely case needs one live partner or a working reel format, and neither has started.
+Checkpoints: Nov 23 (first read of tracking and partner replies), Dec 7 (proof point: a named channel produces a paying stranger).

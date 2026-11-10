@@ -59,3 +59,14 @@ Revenue to date: **$0**. No bookings. Follow-up drafts above are unchanged.
 | Completed | 0 | $0 | – |
 
 Revenue to date: **$0**. No bookings. Follow-up drafts above are unchanged.
+
+## Week of Nov 9, 2026
+
+| Stage | Count | Value | Oldest (days) |
+|---|---|---|---|
+| Booked, not paid | 0 | $0 | – |
+| Paid, not scheduled | 0 | $0 | – |
+| Scheduled | 0 | $0 | – |
+| Completed | 0 | $0 | – |
+
+Revenue to date: **$0**. No bookings.
