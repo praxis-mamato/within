@@ -125,7 +125,7 @@ export function Patterns() {
           </details>
         )}
       </Paywall>
-      <p className="small muted">Patterns use Western placements, with Vedic yogas where noted. Draft text awaiting the approver’s review.</p>
+      <p className="small muted">Patterns use Western placements, with Vedic yogas where noted.</p>
     </>
   );
 }
