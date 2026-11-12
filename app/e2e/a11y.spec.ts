@@ -30,11 +30,15 @@ async function onboard(page: Page, found: string[]) {
 }
 
 test('onboarding and main screens have no serious accessibility issues', async ({ page }) => {
+  // 13 screens plus onboarding, each audited by axe: more than the default 30 seconds on a busy runner.
+  test.setTimeout(120_000);
   const found: string[] = [];
   await onboard(page, found);
   for (const path of SCREENS) {
     await page.goto(`./#${path}`);
-    await page.waitForLoadState('networkidle');
+    // Not 'networkidle': live sign-in and Google's script keep a connection open, so it can never settle.
+    await page.waitForLoadState('load');
+    await expect(page.locator('main, [role="main"]').first()).toBeVisible();
     found.push(...(await audit(page, path)));
   }
   expect(found, found.join('\n')).toEqual([]);
@@ -54,7 +58,9 @@ test('text at 200% never makes a screen scroll sideways', async ({ page }) => {
   await onboard(page, []);
   for (const path of SCREENS) {
     await page.goto(`./#${path}`);
-    await page.waitForLoadState('networkidle');
+    // Not 'networkidle': live sign-in and Google's script keep a connection open, so it can never settle.
+    await page.waitForLoadState('load');
+    await expect(page.locator('main, [role="main"]').first()).toBeVisible();
     const px = await sideways(page);
     if (px > 1) wide.push(`${path} (+${px}px)`);
   }
