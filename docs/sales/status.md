@@ -1,6 +1,6 @@
-# Deal-maker status, 2026-11-10
+# Deal-maker status, 2026-11-12
 
-**Following the growth lead's brief (2026-10-26):** no new prospects and no new drafts. Nothing has changed since 2026-11-03 (checked again 2026-11-10, a week on): `docs/sales/replies/sent-log.md` is still empty and no reply has been pasted, so there are no follow-ups to write.
+**Following the growth lead's brief (2026-10-26):** no new prospects and no new drafts. Nothing has changed since 2026-11-03 (checked again 2026-11-12, nine days on): `docs/sales/replies/sent-log.md` is still empty and no reply has been pasted, so there are no follow-ups to write.
 **Pipeline:** 64 prospects, 40 pitches drafted, 0 confirmed sent, 0 replied, 0 calls, 0 won/lost. Dollars in play: $0 confirmed. Affiliate pay is 30% of first-year revenue ($30 per yearly member), paid only on sales.
 **Messages ready to send:** `docs/sales/outbox/2026-11-03.md` (3 DMs, one message each, details filled in). After those: `2026-10-22.md` (10 DMs) and `2026-10-27.md` (10 emails; postal address is now in the footer).
 **Follow-ups due:** none, because no send is recorded. **Replies to answer:** none; `docs/sales/replies/` has only the new empty `sent-log.md`.
