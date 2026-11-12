@@ -55,6 +55,16 @@ export const ORACLE_TEXT = {
   intro: 'Ask one question. The Oracle reads the sky at this moment against your chart, the way horary astrologers have for centuries, and answers yes, not yet, or ask it another way, with a day when there is one.',
 };
 
+/** What the planet the Moon meets next points to, in horary: the answer's flavor in plain words. */
+export const ORACLE_MOON_NEXT: Record<string, string> = {
+  Sun: 'The Sun points to clarity and being seen: this is about showing up as yourself.',
+  Mercury: 'Mercury points to words: a message, a conversation, or a plan written down.',
+  Venus: 'Venus points to warmth, ease, and what you truly value.',
+  Mars: 'Mars points to action and courage, and to going carefully where tempers run high.',
+  Jupiter: 'Jupiter points to growth and generosity: room for more than you expect.',
+  Saturn: 'Saturn points to patience and structure: it may take longer, and be more solid for it.',
+};
+
 const AREA_WORDS: [Area, RegExp][] = [
   ['love', /\b(love|date|dating|partner|boyfriend|girlfriend|husband|wife|crush|relationship|marry|marriage|text (him|her|them)|reach out|ex)\b/i],
   ['work', /\b(job|work|career|boss|promotion|interview|apply|application|business|client|project|quit|raise|hire|hired)\b/i],
@@ -211,7 +221,7 @@ export function askOracle(question: string, c: NatalChart, place: { lat: number;
   } else if (mn) {
     // No transit to the chart: the Moon's next contact decides, as in classic horary.
     points = mn.planet;
-    because = `The Moon’s next contact is ${mn.aspect === 'opposite' ? 'an opposition' : `a ${mn.aspect === 'conjunct' ? 'conjunction' : mn.aspect}`} with ${mn.planet}, ${when(mn.at)}.`;
+    because = `The Moon’s next contact is ${mn.aspect === 'opposite' ? 'an opposition' : `a ${mn.aspect === 'conjunct' ? 'conjunction' : mn.aspect}`} with ${mn.planet}, ${when(mn.at)}.${ORACLE_MOON_NEXT[mn.planet] ? ` ${ORACLE_MOON_NEXT[mn.planet]}` : ''}`;
     if (SOFT.includes(mn.aspect)) tone = ['Saturn', 'Mars'].includes(mn.planet) ? 'closer' : 'go';
     else if (HARD.includes(mn.aspect)) tone = ['Venus', 'Jupiter'].includes(mn.planet) ? 'closer' : 'wait';
     else tone = ['Saturn', 'Mars'].includes(mn.planet) ? 'closer' : 'go';

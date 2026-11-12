@@ -28,7 +28,43 @@ describe('the Oracle engine', () => {
     for (const [q, intent] of Q) expect(OE.intentOf(q), q).toBe(intent);
   });
   it('library passes the lint', () => {
-    for (const s of [...Object.values(OE.ORACLE_SAYS), ...Object.values(OE.RETURN_MEANING)]) expect(lint(s), s).toEqual([]);
+    for (const s of [...Object.values(OE.ORACLE_SAYS), ...Object.values(OE.RETURN_MEANING), ...Object.values(OE.ORACLE_HEARD), ...Object.values(OE.ORACLE_AREA_HEARD)]) expect(lint(s), s).toEqual([]);
+  });
+  it('speaks to the person who asked: their words, their feeling, their part of life', () => {
+    expect(OE.whetherOf('Should I text my ex?')).toBe('to text your ex');
+    expect(OE.whetherOf('Is it a good time to ask for a raise?')).toBe('to ask for a raise');
+    expect(OE.whetherOf('Am I on the right path?')).toBe('you are on the right path');
+    expect(OE.whetherOf('Should I leave him?')).toBeNull();
+    expect(OE.whetherOf('What is my rising sign?')).toBeNull();
+    const b = sampleBirths()[0];
+    const now = new Date('2026-10-21T18:00:00Z');
+    const c = computeNatal(b, now);
+    const ex = OE.consultOracle('Should I text my ex?', { chart: c, place: b, now });
+    expect(ex.lines[0].text).toMatch(/^(Yes|Not yet)[^.]*, about whether to text your ex\./);
+    const lonely = OE.consultOracle('Why do I feel so lonely lately?', { chart: c, place: b, now });
+    expect(lonely.intent).toBe('feeling');
+    expect(lonely.lines[0].text).toBe(`${OE.ORACLE_HEARD.lonely} ${OE.ORACLE_SAYS.feelingTurn}`);
+    const stuck = OE.consultOracle('I feel stuck in my career', { chart: c, place: b, now });
+    expect(stuck.intent).toBe('area');
+    expect(stuck.lines[0].text).toBe(OE.ORACLE_HEARD.stuck);
+    const money = OE.consultOracle('How is my money looking?', { chart: c, place: b, now });
+    expect(money.lines[0].text).toBe(OE.ORACLE_AREA_HEARD.money);
+  });
+  it('names a long backdrop briefly once it was explained on an earlier day', () => {
+    const b = sampleBirths()[0];
+    const now = new Date('2026-10-21T18:00:00Z');
+    const c = computeNatal(b, now);
+    const q = 'Should I take the trip?';
+    const first = OE.consultOracle(q, { chart: c, place: b, now });
+    const backdrop = first.lines.find((l) => /^In effect now:/.test(l.heading));
+    expect(backdrop).toBeTruthy();
+    if (!backdrop) return;
+    const earlier = { ...OE.consultOracle('What is going on with me?', { chart: c, place: b, now }), day: '2026-10-18' };
+    const later = OE.consultOracle(q, { chart: c, place: b, now, history: [earlier] });
+    const again = later.lines.find((l) => l.heading === backdrop.heading)!;
+    expect(again.text.startsWith(OE.ORACLE_SAYS.stillHere)).toBe(true);
+    expect(again.text.length).toBeLessThan(backdrop.text.length);
+    expect(again.basis).toMatch(/also named Oct 18/);
   });
   it('answers every kind of question for every sample chart, with no gaps and within the lint', () => {
     const now = new Date('2026-10-09T15:00:00Z');
