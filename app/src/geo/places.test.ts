@@ -5,6 +5,8 @@ describe('places', () => {
     const places = await loadPlaces();
     expect(searchPlaces(places, 'Mumbai')[0]).toMatchObject({ countryCode: 'IN', tz: 'Asia/Kolkata' });
     expect(searchPlaces(places, 'springfield il')[0]).toMatchObject({ region: 'IL', tz: 'America/Chicago' });
+    expect(searchPlaces(places, 'Belleville, Illinois')[0]).toMatchObject({ region: 'IL', lat: 38.52 });
+    expect(searchPlaces(places, 'portland oregon')[0]).toMatchObject({ region: 'OR' });
     expect(searchPlaces(places, 'sao paulo')[0]).toMatchObject({ countryCode: 'BR', tz: 'America/Sao_Paulo' });
     expect(searchPlaces(places, 'portland or')[0].tz).toBe('America/Los_Angeles');
   });
