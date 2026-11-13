@@ -6,6 +6,8 @@
   "main": "worker.js",
   "assets": { "directory": "./app/dist", "binding": "ASSETS", "run_worker_first": true },
   "workers_dev": true,
+  // Pull request previews: Cloudflare's branch builds run `npx wrangler preview`, which needs this block (it can be empty).
+  "previews": {},
   "routes": [
     { "pattern": "withinoracle.app", "custom_domain": true },
     { "pattern": "www.withinoracle.app", "custom_domain": true }
