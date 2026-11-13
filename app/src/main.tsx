@@ -7,6 +7,7 @@ import { applyApprovedEdits } from './content/registry';
 import { keepFresh } from './lib/freshness';
 import { captureReferral } from './lib/referral';
 import { moveIn } from './lib/moveIn';
+import { moveReviewIn, reviewMoveTarget } from './lib/moveReview';
 import { startNative } from './services/native';
 import { supabase } from './services/supabase';
 
@@ -22,9 +23,14 @@ applyApprovedEdits();
 // In the iPhone app: finish sign-in when Safari hands back, and match the status bar to the sky.
 void startNative(async (code) => supabase()?.auth.exchangeCodeForSession(code));
 // The app's old GitHub Pages address hands its saved data to withinoracle.app, like the old workers.dev link.
-if (location.hostname.endsWith('github.io') && !location.search) location.replace('./bridge.html');
+// The review console's old link goes straight to the console there, with its saved decisions.
+const onOldPages = location.hostname.endsWith('github.io') && !location.search;
+const reviewTarget = onOldPages ? reviewMoveTarget(location.hash) : null;
+if (reviewTarget) location.replace(reviewTarget);
+else if (onOldPages) location.replace('./bridge.html');
 // Arriving from an old address with saved data: store it before the app loads its state.
-else
+else {
+  moveReviewIn();
   void moveIn().finally(() =>
     createRoot(document.getElementById('root')!).render(
       <StrictMode>
@@ -32,3 +38,4 @@ else
       </StrictMode>,
     ),
   );
+}

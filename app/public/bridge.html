@@ -21,6 +21,8 @@
     gone = true;
     location.replace(HOME + (frag || ''));
   }
+  // The template review console's link goes straight to the console (its decisions are kept separately).
+  if (/^#\/review(\/|$)/.test(location.hash)) return go(location.hash);
   setTimeout(function () { go(); }, 5000);
   function b64(bytes) {
     var s = '';
