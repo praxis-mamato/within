@@ -113,6 +113,9 @@ export default function Settings() {
           <li>No public profile, no address-book access, no advertising.</li>
           <li>Your journal and milestones are never used to train models.</li>
           <li>Adding someone’s details doesn’t mean they agreed. Keep it to a nickname.</li>
+          <li>
+            <a href="/privacy/" target="_blank" rel="noopener">Privacy policy</a>
+          </li>
         </ul>
         <div className="btn-row">
           <button type="button" className="btn quiet" aria-expanded={exportOpen} onClick={() => setExportOpen(!exportOpen)}>

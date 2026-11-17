@@ -7,7 +7,7 @@ interpretations; Claude writes a connected reading in Within's careful, non-fata
 
 ## Use it
 
-1. Add the plugin, then connect **Within** on the plugin's Connectors tab and sign in with your Within account (Google or Apple).
+1. Add the plugin, then connect **Within** on the plugin's Connectors tab and sign in with your Within account (Google sign-in).
 2. Ask things like "What's my birth chart like?", "What is the sky doing for me this week?", "Read my Vedic chart", "When does my Saturn return start?", or "How do my partner and I work together?"
 3. Claude asks for your birth date, time (and how sure you are of it), and town.
 
