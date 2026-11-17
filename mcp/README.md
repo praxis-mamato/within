@@ -28,6 +28,6 @@ npx wrangler dev    # http://localhost:8787/mcp
 
 ## Deploy (one time)
 
-1. Cloudflare: upgrade to Workers Paid (charts take more CPU than the free plan's 10 ms), create an API token from the **Edit Cloudflare Workers** template, and add it to this repository as the `CLOUDFLARE_API_TOKEN` Actions secret. `.github/workflows/mcp-deploy.yml` then deploys `within-mcp` to `https://within-mcp.withinoracle.workers.dev/mcp` on every change to the live branch (run it by hand from the Actions tab the first time).
+1. Cloudflare: upgrade to Workers Paid (charts take more CPU than the free plan's 10 ms), create an API token from the **Edit Cloudflare Workers** template, and add it to this repository as the `CLOUDFLARE_TOKEN` Actions secret. `.github/workflows/mcp-deploy.yml` then deploys `within-mcp` to `https://within-mcp.withinoracle.workers.dev/mcp` on every change to the live branch (run it by hand from the Actions tab the first time).
 2. Supabase: merging `supabase/config.toml` turns on the OAuth 2.1 server with dynamic registration. Check **Authentication → OAuth Server** shows it on with authorization path `/oauth/consent`.
 3. Test in Claude: **Customize → Connectors → Add custom connector** with the `/mcp` URL, sign in, and call each tool.
