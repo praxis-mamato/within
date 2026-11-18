@@ -166,7 +166,7 @@ export default function Oracle() {
     setInfo(null);
     board.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     // While the ball turns, the Oracle writes the answer for this person from their whole chart. The same
-    // question on the same day keeps its answer; if writing fails or is slow, the engine's own answer stands.
+    // question on the same day keeps its answer; if writing fails or takes over 25 seconds, the engine’s own answer stands.
     const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
     const turning = new Promise((r) => window.setTimeout(r, reduce ? 0 : 2600));
     const writing = same?.personal || !state.aiAnswers || a.intent === 'energy' ? Promise.resolve(null) : personalAnswer({ question, label: a.label, notes: answerText(a), facts: wholeChart(), about: aboutMe() });

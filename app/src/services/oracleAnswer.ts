@@ -12,7 +12,7 @@ export type { AnswerReply };
 
 const clip = (xs: string[], n: number, chars: number) => xs.filter(Boolean).slice(0, n).map((x) => x.slice(0, chars));
 
-export async function personalAnswer(input: { question: string; label: string; notes: string[]; facts: string[]; about: string[] }, timeoutMs = 12000): Promise<AnswerReply | null> {
+export async function personalAnswer(input: { question: string; label: string; notes: string[]; facts: string[]; about: string[] }, timeoutMs = 25000): Promise<AnswerReply | null> {
   if (!LIVE) return null;
   const L = ANSWER_LIMITS;
   const body = {
