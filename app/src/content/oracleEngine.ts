@@ -83,17 +83,17 @@ export interface OracleContext {
 
 export const ORACLE_SAYS = {
   welcome: 'Welcome to the Oracle…',
-  invite: 'Ask anything. The stars answer, from your own chart.',
-  how: 'Ask about your chart, today’s sky, the right time for something, what you are moving through, or what is on your heart. The Oracle reads the sky against your chart, the way astrologers have for centuries, to help you navigate life.',
+  invite: 'Ask me anything. I’ll answer from your own chart.',
+  how: 'Ask me about a decision, a feeling, a person, or the right time for something. I read today’s sky against your chart, the way astrologers have for centuries, and answer you, not just your sign.',
   lastTime: 'Last time',
-  quietWhen: 'The next two months hold no standout window for this, so the Oracle points to the waxing Moon, the traditional time to begin.',
+  quietWhen: 'Nothing in the next two months stands out for this, so I’d go with the waxing Moon, the traditional time to begin.',
   waxing: 'The Moon is waxing, the traditional time to begin and build.',
   mercuryRx: 'Mercury is retrograde, a traditional time to review rather than sign, launch, or send.',
   venusRx: 'Venus is retrograde, a time tradition reads as better for reflecting on love and money than starting something new in them.',
-  noPerson: 'Add the other person in Relationships, with their birth details, and ask again. The Oracle can then read the two charts side by side.',
-  noTime: 'This needs an exact birth time. Add it in Settings and ask again.',
+  noPerson: 'Add them in Relationships with their birth details, then ask me again, and I can read your two charts side by side.',
+  noTime: 'I need your exact birth time for this one. Add it in Settings and ask me again.',
   returnNow: 'You are in it now, or close to it: this return is active within a year either side of today.',
-  consult: 'For a fuller answer, the Oracle can consult your whole chart and write it out for you.',
+  consult: 'Want more? I can go through your whole chart and write it all out for you.',
 };
 
 /** What a planetary return asks, in brief. */
@@ -523,7 +523,7 @@ function remember(question: string, ctx: OracleContext, r: OracleReply): OracleR
   const related = [...history].reverse().find((h) => h.day !== day && (area ? areaOf(h.question) === area : h.intent === r.intent && !['open', 'sky'].includes(r.intent)));
   if (related) {
     const when = new Date(`${related.day}T12:00:00Z`).toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' });
-    lines = [...lines, { heading: ORACLE_SAYS.lastTime, text: `On ${when} you asked “${related.question}”, and the Oracle said: ${related.label}.` }];
+    lines = [...lines, { heading: ORACLE_SAYS.lastTime, text: `On ${when} you asked “${related.question}”, and I said: ${related.label}.` }];
   }
   return { ...r, lines };
 }
@@ -552,7 +552,7 @@ function eventReply(question: string, ctx: OracleContext): OracleReply | null {
   if (subj) {
     who = subj.name ?? 'them';
     if (!subj.place)
-      return { ...base, label: `${who}’s chart`, orb: 'WHERE?', points: 'Moon', lines: [{ heading: 'Add the town', text: `To read ${who}’s sky the Oracle needs the town they were born in, after the date and time, for example “${subj.name ?? 'Sam'} 6/6/86 5:40pm Billings MT”.` }], deeper: [] };
+      return { ...base, label: `${who}’s chart`, orb: 'WHERE?', points: 'Moon', lines: [{ heading: 'Add the town', text: `To read ${who}’s sky I need the town they were born in, after the date and time, for example “${subj.name ?? 'Sam'} 6/6/86 5:40pm Billings MT”.` }], deeper: [] };
     try {
       chart = computeNatal({ date: subj.date, time: subj.time ?? '12:00', timePrecision: subj.time ? 'exact' : 'unknown', windowMinutes: 0, lat: subj.place.lat, lon: subj.place.lon, tz: subj.place.tz });
     } catch {
@@ -997,7 +997,7 @@ export function skyToday(c: NatalChart, place: { lat: number; lon: number }, now
 /** What each answer on the board means. */
 export const TONE_MEANING: Record<Tone, string> = {
   go: 'The sky supports this. Take the next small step, at a pace that feels like yours.',
-  wait: 'The timing looks better soon. The Oracle often names the day to come back.',
+  wait: 'The timing looks better soon. When I can, I’ll name the day to come back.',
   closer: 'Something here is not yet clear. Check the details, and your own motives, before you act.',
   again: 'The question cannot be read as it stands, or it rests on someone else’s choices. Ask about what you can choose.',
 };

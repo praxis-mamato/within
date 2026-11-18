@@ -39,7 +39,7 @@ export default function OracleIntro() {
           <h1 ref={heading} tabIndex={-1} className="oracle-welcome">
             Welcome to the Oracle…
           </h1>
-          <p className="intro-line">Ask anything. The stars answer, from your own chart.</p>
+          <p className="intro-line">Ask me anything. I’ll answer from your own chart.</p>
           <button type="button" className="btn intro-btn" onClick={() => setStep('birth')}>
             Begin
           </button>
@@ -52,7 +52,7 @@ export default function OracleIntro() {
           <h1 ref={heading} tabIndex={-1} className="oracle-welcome">
             Where your story begins
           </h1>
-          <p className="intro-line">Your birth date, time, and place.</p>
+          <p className="intro-line">When and where were you born? A rough time is fine if that’s all you know.</p>
           <div className="intro-form">
             <BirthFields value={birth} onChange={setBirth} idPrefix="ob" />
           </div>
@@ -71,7 +71,7 @@ export default function OracleIntro() {
           }}
         >
           <h1 ref={heading} tabIndex={-1} className="oracle-welcome">
-            What do you seek?
+            What’s on your mind?
           </h1>
           <label htmlFor="intro-q" className="sr-only">
             Your question
