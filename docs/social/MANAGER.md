@@ -56,10 +56,22 @@ Every reel, post, and story must teach or tell something **true and specific fro
 - **Teach one real thing.** Why retrogrades look backward, what a station is, the myth behind Scorpio, what a nakshatra is, how Vedic and Western differ. Within reads both traditions: use the Vedic angle; few accounts can.
 - **Hook = a true promise the reel pays off** ("The 3 days this month to sign nothing", "Why Scorpio season feels heavy"), never clickbait.
 - **Pause and pick reels:** every message is tied to the actual transit of the day and says so in the caption (e.g. Mercury retrograde: REVISIT / REPAIR / RECONNECT). No generic "BEGIN / REST / TRUST".
-- **The Oracle's voice:** warm, wise, concrete, from an astrologer with seven years of study who has read thousands of charts (Maggie, Nov 3; say it unnamed, "the reader"). Short sentences. No filler adjectives.
+- **The Oracle's voice:** warm, wise, concrete, from an astrologer with seven years of study who has read thousands of charts (Maggie, Nov 3; say it unnamed, "the reader"). Short sentences. No filler adjectives. Human first: see "Sound like a person" below.
 - **Every story every day:** the daily message story plus the day's reel shared as a story (both are queued automatically with the reel). Video, never a still.
 - **Check before queueing:** would an astrologer learn nothing from this? Rewrite it.
 - **Sound like a person (Maggie, Nov 18: "make our app more human … same with the social media posts").** Open where the reader is (a moment they know: reading their horoscope twice, being 28 and reviewing everything), not with a definition or a product line. Write to one person: "you", contractions, the way you'd text a friend who reads charts. One idea per post; say "Western and Vedic" only when the post is about the difference. No ✦ on the first line, no ◆ bullet lists (except a real reference list), no "not X, it's Y", no stacked adjectives. End with one invitation (a real question or "Ask the Oracle, link in bio"), not a sales line plus a share line every time. Examples: docs/social/human-voice.md.
+
+## Sound like a person, not a textbook (Maggie, Nov 18: "make it more human")
+The facts stay exact; the voice changes. Every caption, hook, story line and comment reply should read like a warm astrologer talking to one friend, not an ephemeris or an encyclopedia entry.
+- **Start with the person, then the sky.** Open on something people actually feel or do ("Ever met someone who's nothing like their Sun sign?", "If this week's had you rereading old texts..."), then give the real event with its date and degree.
+- **Talk like people talk.** Contractions (it's, you're, don't), "you" and "I/we", short sentences mixed with longer ones. Not "It is the sign on the eastern horizon"; say "It's the sign that was rising in the east the minute you were born."
+- **Times the way people say them.** "Tonight, around 3:30pm Eastern" or "this Saturday", not "20:29 UTC". Keep the exact UTC only where it matters, and then after the friendly version.
+- **One technical word per post, explained.** "Whole-sign houses", "sidereal", "ayanamsa", "station": use at most one, and say what it means in the same sentence. Leave the rest for the app.
+- **No bullet lists of definitions (◆) in captions.** If a carousel needs a list, put it in the slides and keep the caption conversational.
+- **A small human moment beats a fact dump.** A real-life example ("the friend who reorganizes the pantry under a Virgo Moon"), a gentle joke, or an honest admission ("this one's subtle, you might not feel it at all") is welcome. Never invent a client, a testimonial, or a story about Maggie.
+- **Endings that feel like an invitation, not a CTA.** "Curious where it lands for you? Ask the Oracle, link in bio" over "Ask the Oracle for your houses: link in bio".
+- **Read it out loud.** If it sounds like a horoscope column or a Wikipedia line, rewrite it. Lint still applies (no will, always, never, soulmate, fated, stay/leave advice).
+- **Comment replies** sound like a person answering a person: use their words back, 1–3 sentences, no hashtags, emoji only if they used one.
 
 ## The sky now (every caption, story and reply)
 Before writing anything, print the prominent transits: `cd app && npx tsx -e "import('./src/content/skyNow.ts').then(m => console.log(m.skyNow().join('\n')))"`.

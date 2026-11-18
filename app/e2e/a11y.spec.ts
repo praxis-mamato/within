@@ -22,7 +22,7 @@ async function onboard(page: Page, found: string[]) {
   await expect(page.getByRole('heading', { name: 'Where your story begins' })).toBeVisible();
   found.push(...(await audit(page, 'intro: birth')));
   await page.getByRole('button', { name: 'Continue' }).click();
-  await expect(page.getByRole('heading', { name: 'What do you seek?' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'What’s on your mind?' })).toBeVisible();
   found.push(...(await audit(page, 'intro: ask')));
   await page.getByLabel('Your question').fill('What’s my rising sign?');
   await page.getByRole('button', { name: 'Ask the Oracle' }).click();

@@ -33,16 +33,16 @@ export const ORACLE_TONE: Record<Tone, { label: string; lines: string[] }> = {
   },
   again: {
     label: 'Ask it another way',
-    lines: ['The Oracle cannot read this one as it stands. Ask it another way.', 'The question is a little cloudy. Try asking about what you can choose.'],
+    lines: ['I can’t read this one as it stands. Could you ask it another way?', 'The question is a little cloudy. Try asking about what you can choose.'],
   },
 };
 
 /** Questions the Oracle does not give a tone to, and the question it offers instead. */
 export const ORACLE_REFRAME: Record<Limit, string> = {
-  health: 'The Oracle does not answer questions about health, illness, or pregnancy; a doctor or midwife is the right voice there. Try asking: what helps me feel steady while I wait to know more?',
-  others: 'The Oracle does not speak for another person’s heart or choices. Try asking about your side: what do I need from this connection, and how could I ask for it?',
-  legal: 'The Oracle does not answer legal questions; a lawyer is the right voice there. Try asking: how can I take care of myself through this process?',
-  gamble: 'The Oracle does not pick bets, stocks, or numbers. Try asking: what is my relationship with risk teaching me right now?',
+  health: 'I don’t answer questions about health, illness, or pregnancy; a doctor or midwife is the right voice there. Try asking: what helps me feel steady while I wait to know more?',
+  others: 'I can’t speak for another person’s heart or choices. Try asking about your side: what do I need from this connection, and how could I ask for it?',
+  legal: 'I don’t answer legal questions; a lawyer is the right voice there. Try asking: how can I take care of myself through this process?',
+  gamble: 'I don’t pick bets, stocks, or numbers. Try asking: what is my relationship with risk teaching me right now?',
   unclear: 'Ask one clear question about something you can act on, for example: should I reach out to her this week?',
 };
 
@@ -51,8 +51,8 @@ export const ORACLE_TEXT = {
     'The Moon is “void of course”: it makes no more contacts before it changes sign. Horary tradition reads this as a moment when a matter tends to stay as it is, so it is better to wait and ask again once the Moon moves on.',
   moonNext: 'In horary tradition, the Moon’s next contact shows how a question tends to unfold.',
   sameDay: 'The sky gives one answer to a question each day. Ask again tomorrow, or ask something new.',
-  limit: 'You have asked the Oracle three questions today. The sky resets at midnight, or subscribe for unlimited questions and the full reading behind each answer.',
-  intro: 'Ask one question. The Oracle reads the sky at this moment against your chart, the way horary astrologers have for centuries, and answers yes, not yet, or ask it another way, with a day when there is one.',
+  limit: 'That’s your three questions for today. Come back after midnight and we’ll keep going, or subscribe to ask as much as you like and get the full reading behind each answer.',
+  intro: 'Ask me one question. I read the sky at this moment against your chart, the way horary astrologers have for centuries, and answers yes, not yet, or ask it another way, with a day when there is one.',
 };
 
 const AREA_WORDS: [Area, RegExp][] = [
@@ -171,7 +171,7 @@ export function askOracle(question: string, c: NatalChart, place: { lat: number;
 
   const area = areaOf(q);
   const why: string[] = [moonLine];
-  why.push(area ? `Your question is about ${area === 'health' ? 'body and energy' : W.HOUSE[Number(Object.keys(HOUSE_AREA).find((h) => HOUSE_AREA[Number(h)] === area))].area}, so the Oracle looks at the planets touching that part of your chart.` : 'Your question touches no single area, so the Oracle reads the strongest contact to your chart right now.');
+  why.push(area ? `Your question is about ${area === 'health' ? 'body and energy' : W.HOUSE[Number(Object.keys(HOUSE_AREA).find((h) => HOUSE_AREA[Number(h)] === area))].area}, so I looked at the planets touching that part of your chart.` : 'Your question touches no single area, so I read the strongest contact to your chart right now.');
 
 
   // Transits to the person's chart in the next three days, the ones about the question first.

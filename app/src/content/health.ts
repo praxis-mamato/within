@@ -57,7 +57,7 @@ export const SIXTH_ROUTINE: Record<string, string> = {
   Pisces: 'Gentle routines: water, dance, yoga, sleep, and quiet.',
 };
 export const HEALTH_TEXT = {
-  boundary: 'The Oracle can’t speak to illness, a diagnosis, or pregnancy; a doctor can. Here is what your chart says about your energy and what supports it.',
+  boundary: 'I can’t speak to illness, a diagnosis, or pregnancy; a doctor can. Here’s what your chart says about your energy and what helps it.',
   care: 'For any symptom or worry, see a doctor. Astrology is for noticing your patterns, not for medical decisions.',
   noTime: 'Add your birth time to see your 6th house, the traditional house of daily health.',
 };

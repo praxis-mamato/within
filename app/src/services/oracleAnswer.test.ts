@@ -16,6 +16,9 @@ describe('personal answers', () => {
     expect(m).toContain('leave "deeper" empty');
     expect(answerMessage(req, true)).toContain('write "deeper"');
   });
+  it('tells the model today’s date, so it can say "this Thursday" like a person would', () => {
+    expect(answerMessage(req, false, new Date('2026-11-18T20:00:00Z'))).toMatch(/^TODAY: Wednesday, November 18, 2026/);
+  });
   it('passes a personal answer grounded in the chart', () => {
     const ok = { answer: ['Not yet. Your Venus in Libra sits opposite Saturn, so love may ask for patience before words.', 'Wait for Nov 14, when Venus turns direct.'], deeper: [], reflection: 'What would make reaching out feel safe?' };
     expect(answerProblems(ok, req)).toEqual([]);

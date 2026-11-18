@@ -295,7 +295,7 @@ export default function Oracle() {
           )}
           {answer.intent === 'energy' && energy && <EnergyWheel planets={me.western.planets} aspects={energy.aspects} asc={energy.asc} />}
           <Lines items={answer.lines} />
-          {answer.personal && <p className="small oracle-muted">Written for you from your whole chart, with AI help, and checked against Within’s rules.</p>}
+          {answer.personal && <p className="small oracle-muted">Written just for you from your whole chart, with AI help, and checked against Within’s rules.</p>}
           {answer.consulted && (
             <div className="oracle-consulted">
               <p className="small">The Oracle read</p>
@@ -383,7 +383,7 @@ export default function Oracle() {
       {answer && phase === 'answered' && answer.intent !== 'simplify' && (
         <section className="oracle-answer oracle-talk" aria-labelledby="ot-h">
           <h2 id="ot-h">Talk it through with the Oracle</h2>
-          <p className="small oracle-muted">Tell it what’s really going on, and it answers you, not just your chart.</p>
+          <p className="small oracle-muted">Tell me what’s really going on, and I’ll answer you, not just your chart.</p>
           {entitlement.active ? (
             <OracleChat question={answer.question} answer={answerText(answer)} facts={wholeChart} />
           ) : talkPitch ? (
@@ -392,7 +392,7 @@ export default function Oracle() {
             </Paywall>
           ) : (
             <>
-              <p>Members can talk it through: tell the Oracle what happened, how it feels, who it’s about, and it answers you personally from your chart and today’s sky, with follow-up questions.</p>
+              <p>Members can talk it through with me: tell me what happened, how it feels, and who it’s about, and I’ll answer you personally from your chart and today’s sky, and we can keep talking.</p>
               <button
                 type="button"
                 className="btn secondary"
@@ -424,7 +424,7 @@ export default function Oracle() {
           }}
         >
           <label htmlFor="oracle-q">Ask the stars</label>
-          <textarea ref={input} id="oracle-q" rows={2} maxLength={300} value={q} placeholder="Ask anything about your chart, the sky, or your timing…" onChange={(e) => (setQ(e.target.value), phase === 'answered' && setPhase('idle'))} />
+          <textarea ref={input} id="oracle-q" rows={2} maxLength={300} value={q} placeholder="What’s on your mind? A decision, a feeling, a person, a date…" onChange={(e) => (setQ(e.target.value), phase === 'answered' && setPhase('idle'))} />
           <div className="chips">
             {EXAMPLES.map((x) => (
               <button key={x} type="button" className="chip" onClick={() => (setQ(x), ask(x))}>
