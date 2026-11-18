@@ -59,6 +59,7 @@ Every reel, post, and story must teach or tell something **true and specific fro
 - **The Oracle's voice:** warm, wise, concrete, from an astrologer with seven years of study who has read thousands of charts (Maggie, Nov 3; say it unnamed, "the reader"). Short sentences. No filler adjectives.
 - **Every story every day:** the daily message story plus the day's reel shared as a story (both are queued automatically with the reel). Video, never a still.
 - **Check before queueing:** would an astrologer learn nothing from this? Rewrite it.
+- **Sound like a person (Maggie, Nov 18: "make our app more human … same with the social media posts").** Open where the reader is (a moment they know: reading their horoscope twice, being 28 and reviewing everything), not with a definition or a product line. Write to one person: "you", contractions, the way you'd text a friend who reads charts. One idea per post; say "Western and Vedic" only when the post is about the difference. No ✦ on the first line, no ◆ bullet lists (except a real reference list), no "not X, it's Y", no stacked adjectives. End with one invitation (a real question or "Ask the Oracle, link in bio"), not a sales line plus a share line every time. Examples: docs/social/human-voice.md.
 
 ## The sky now (every caption, story and reply)
 Before writing anything, print the prominent transits: `cd app && npx tsx -e "import('./src/content/skyNow.ts').then(m => console.log(m.skyNow().join('\n')))"`.
