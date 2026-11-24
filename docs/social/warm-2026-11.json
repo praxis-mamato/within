@@ -1,0 +1,24 @@
+[
+  {
+    "file": "2026-11-24-fullmoon",
+    "format": "feed",
+    "art": "fullmoon",
+    "note": "go look up tonight",
+    "title": "Full Moon in Gemini",
+    "lines": [
+      "At its fullest Tuesday, 9:54am ET.",
+      "A good night to say the thing you've been rehearsing."
+    ]
+  },
+  {
+    "file": "2026-11-24-fullmoon-story",
+    "format": "story",
+    "art": "fullmoon",
+    "note": "go look up tonight",
+    "title": "Full Moon in Gemini",
+    "lines": [
+      "At its fullest Tuesday, 9:54am ET.",
+      "Send the text. Make the call."
+    ]
+  }
+]
